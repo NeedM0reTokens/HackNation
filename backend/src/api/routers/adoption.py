@@ -22,17 +22,25 @@ class AdoptionRouter(APIRouter):
             self.calculate_adoption_leave_route,
             methods=["POST"],
             response_model=AdoptionLeaveResult,
-            summary="Kalkulator urlopu dla adopcji i rodziny zastępczej niezawodowej (BE-20)",
+            summary="Urlop na warunkach macierzyńskiego dla adopcji i rodziny zastępczej (BE-20)",
             description=(
-                "Oblicza wymiar urlopu na warunkach macierzyńskiego oraz rodzicielskiego "
-                "dla rodziców adopcyjnych i rodzin zastępczych z uwzględnieniem limitów "
-                "wieku (7/10/14 lat) oraz gwarantowanego minimum 9 tygodni (art. 183 KP)."
+                "Oblicza wymiary urlopów i zasiłków dla rodziców adopcyjnych i rodzin zastępczych "
+                "zgodnie z art. 183 Kodeksu Pracy i art. 29 ust. 1 pkt 2 ustawy zasiłkowej:\n\n"
+                "- **Podmioty uprawnione**: przysposobienie dziecka (`ADOPTION`) oraz rodzina "
+                "zastępcza niezawodowa (`FOSTER_FAMILY_NON_PROFESSIONAL`).\n"
+                "- **Limity wieku dziecka**: do ukończenia 7. roku życia (standard) lub "
+                "do 10. roku życia przy odroczeniu obowiązku szkolnego.\n"
+                "- **Gwarantowane minimum 9 tygodni**: jeśli do limitu zostało mniej czasu, "
+                "pracownikowi przysługuje gwarantowane ustawowo min. 9 tygodni urlopu.\n"
+                "- **Urlop rodzicielski po adopcji**: aż do ukończenia przez dziecko 14 lat."
             ),
+            response_description="Wymiary urlopów na warunkach macierzyńskiego i rodzicielskiego",
         )
 
     def calculate_adoption_leave_route(
         self, payload: AdoptionLeaveInput
     ) -> AdoptionLeaveResult:
+        """Oblicza wymiar urlopu na warunkach macierzyńskiego i rodzicielskiego dla opiekunów."""
         return calculate_adoption_leave(payload)
 
 
