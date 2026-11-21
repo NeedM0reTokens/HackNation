@@ -34,7 +34,7 @@ class PresetsListResponse(BaseModel):
 class TimelinePeriod(BaseModel):
     id: str
     name: str
-    person: str  # "mother", "father", "caregiver"
+    person: str
     start_date: date
     end_date: date
     weeks: int
@@ -47,20 +47,20 @@ class TimelinePeriod(BaseModel):
     monthly_salary_gross: float = 0.0
     total_salary_gross: float = 0.0
     combined_period_income: float
-    payer: str  # "ZUS", "Pracodawca", "ZUS + Pracodawca"
+    payer: str
     description: str
 
 
 class TimelineMilestone(BaseModel):
     milestone_date: date
     title: str
-    importance: str  # "CRITICAL", "HIGH", "INFO"
+    importance: str
     legal_basis: str
     action_required: str
 
 
 class MonthlyCashflow(BaseModel):
-    year_month: str  # "YYYY-MM"
+    year_month: str
     mother_benefit: float
     father_benefit: float
     work_salary: float
@@ -77,7 +77,7 @@ class IntegratedWorkCombination(BaseModel):
 
 class IntegratedParentalSharing(BaseModel):
     enabled: bool = False
-    mode: str = "SEQUENTIAL"  # "SEQUENTIAL" or "SIMULTANEOUS"
+    mode: str = "SEQUENTIAL"
     mother_weeks: int = 32
     father_weeks: int = 9
 

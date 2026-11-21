@@ -381,6 +381,32 @@ def _extract_claim_data(text: str, doc_type: DocumentType) -> BenefitClaimData:
     else:
         claim.sick_leave_duration_days = 0
 
+    birth_date_patterns = [
+        r"(?:urodzenia dziecka|urodzonego|urodzonej|data urodzenia|poród|porodu)[:\s]+"
+        + r"(\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4})",
+        r"(?:urodził[ao] się w dniu|urodzona w dniu|urodzony w dniu)[:\s]+"
+        + r"(\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4})",
+    ]
+    for b_pat in birth_date_patterns:
+        b_match = re.search(b_pat, text, re.I)
+        if b_match:
+            parsed_b_date = _parse_date(b_match.group(1))
+            if parsed_b_date:
+                claim.child_birth_date = parsed_b_date.isoformat()
+                break
+
+    leave_dates_pat = (
+        r"(?:od|w okresie od)[:\s]+(\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4})"
+        + r"[:\s]+(?:do)[:\s]+(\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4})"
+    )
+    leave_dates_match = re.search(leave_dates_pat, text, re.I)
+    if leave_dates_match:
+        d_from = _parse_date(leave_dates_match.group(1))
+        d_to = _parse_date(leave_dates_match.group(2))
+        if d_from and d_to:
+            claim.sick_leave_start_date = d_from.isoformat()
+            claim.sick_leave_end_date = d_to.isoformat()
+
     return claim
 
 
@@ -520,6 +546,21 @@ def parse_and_validate_pdf(file_bytes: bytes, filename: str) -> PdfParseResponse
 
     eligibility = _assess_eligibility(doc_type, person, payer, insurance, claim)
 
+    is_female = person.gender != "MALE"
+    m_income = insurance.gross_monthly_income if is_female else 0.0
+    f_income = insurance.gross_monthly_income if not is_female else 0.0
+    m_emp = insurance.employment_type if is_female else "EMPLOYMENT_CONTRACT"
+    f_emp = insurance.employment_type if not is_female else "EMPLOYMENT_CONTRACT"
+
+    special_case: str | None = None
+    if claim.has_za_zyciem_certificate:
+        special_case = "ZA_ZYCIEM"
+    elif claim.is_premature_or_hospitalized:
+        special_case = "PREMATURE"
+
+    today_str = date.today().isoformat()
+    birth_date_str = claim.child_birth_date or today_str
+
     calculator_prefill = CalculatorPreFill(
         employment_type=insurance.employment_type,
         gross_monthly_income=insurance.gross_monthly_income,
@@ -530,6 +571,16 @@ def parse_and_validate_pdf(file_bytes: bytes, filename: str) -> PdfParseResponse
         children_born_count=claim.children_count,
         sick_leave_duration_days=claim.sick_leave_duration_days,
         payer_size=payer.payer_size,
+        child_birth_date=birth_date_str,
+        applied_within_21_days=True,
+        chosen_variant="UNIFIED_81_5",
+        special_case_type=special_case,
+        mother_gross_monthly_income=m_income,
+        mother_employment_type=m_emp,
+        is_mother_insured=insurance.is_currently_insured if is_female else True,
+        father_gross_monthly_income=f_income,
+        father_employment_type=f_emp,
+        is_father_insured=insurance.is_currently_insured if not is_female else True,
     )
 
     preview = (raw_text[:600] + "...") if len(raw_text) > 600 else raw_text

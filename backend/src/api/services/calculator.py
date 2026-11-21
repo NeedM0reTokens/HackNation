@@ -7,6 +7,7 @@ from ...constants import (
     FULL_MATERNITY_RATE,
     MANDATORY_MOTHER_MATERNITY_WEEKS,
     MATERNITY_WEEKS_BY_CHILD_COUNT,
+    MIN_WAGE_2026,
     NON_TRANSFERABLE_PARENTAL_WEEKS,
     PARENTAL_MAX_WORK_FRACTION,
     PARENTAL_WEEKS_MULTIPLE_BIRTH,
@@ -33,7 +34,14 @@ from ..models.calculator import (
     TimelineMilestone,
     TimelinePeriod,
 )
-from ..models.maternity import BenefitPaymentVariant
+from ..models.maternity import BenefitPaymentVariant, MaternityEmploymentType
+
+
+def _add_years(d: date, years: int) -> date:
+    try:
+        return d.replace(year=d.year + years)
+    except ValueError:
+        return d.replace(year=d.year + years, day=28)
 
 
 def get_allowance_rates_service() -> AllowanceRatesResponse:
@@ -258,6 +266,21 @@ def calculate_integrated_parental_service(
     father_net_base = round(
         data.father_gross_monthly_income * (1.0 - SOCIAL_CONTRIBUTIONS_RATE / 100.0), 2
     )
+
+    min_wage_net = round(MIN_WAGE_2026 * (1.0 - SOCIAL_CONTRIBUTIONS_RATE / 100.0), 2)
+    if (
+        data.is_mother_insured
+        and data.mother_employment_type == MaternityEmploymentType.EMPLOYMENT_CONTRACT
+        and data.mother_gross_monthly_income > 0
+    ):
+        mother_net_base = max(mother_net_base, min_wage_net)
+
+    if (
+        data.is_father_insured
+        and data.father_employment_type == MaternityEmploymentType.EMPLOYMENT_CONTRACT
+        and data.father_gross_monthly_income > 0
+    ):
+        father_net_base = max(father_net_base, min_wage_net)
 
     mother_daily_100 = round(mother_net_base / 30.0, 2)
     father_daily_100 = round(father_net_base / 30.0, 2)
@@ -566,7 +589,7 @@ def calculate_integrated_parental_service(
     total_benefit_sum = round(sum(p.total_benefit_net for p in timeline_periods), 2)
     total_salary_sum = round(sum(p.total_salary_gross for p in timeline_periods), 2)
     total_family_income = round(total_benefit_sum + total_salary_sum, 2)
-    total_leave_days = (timeline_end - data.child_birth_date).days + 1
+    total_leave_days = (timeline_end - timeline_start).days + 1
     total_leave_weeks = total_leave_days // 7
 
     b_date = data.child_birth_date
@@ -593,18 +616,14 @@ def calculate_integrated_parental_service(
             action_required="Mozliwosc rezygnacji i przekazania reszty macierzynskiego ojcu.",
         ),
         TimelineMilestone(
-            milestone_date=date(b_date.year + 1, b_date.month, b_date.day),
+            milestone_date=_add_years(b_date, 1),
             title="Koniec terminu na urlop ojcowski (12 miesiecy)",
             importance="HIGH",
             legal_basis="Art. 182(3) § 1 Kodeksu Pracy",
             action_required="Wykorzystanie 14 dni urlopu ojcowskiego przed 1. urodzinami.",
         ),
         TimelineMilestone(
-            milestone_date=date(
-                b_date.year + (14 if is_adoption else 6),
-                b_date.month,
-                b_date.day,
-            ),
+            milestone_date=_add_years(b_date, 14 if is_adoption else 6),
             title=f"Koniec terminu na urlop rodzicielski ({14 if is_adoption else 6} lat)",
             importance="INFO",
             legal_basis="Art. 182(1a) Kodeksu Pracy",
@@ -697,8 +716,15 @@ def calculate_integrated_parental_service(
         f"Zarejestrowano {len(milestones)} kluczowych terminow prawnych z Kodeksu Pracy.",
     ]
 
+    is_eligible = data.is_mother_insured or data.is_father_insured
+    if not is_eligible:
+        summary_notes.append(
+            "Oboje rodzice nie podlegają ubezpieczeniu chorobowemu ZUS - przysługuje "
+            + "świadczenie rodzicielskie (tzw. kosiniakowe 1000 zł/mc z MOPS/GOPS)."
+        )
+
     return IntegratedCalculatorResult(
-        is_eligible=True,
+        is_eligible=is_eligible,
         child_birth_date=data.child_birth_date,
         timeline_start_date=timeline_start,
         timeline_end_date=timeline_end,
