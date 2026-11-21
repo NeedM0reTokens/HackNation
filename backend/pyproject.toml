@@ -21,7 +21,7 @@ dev = [
 [tool.ruff]
 target-version = "py312"
 line-length = 100
-src = ["src", "app"]
+src = ["src"]
 
 [tool.ruff.lint]
 select = [
@@ -41,7 +41,7 @@ indent-style = "space"
 
 # --- Konfiguracja BASEDPYRIGHT ---
 [tool.basedpyright]
-include = ["src", "app"]
+include = ["src"]
 pythonVersion = "3.12"
 typeCheckingMode = "standard"
 reportMissingTypeStubs = false

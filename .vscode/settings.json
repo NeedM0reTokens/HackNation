@@ -2,7 +2,6 @@
   "python.languageServer": "None",
   "basedpyright.importStrategy": "fromEnvironment",
   "ruff.importStrategy": "fromEnvironment",
-  "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
   "python.analysis.extraPaths": [
     "${workspaceFolder}/backend"
   ],
@@ -13,5 +12,6 @@
       "source.fixAll.ruff": "explicit",
       "source.organizeImports.ruff": "explicit"
     }
-  }
+  },
+  "files.eol": "\n"
 }
