@@ -1,56 +1,56 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "AdminConfigSchema",
-  "description": "JSON Schema dla konfiguracji parametrów Zasiłkowego Przewodnika Przyszłego Rodzica (BE-03 / SETUP-06)",
+  "description": "JSON Schema for ZUS Allowance Guide Legal & Calculation Parameters (BE-03 / SETUP-06)",
   "type": "object",
-  "required": ["stopy_procentowe", "wymiary_urlopow", "okresy_i_limity"],
+  "required": ["benefit_rates", "leave_durations", "periods_and_limits"],
   "properties": {
-    "stopy_procentowe": {
+    "benefit_rates": {
       "type": "object",
       "properties": {
-        "stopa_chorobowy_kod_b": { "type": "number", "minimum": 0, "maximum": 100 },
-        "stopa_chorobowy_standard": { "type": "number", "minimum": 0, "maximum": 100 },
-        "stopa_macierzynski_jednolity": { "type": "number", "minimum": 0, "maximum": 100 },
-        "stopa_macierzynski_standard": { "type": "number", "minimum": 0, "maximum": 100 },
-        "stopa_rodzicielski_standard": { "type": "number", "minimum": 0, "maximum": 100 },
-        "stopa_ojcowski": { "type": "number", "minimum": 0, "maximum": 100 },
-        "stopa_swiadczenie_rehab_1_3": { "type": "number", "minimum": 0, "maximum": 100 },
-        "stopa_swiadczenie_rehab_pozostale": { "type": "number", "minimum": 0, "maximum": 100 },
-        "stopa_swiadczenie_rehab_ciaza": { "type": "number", "minimum": 0, "maximum": 100 }
+        "pregnancy_sick_leave_rate": { "type": "number", "minimum": 0, "maximum": 100 },
+        "standard_sick_leave_rate": { "type": "number", "minimum": 0, "maximum": 100 },
+        "unified_benefit_rate": { "type": "number", "minimum": 0, "maximum": 100 },
+        "full_maternity_rate": { "type": "number", "minimum": 0, "maximum": 100 },
+        "standard_parental_rate": { "type": "number", "minimum": 0, "maximum": 100 },
+        "paternity_benefit_rate": { "type": "number", "minimum": 0, "maximum": 100 },
+        "rehabilitation_benefit_rate_first_3_months": { "type": "number", "minimum": 0, "maximum": 100 },
+        "rehabilitation_benefit_rate_remaining": { "type": "number", "minimum": 0, "maximum": 100 },
+        "rehabilitation_benefit_rate_pregnancy": { "type": "number", "minimum": 0, "maximum": 100 }
       }
     },
-    "wymiary_urlopow": {
+    "leave_durations": {
       "type": "object",
       "properties": {
-        "urlop_macierzynski_1_dziecko_tygodnie": { "type": "integer", "minimum": 1 },
-        "urlop_macierzynski_2_dzieci_tygodnie": { "type": "integer", "minimum": 1 },
-        "urlop_macierzynski_3_dzieci_tygodnie": { "type": "integer", "minimum": 1 },
-        "urlop_macierzynski_4_dzieci_tygodnie": { "type": "integer", "minimum": 1 },
-        "urlop_macierzynski_5_plus_tygodnie": { "type": "integer", "minimum": 1 },
-        "urlop_macierzynski_obligatoryjny_matki_tygodnie": { "type": "integer", "minimum": 1 },
-        "urlop_rodzicielski_1_dziecko_tygodnie": { "type": "integer", "minimum": 1 },
-        "urlop_rodzicielski_wieloraczki_tygodnie": { "type": "integer", "minimum": 1 },
-        "urlop_rodzicielski_nieprzenoszalny_tygodnie": { "type": "integer", "minimum": 0 },
-        "urlop_ojcowski_dni": { "type": "integer", "minimum": 1 },
-        "max_czesci_urlopu_rodzicielskiego": { "type": "integer", "minimum": 1 }
+        "maternity_weeks_single_child": { "type": "integer", "minimum": 1 },
+        "maternity_weeks_twins": { "type": "integer", "minimum": 1 },
+        "maternity_weeks_triplets": { "type": "integer", "minimum": 1 },
+        "maternity_weeks_quadruplets": { "type": "integer", "minimum": 1 },
+        "maternity_weeks_quintuplets_plus": { "type": "integer", "minimum": 1 },
+        "mandatory_mother_maternity_weeks": { "type": "integer", "minimum": 1 },
+        "parental_weeks_standard": { "type": "integer", "minimum": 1 },
+        "parental_weeks_multiple_birth": { "type": "integer", "minimum": 1 },
+        "non_transferable_parental_weeks": { "type": "integer", "minimum": 0 },
+        "paternity_leave_days": { "type": "integer", "minimum": 1 },
+        "max_parental_leave_parts": { "type": "integer", "minimum": 1 }
       }
     },
-    "okresy_i_limity": {
+    "periods_and_limits": {
       "type": "object",
       "properties": {
-        "okres_wyczekiwania_uop_dni": { "type": "integer", "minimum": 0 },
-        "okres_wyczekiwania_dobrowolne_dni": { "type": "integer", "minimum": 0 },
-        "dni_chorobowe_pracodawca_standard": { "type": "integer", "minimum": 0 },
-        "dni_chorobowe_pracodawca_50plus": { "type": "integer", "minimum": 0 },
-        "wiek_prog_pracodawca": { "type": "integer", "minimum": 0 },
-        "max_okres_zasilkowy_ciaza_dni": { "type": "integer", "minimum": 1 },
-        "max_okres_zasilkowy_standard_dni": { "type": "integer", "minimum": 1 },
-        "limit_wieku_ojcowski_miesiace": { "type": "integer", "minimum": 1 },
-        "limit_wieku_adopcja_ojcowski_lat": { "type": "integer", "minimum": 1 },
-        "termin_wniosku_macierzynski_81_5_dni": { "type": "integer", "minimum": 1 },
-        "placa_minimalna_2026": { "type": "number", "minimum": 0 },
-        "skladki_spoleczne_proc": { "type": "number", "minimum": 0, "maximum": 100 },
-        "procent_zadluzenia_limit_zus": { "type": "number", "minimum": 0, "maximum": 100 }
+        "mandatory_waiting_period_days": { "type": "integer", "minimum": 0 },
+        "voluntary_waiting_period_days": { "type": "integer", "minimum": 0 },
+        "employer_sick_days_standard": { "type": "integer", "minimum": 0 },
+        "employer_sick_days_senior": { "type": "integer", "minimum": 0 },
+        "senior_age_threshold": { "type": "integer", "minimum": 0 },
+        "max_pregnancy_sick_leave_days": { "type": "integer", "minimum": 1 },
+        "max_standard_sick_leave_days": { "type": "integer", "minimum": 1 },
+        "max_child_age_paternity_months": { "type": "integer", "minimum": 1 },
+        "max_child_age_paternity_adoption_years": { "type": "integer", "minimum": 1 },
+        "long_application_deadline_days": { "type": "integer", "minimum": 1 },
+        "min_wage_2026": { "type": "number", "minimum": 0 },
+        "social_contributions_rate": { "type": "number", "minimum": 0, "maximum": 100 },
+        "zus_debt_limit_percentage": { "type": "number", "minimum": 0, "maximum": 100 }
       }
     }
   }

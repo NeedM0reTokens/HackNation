@@ -1,7 +1,4 @@
-from enum import StrEnum
-
-from pydantic import BaseModel, Field
-from src.constants import (
+from ...constants import (
     FULL_MATERNITY_RATE,
     LONG_APPLICATION_DEADLINE_DAYS,
     MANDATORY_MOTHER_MATERNITY_WEEKS,
@@ -18,67 +15,13 @@ from src.constants import (
     STANDARD_PARENTAL_RATE,
     UNIFIED_BENEFIT_RATE,
 )
-
-
-class MaternityEmploymentType(StrEnum):
-    EMPLOYMENT_CONTRACT = "EMPLOYMENT_CONTRACT"
-    MANDATE_CONTRACT = "MANDATE_CONTRACT"
-    B2B = "B2B"
-    NONE = "NONE"
-
-
-class BenefitPaymentVariant(StrEnum):
-    UNIFIED_81_5 = "UNIFIED_81_5"
-    VARIABLE_100_70 = "VARIABLE_100_70"
-
-
-class MaternityParentalInput(BaseModel):
-    employment_type: MaternityEmploymentType
-    gross_monthly_income: float = Field(..., gt=0)
-    children_born_count: int = Field(1, ge=1, le=10)
-    is_insured_at_birth: bool = Field(True)
-    has_za_zyciem_certificate: bool = Field(False)
-    applied_within_21_days: bool = Field(True)
-    chosen_variant: BenefitPaymentVariant = BenefitPaymentVariant.UNIFIED_81_5
-    mother_maternity_weeks: int = Field(20, ge=14)
-    father_parental_weeks: int = Field(9, ge=0)
-    mother_parental_weeks: int = Field(32, ge=0)
-    parental_leave_parts_count: int = Field(1, ge=1, le=10)
-    child_age_years: int = Field(0, ge=0, le=18)
-
-
-class PeriodBreakdown(BaseModel):
-    name: str
-    weeks: int
-    days: int
-    rate_percentage: float
-    monthly_amount: float
-    total_amount: float
-    taken_by: str
-
-
-class MaternityParentalResult(BaseModel):
-    is_eligible: bool
-    total_maternity_weeks: int
-    total_parental_weeks: int
-    total_weeks: int
-
-    mother_total_weeks: int
-    father_total_weeks: int
-
-    calculation_base_net: float
-    daily_rate: float
-    total_benefit_amount: float
-
-    chosen_variant: BenefitPaymentVariant
-    comparison_unified_total: float
-    comparison_variable_total: float
-
-    periods: list[PeriodBreakdown] = []
-    refusal_reasons: list[str] = []
-    warning_notes: list[str] = []
-    required_documents: list[str] = []
-    legal_notes: list[str] = []
+from ..models.maternity import (
+    BenefitPaymentVariant,
+    MaternityEmploymentType,
+    MaternityParentalInput,
+    MaternityParentalResult,
+    PeriodBreakdown,
+)
 
 
 def _calculate_net_base(gross: float) -> float:
@@ -86,6 +29,8 @@ def _calculate_net_base(gross: float) -> float:
 
 
 def get_maternity_weeks(children_count: int) -> int:
+    if children_count <= 0:
+        return 0
     return MATERNITY_WEEKS_BY_CHILD_COUNT.get(
         children_count,
         MATERNITY_WEEKS_BY_CHILD_COUNT[5],
@@ -93,17 +38,15 @@ def get_maternity_weeks(children_count: int) -> int:
 
 
 def get_parental_weeks(children_count: int, has_za_zyciem: bool) -> int:
+    if children_count <= 0:
+        return 0
     if has_za_zyciem:
         return (
             PARENTAL_WEEKS_ZA_ZYCIEM_SINGLE
             if children_count == 1
             else PARENTAL_WEEKS_ZA_ZYCIEM_MULTIPLE
         )
-    return (
-        PARENTAL_WEEKS_STANDARD
-        if children_count == 1
-        else PARENTAL_WEEKS_MULTIPLE_BIRTH
-    )
+    return PARENTAL_WEEKS_STANDARD if children_count == 1 else PARENTAL_WEEKS_MULTIPLE_BIRTH
 
 
 def calculate_maternity_parental_benefit(
@@ -166,6 +109,19 @@ def calculate_maternity_parental_benefit(
         refusal_reasons.append(
             f"Maksymalna pula rodzicielskiego dla jednego rodzica to {shared_pool_limit} tyg. "
             + f"(z puli {parental_total_weeks} tyg., 9 tyg. jest wyłączne dla drugiego rodzica)."
+        )
+
+    if data.father_parental_weeks > shared_pool_limit:
+        refusal_reasons.append(
+            f"Maksymalna pula rodzicielskiego dla ojca to {shared_pool_limit} tyg. "
+            + f"(z puli {parental_total_weeks} tyg., 9 tyg. jest wyłączne dla drugiego rodzica)."
+        )
+
+    if (data.mother_parental_weeks + data.father_parental_weeks) > parental_total_weeks:
+        refusal_reasons.append(
+            "Łączny wymiar urlopu rodzicielskiego obojga rodziców nie może przekraczać "
+            + f"{parental_total_weeks} tygodni (zgłoszono "
+            + f"{data.mother_parental_weeks + data.father_parental_weeks} tyg.)."
         )
 
     if data.parental_leave_parts_count > MAX_PARENTAL_LEAVE_PARTS:

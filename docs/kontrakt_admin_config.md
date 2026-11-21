@@ -1,81 +1,81 @@
-# Kontrakt Danych: Panel Admina (Konfiguracja Parametrów Prawnych)
+# Data Contract: Admin Panel (Legal & Calculation Parameters Configuration)
 
-**Moduł:** `BE-03` / `SETUP-06`  
-**Wersja kontraktu:** `1.0.0`  
-**Prefiks API:** `/api/admin`  
-**Format wymiany danych:** `application/json`
+**Module:** `BE-03` / `SETUP-06`  
+**Contract Version:** `1.1.0`  
+**API Prefix:** `/api/admin`  
+**Data Exchange Format:** `application/json`
 
 ---
 
-## 1. Zestawienie Endpointów
+## 1. Endpoints Overview
 
-| Metoda | Ścieżka | Opis | Kod sukcesu |
+| Method | Path | Description | Success Status |
 |---|---|---|---|
-| `GET` | `/api/admin/config` | Pobranie aktualnych parametrów prawnych i stawek | `200 OK` |
-| `PUT` | `/api/admin/config` | Aktualizacja parametrów w locie (bez restartu) | `200 OK` / `422 Unprocessable` |
+| `GET` | `/api/admin/config` | Retrieve current legal parameters and rates | `200 OK` |
+| `PUT` | `/api/admin/config` | Update parameters in runtime (without server restart) | `200 OK` / `422 Unprocessable` |
 
 ---
 
-## 2. Model Danych (`AdminConfig`)
+## 2. Data Model (`AdminConfig`)
 
-Konfiguracja podzielona jest na 3 logiczne sekcje:
-1. **`stopy_procentowe`** – stawki procentowe zasiłków (np. 100%, 81.5%, 70%).
-2. **`wymiary_urlopow`** – wymiary urlopów w tygodniach i dniach (zgodne z Kodeksem Pracy i dyrektywą Work-Life Balance).
-3. **`okresy_i_limity`** – okresy wyczekiwania, limity wieku dzieci i kwoty progowe.
+The configuration is divided into 3 logical sections:
+1. **`benefit_rates`** – Benefit percentage rates (e.g., 100%, 81.5%, 70%).
+2. **`leave_durations`** – Leave durations in weeks and days (compliant with Polish Labour Code and EU Work-Life Balance Directive).
+3. **`periods_and_limits`** – Waiting periods, child age thresholds, minimum wage and statutory limits.
 
 ---
 
-## 3. Szczegóły Endpointów
+## 3. Endpoints Details
 
 ### 3.1. `GET /api/admin/config`
-Zwraca aktualny stan konfiguracji prawnej aplikacji.
+Returns current legal configuration state.
 
-#### Nagłówki żądania:
+#### Request Headers:
 ```http
 Accept: application/json
 ```
 
-#### Przykładowa odpowiedź (`200 OK`):
+#### Example Response (`200 OK`):
 ```json
 {
-  "stopy_procentowe": {
-    "stopa_chorobowy_kod_b": 100.0,
-    "stopa_chorobowy_standard": 80.0,
-    "stopa_macierzynski_jednolity": 81.5,
-    "stopa_macierzynski_standard": 100.0,
-    "stopa_rodzicielski_standard": 70.0,
-    "stopa_ojcowski": 100.0,
-    "stopa_swiadczenie_rehab_1_3": 90.0,
-    "stopa_swiadczenie_rehab_pozostale": 75.0,
-    "stopa_swiadczenie_rehab_ciaza": 100.0
+  "benefit_rates": {
+    "pregnancy_sick_leave_rate": 100.0,
+    "standard_sick_leave_rate": 80.0,
+    "unified_benefit_rate": 81.5,
+    "full_maternity_rate": 100.0,
+    "standard_parental_rate": 70.0,
+    "paternity_benefit_rate": 100.0,
+    "rehabilitation_benefit_rate_first_3_months": 90.0,
+    "rehabilitation_benefit_rate_remaining": 75.0,
+    "rehabilitation_benefit_rate_pregnancy": 100.0
   },
-  "wymiary_urlopow": {
-    "urlop_macierzynski_1_dziecko_tygodnie": 20,
-    "urlop_macierzynski_2_dzieci_tygodnie": 31,
-    "urlop_macierzynski_3_dzieci_tygodnie": 33,
-    "urlop_macierzynski_4_dzieci_tygodnie": 35,
-    "urlop_macierzynski_5_plus_tygodnie": 37,
-    "urlop_macierzynski_obligatoryjny_matki_tygodnie": 14,
-    "urlop_rodzicielski_1_dziecko_tygodnie": 41,
-    "urlop_rodzicielski_wieloraczki_tygodnie": 43,
-    "urlop_rodzicielski_nieprzenoszalny_tygodnie": 9,
-    "urlop_ojcowski_dni": 14,
-    "max_czesci_urlopu_rodzicielskiego": 5
+  "leave_durations": {
+    "maternity_weeks_single_child": 20,
+    "maternity_weeks_twins": 31,
+    "maternity_weeks_triplets": 33,
+    "maternity_weeks_quadruplets": 35,
+    "maternity_weeks_quintuplets_plus": 37,
+    "mandatory_mother_maternity_weeks": 14,
+    "parental_weeks_standard": 41,
+    "parental_weeks_multiple_birth": 43,
+    "non_transferable_parental_weeks": 9,
+    "paternity_leave_days": 14,
+    "max_parental_leave_parts": 5
   },
-  "okresy_i_limity": {
-    "okres_wyczekiwania_uop_dni": 30,
-    "okres_wyczekiwania_dobrowolne_dni": 90,
-    "dni_chorobowe_pracodawca_standard": 33,
-    "dni_chorobowe_pracodawca_50plus": 14,
-    "wiek_prog_pracodawca": 50,
-    "max_okres_zasilkowy_ciaza_dni": 270,
-    "max_okres_zasilkowy_standard_dni": 182,
-    "limit_wieku_ojcowski_miesiace": 12,
-    "limit_wieku_adopcja_ojcowski_lat": 14,
-    "termin_wniosku_macierzynski_81_5_dni": 21,
-    "placa_minimalna_2026": 4806.0,
-    "skladki_spoleczne_proc": 13.71,
-    "procent_zadluzenia_limit_zus": 1.0
+  "periods_and_limits": {
+    "mandatory_waiting_period_days": 30,
+    "voluntary_waiting_period_days": 90,
+    "employer_sick_days_standard": 33,
+    "employer_sick_days_senior": 14,
+    "senior_age_threshold": 50,
+    "max_pregnancy_sick_leave_days": 270,
+    "max_standard_sick_leave_days": 182,
+    "max_child_age_paternity_months": 12,
+    "max_child_age_paternity_adoption_years": 14,
+    "long_application_deadline_days": 21,
+    "min_wage_2026": 4806.0,
+    "social_contributions_rate": 13.71,
+    "zus_debt_limit_percentage": 1.0
   }
 }
 ```
@@ -83,125 +83,124 @@ Accept: application/json
 ---
 
 ### 3.2. `PUT /api/admin/config`
-Umożliwia modyfikację wybranych sekcji lub pojedynczych parametrów. Zmiana jest natychmiast aplikowana w pamięci procesu oraz zapisywana do `config.json`.
+Allows updating any section or individual parameter. Changes are immediately applied in memory and persisted to `config.json`.
 
-#### Nagłówki żądania:
+#### Request Headers:
 ```http
 Content-Type: application/json
 Accept: application/json
 ```
 
-#### Przykładowe ciało żądania (zmiana stawki jednolitej na 82% i liczby dni urlopu ojcowskiego na 16):
+#### Example Request Body (updating unified benefit rate to 82% and paternity days to 16):
 ```json
 {
-  "stopy_procentowe": {
-    "stopa_macierzynski_jednolity": 82.0
+  "benefit_rates": {
+    "unified_benefit_rate": 82.0
   },
-  "wymiary_urlopow": {
-    "urlop_ojcowski_dni": 16
+  "leave_durations": {
+    "paternity_leave_days": 16
   }
 }
 ```
 
-#### Odpowiedź sukcesu (`200 OK`):
-Zwraca pełny zaktualizowany obiekt `AdminConfig`.
+#### Success Response (`200 OK`):
+Returns the full updated `AdminConfig` object.
 
-#### Błąd walidacji (`422 Unprocessable Entity`):
+#### Validation Error (`422 Unprocessable Entity`):
 ```json
 {
-  "detail": "Błąd walidacji konfiguracji: 1 validation error for AdminConfig..."
+  "detail": "Configuration validation error: 1 validation error for AdminConfig..."
 }
 ```
 
 ---
 
-## 4. Słownik Parametrów
+## 4. Parameter Dictionary
 
-| Pole | Typ | Jednostka | Opis prawny |
+| Field | Type | Unit | Legal Description |
 |---|---|---|---|
-| `stopa_chorobowy_kod_b` | `float` | `%` | Zasiłek chorobowy w trakcie ciąży (100% podstawy wymiaru) |
-| `stopa_chorobowy_standard` | `float` | `%` | Standardowy zasiłek chorobowy (80% podstawy) |
-| `stopa_macierzynski_jednolity` | `float` | `%` | Wniosek złożony do 21 dni po porodzie (tzw. długi wniosek: 81.5% przez cały okres) |
-| `stopa_macierzynski_standard` | `float` | `%` | Wariant 100% za okres macierzyńskiego |
-| `stopa_rodzicielski_standard` | `float` | `%` | Wariant 70% za okres rodzicielskiego |
-| `stopa_ojcowski` | `float` | `%` | 100% podstawy wymiaru za okres urlopu ojcowskiego |
-| `stopa_swiadczenie_rehab_ciaza`| `float` | `%` | Świadczenie rehabilitacyjne w ciąży (100%) |
-| `urlop_macierzynski_1_dziecko_tygodnie` | `int` | tyg. | 20 tygodni przy 1 dziecku |
-| `urlop_macierzynski_obligatoryjny_matki_tygodnie`| `int` | tyg. | 14 tygodni obligatoryjne dla matki przed możliwością przekazania ojcu |
-| `urlop_rodzicielski_1_dziecko_tygodnie` | `int` | tyg. | 41 tygodni urlopu rodzicielskiego (łączny wymiar) |
-| `urlop_rodzicielski_nieprzenoszalny_tygodnie` | `int` | tyg. | 9 tygodni wyłącznego, nieprzenoszalnego urlopu dla drugiego rodzica |
-| `urlop_ojcowski_dni` | `int` | dni | 14 dni kalendarzowych urlopu ojcowskiego |
-| `max_czesci_urlopu_rodzicielskiego` | `int` | szt. | Maksymalnie 5 części urlopu |
-| `okres_wyczekiwania_uop_dni` | `int` | dni | 30 dni ubezpieczenia obowiązkowego (UoP) |
-| `okres_wyczekiwania_dobrowolne_dni` | `int` | dni | 90 dni ubezpieczenia dobrowolnego (zlecenie, JDG) |
-| `dni_chorobowe_pracodawca_standard` | `int` | dni | 33 dni choroby w roku płatne przez pracodawcę |
-| `dni_chorobowe_pracodawca_50plus` | `int` | dni | 14 dni choroby po 50. roku życia płatne przez pracodawcę |
-| `max_okres_zasilkowy_ciaza_dni`| `int` | dni | Maksymalny okres pobierania zasiłku chorobowego w ciąży (270 dni) |
-| `limit_wieku_ojcowski_miesiace`| `int` | m-ce | Wiek dziecka, do którego można wykorzystać urlop ojcowski (12 miesięcy) |
-| `termin_wniosku_macierzynski_81_5_dni` | `int` | dni | Termin na złożenie wniosku o zasiłek w stawce 81.5% (21 dni od porodu) |
-| `placa_minimalna_2026` | `float` | zł | Płaca minimalna brutto w 2026 roku (4806.00 zł) |
-| `skladki_spoleczne_proc` | `float` | `%` | Procent potrącany z brutto na ZUS (13.71%) |
-| `procent_zadluzenia_limit_zus`| `float` | `%` | Limit zadłużenia JDG w ZUS (1% płacy minimalnej = 48.06 zł) |
+| `pregnancy_sick_leave_rate` | `float` | `%` | Sick leave benefit during pregnancy (Code B: 100%) |
+| `standard_sick_leave_rate` | `float` | `%` | Standard sick leave benefit (80%) |
+| `unified_benefit_rate` | `float` | `%` | Long application within 21 days from birth (81.5% throughout entire period) |
+| `full_maternity_rate` | `float` | `%` | Standard maternity leave rate (100%) |
+| `standard_parental_rate` | `float` | `%` | Standard parental leave rate (70%) |
+| `paternity_benefit_rate` | `float` | `%` | Paternity leave benefit rate (100%) |
+| `rehabilitation_benefit_rate_pregnancy` | `float` | `%` | Rehabilitation benefit in pregnancy (100%) |
+| `maternity_weeks_single_child` | `int` | weeks | 20 weeks for 1 child |
+| `mandatory_mother_maternity_weeks` | `int` | weeks | 14 weeks mandatory for mother before transfer |
+| `parental_weeks_standard` | `int` | weeks | 41 weeks parental leave total (1 child) |
+| `non_transferable_parental_weeks` | `int` | weeks | 9 weeks non-transferable parental leave for the other parent (EU WLB Directive) |
+| `paternity_leave_days` | `int` | days | 14 calendar days of paternity leave |
+| `max_parental_leave_parts` | `int` | parts | Maximum 5 parts for parental leave |
+| `mandatory_waiting_period_days` | `int` | days | Mandatory insurance waiting period (30 days for Employment Contract / UoP) |
+| `voluntary_waiting_period_days` | `int` | days | Voluntary insurance waiting period (90 days for Mandate / JDG) |
+| `employer_sick_days_standard` | `int` | days | 33 sick leave days paid by employer |
+| `employer_sick_days_senior` | `int` | days | 14 sick leave days paid by employer after age 50 |
+| `max_pregnancy_sick_leave_days` | `int` | days | Max sick leave benefit period in pregnancy (270 days) |
+| `max_child_age_paternity_months` | `int` | months | Paternity leave validity window (up to 12 months of child age) |
+| `long_application_deadline_days` | `int` | days | Deadline to submit 81.5% long application (21 days from birth) |
+| `min_wage_2026` | `float` | PLN | Statutory minimum wage gross in 2026 (4806.00 PLN) |
+| `social_contributions_rate` | `float` | `%` | Social contributions deducted from gross (13.71%) |
+| `zus_debt_limit_percentage` | `float` | `%` | JDG ZUS debt limit threshold (1.0% of min wage = 48.06 PLN) |
 
 ---
 
-## 5. Definicje TypeScript (dla Frontendu)
+## 5. TypeScript Definitions (for Frontend)
 
-Plik z typami znajduje się w `docs/types/admin_config.d.ts` oraz `frontend/src/types/admin.d.ts`.
-Można go bezpośrednio zaimportować w komponentach React:
+Available in `docs/types/admin_config.d.ts` and `frontend/src/types/admin.d.ts`:
 
 ```typescript
-export interface StopyProcentowe {
-  stopa_chorobowy_kod_b: number;
-  stopa_chorobowy_standard: number;
-  stopa_macierzynski_jednolity: number;
-  stopa_macierzynski_standard: number;
-  stopa_rodzicielski_standard: number;
-  stopa_ojcowski: number;
-  stopa_swiadczenie_rehab_1_3: number;
-  stopa_swiadczenie_rehab_pozostale: number;
-  stopa_swiadczenie_rehab_ciaza: number;
+export interface BenefitRates {
+  pregnancy_sick_leave_rate: number;
+  standard_sick_leave_rate: number;
+  unified_benefit_rate: number;
+  full_maternity_rate: number;
+  standard_parental_rate: number;
+  paternity_benefit_rate: number;
+  rehabilitation_benefit_rate_first_3_months: number;
+  rehabilitation_benefit_rate_remaining: number;
+  rehabilitation_benefit_rate_pregnancy: number;
 }
 
-export interface WymiaryUrlopow {
-  urlop_macierzynski_1_dziecko_tygodnie: number;
-  urlop_macierzynski_2_dzieci_tygodnie: number;
-  urlop_macierzynski_3_dzieci_tygodnie: number;
-  urlop_macierzynski_4_dzieci_tygodnie: number;
-  urlop_macierzynski_5_plus_tygodnie: number;
-  urlop_macierzynski_obligatoryjny_matki_tygodnie: number;
-  urlop_rodzicielski_1_dziecko_tygodnie: number;
-  urlop_rodzicielski_wieloraczki_tygodnie: number;
-  urlop_rodzicielski_nieprzenoszalny_tygodnie: number;
-  urlop_ojcowski_dni: number;
-  max_czesci_urlopu_rodzicielskiego: number;
+export interface LeaveDurations {
+  maternity_weeks_single_child: number;
+  maternity_weeks_twins: number;
+  maternity_weeks_triplets: number;
+  maternity_weeks_quadruplets: number;
+  maternity_weeks_quintuplets_plus: number;
+  mandatory_mother_maternity_weeks: number;
+  parental_weeks_standard: number;
+  parental_weeks_multiple_birth: number;
+  non_transferable_parental_weeks: number;
+  paternity_leave_days: number;
+  max_parental_leave_parts: number;
 }
 
-export interface OkresyILimity {
-  okres_wyczekiwania_uop_dni: number;
-  okres_wyczekiwania_dobrowolne_dni: number;
-  dni_chorobowe_pracodawca_standard: number;
-  dni_chorobowe_pracodawca_50plus: number;
-  wiek_prog_pracodawca: number;
-  max_okres_zasilkowy_ciaza_dni: number;
-  max_okres_zasilkowy_standard_dni: number;
-  limit_wieku_ojcowski_miesiace: number;
-  limit_wieku_adopcja_ojcowski_lat: number;
-  termin_wniosku_macierzynski_81_5_dni: number;
-  placa_minimalna_2026: number;
-  skladki_spoleczne_proc: number;
-  procent_zadluzenia_limit_zus: number;
+export interface PeriodsAndLimits {
+  mandatory_waiting_period_days: number;
+  voluntary_waiting_period_days: number;
+  employer_sick_days_standard: number;
+  employer_sick_days_senior: number;
+  senior_age_threshold: number;
+  max_pregnancy_sick_leave_days: number;
+  max_standard_sick_leave_days: number;
+  max_child_age_paternity_months: number;
+  max_child_age_paternity_adoption_years: number;
+  long_application_deadline_days: number;
+  min_wage_2026: number;
+  social_contributions_rate: number;
+  zus_debt_limit_percentage: number;
 }
 
 export interface AdminConfig {
-  stopy_procentowe: StopyProcentowe;
-  wymiary_urlopow: WymiaryUrlopow;
-  okresy_i_limity: OkresyILimity;
+  benefit_rates: BenefitRates;
+  leave_durations: LeaveDurations;
+  periods_and_limits: PeriodsAndLimits;
 }
 
 export interface AdminConfigUpdate {
-  stopy_procentowe?: Partial<StopyProcentowe>;
-  wymiary_urlopow?: Partial<WymiaryUrlopow>;
-  okresy_i_limity?: Partial<OkresyILimity>;
+  benefit_rates?: Partial<BenefitRates>;
+  leave_durations?: Partial<LeaveDurations>;
+  periods_and_limits?: Partial<PeriodsAndLimits>;
 }
 ```

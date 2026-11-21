@@ -1,0 +1,41 @@
+{
+  "benefit_rates": {
+    "pregnancy_sick_leave_rate": 100.0,
+    "standard_sick_leave_rate": 80.0,
+    "unified_benefit_rate": 81.5,
+    "full_maternity_rate": 100.0,
+    "standard_parental_rate": 70.0,
+    "paternity_benefit_rate": 100.0,
+    "rehabilitation_benefit_rate_first_3_months": 90.0,
+    "rehabilitation_benefit_rate_remaining": 75.0,
+    "rehabilitation_benefit_rate_pregnancy": 100.0
+  },
+  "leave_durations": {
+    "maternity_weeks_single_child": 20,
+    "maternity_weeks_twins": 31,
+    "maternity_weeks_triplets": 33,
+    "maternity_weeks_quadruplets": 35,
+    "maternity_weeks_quintuplets_plus": 37,
+    "mandatory_mother_maternity_weeks": 14,
+    "parental_weeks_standard": 41,
+    "parental_weeks_multiple_birth": 43,
+    "non_transferable_parental_weeks": 9,
+    "paternity_leave_days": 14,
+    "max_parental_leave_parts": 5
+  },
+  "periods_and_limits": {
+    "mandatory_waiting_period_days": 30,
+    "voluntary_waiting_period_days": 90,
+    "employer_sick_days_standard": 33,
+    "employer_sick_days_senior": 14,
+    "senior_age_threshold": 50,
+    "max_pregnancy_sick_leave_days": 270,
+    "max_standard_sick_leave_days": 182,
+    "max_child_age_paternity_months": 12,
+    "max_child_age_paternity_adoption_years": 14,
+    "long_application_deadline_days": 21,
+    "min_wage_2026": 4806.0,
+    "social_contributions_rate": 13.71,
+    "zus_debt_limit_percentage": 1.0
+  }
+}
