@@ -1,93 +1,93 @@
 /**
- * TypeScript Typings dla Panelu Admina (Konfiguracja Parametrów Prawnych ZUS)
- * Moduł: BE-03 / SETUP-06
+ * TypeScript Typings for Admin Panel (ZUS Legal & Calculation Parameters)
+ * Module: BE-03 / SETUP-06
  */
 
-export interface StopyProcentowe {
-  /** % zasiłku chorobowego w ciąży (kod B, domyślnie 100%) */
-  stopa_chorobowy_kod_b: number;
-  /** % standardowego zasiłku chorobowego (domyślnie 80%) */
-  stopa_chorobowy_standard: number;
-  /** % wniosek długi: macierzyński + rodzicielski w 21 dni (domyślnie 81.5%) */
-  stopa_macierzynski_jednolity: number;
-  /** % zasiłku macierzyńskiego standard (domyślnie 100%) */
-  stopa_macierzynski_standard: number;
-  /** % zasiłku rodzicielskiego standard (domyślnie 70%) */
-  stopa_rodzicielski_standard: number;
-  /** % zasiłku ojcowskiego (domyślnie 100%) */
-  stopa_ojcowski: number;
-  /** % świadczenie rehabilitacyjne pierwsze 3 m-ce (domyślnie 90%) */
-  stopa_swiadczenie_rehab_1_3: number;
-  /** % świadczenie rehabilitacyjne pozostałe m-ce (domyślnie 75%) */
-  stopa_swiadczenie_rehab_pozostale: number;
-  /** % świadczenie rehabilitacyjne w ciąży (domyślnie 100%) */
-  stopa_swiadczenie_rehab_ciaza: number;
+export interface BenefitRates {
+  /** % pregnancy sick leave (code B, default: 100%) */
+  pregnancy_sick_leave_rate: number;
+  /** % standard sick leave (default: 80%) */
+  standard_sick_leave_rate: number;
+  /** % long application: maternity + parental within 21 days (default: 81.5%) */
+  unified_benefit_rate: number;
+  /** % standard maternity leave benefit (default: 100%) */
+  full_maternity_rate: number;
+  /** % standard parental leave benefit (default: 70%) */
+  standard_parental_rate: number;
+  /** % paternity leave benefit (default: 100%) */
+  paternity_benefit_rate: number;
+  /** % rehabilitation benefit first 3 months (default: 90%) */
+  rehabilitation_benefit_rate_first_3_months: number;
+  /** % rehabilitation benefit remaining months (default: 75%) */
+  rehabilitation_benefit_rate_remaining: number;
+  /** % rehabilitation benefit during pregnancy (default: 100%) */
+  rehabilitation_benefit_rate_pregnancy: number;
 }
 
-export interface WymiaryUrlopow {
-  /** Tygodnie urlopu macierzyńskiego przy 1 dziecku (20) */
-  urlop_macierzynski_1_dziecko_tygodnie: number;
-  /** Tygodnie urlopu macierzyńskiego przy bliźniakach (31) */
-  urlop_macierzynski_2_dzieci_tygodnie: number;
-  /** Tygodnie urlopu macierzyńskiego przy trojaczkach (33) */
-  urlop_macierzynski_3_dzieci_tygodnie: number;
-  /** Tygodnie urlopu macierzyńskiego przy czworaczkach (35) */
-  urlop_macierzynski_4_dzieci_tygodnie: number;
-  /** Tygodnie urlopu macierzyńskiego przy pięcioraczkach i więcej (37) */
-  urlop_macierzynski_5_plus_tygodnie: number;
-  /** Obligatoryjne tygodnie macierzyńskiego dla matki (14) */
-  urlop_macierzynski_obligatoryjny_matki_tygodnie: number;
-  /** Tygodnie urlopu rodzicielskiego przy 1 dziecku (41) */
-  urlop_rodzicielski_1_dziecko_tygodnie: number;
-  /** Tygodnie urlopu rodzicielskiego przy ciąży mnogiej (43) */
-  urlop_rodzicielski_wieloraczki_tygodnie: number;
-  /** Nieprzenoszalne tygodnie dla drugiego rodzica z dyrektywy WLB (9) */
-  urlop_rodzicielski_nieprzenoszalny_tygodnie: number;
-  /** Dni urlopu ojcowskiego (14) */
-  urlop_ojcowski_dni: number;
-  /** Maksymalna liczba części urlopu rodzicielskiego (5) */
-  max_czesci_urlopu_rodzicielskiego: number;
+export interface LeaveDurations {
+  /** Maternity leave weeks for 1 child (20) */
+  maternity_weeks_single_child: number;
+  /** Maternity leave weeks for twins (31) */
+  maternity_weeks_twins: number;
+  /** Maternity leave weeks for triplets (33) */
+  maternity_weeks_triplets: number;
+  /** Maternity leave weeks for quadruplets (35) */
+  maternity_weeks_quadruplets: number;
+  /** Maternity leave weeks for quintuplets or more (37) */
+  maternity_weeks_quintuplets_plus: number;
+  /** Mandatory maternity weeks for mother before transfer (14) */
+  mandatory_mother_maternity_weeks: number;
+  /** Parental leave weeks for single child (41) */
+  parental_weeks_standard: number;
+  /** Parental leave weeks for multiple birth (43) */
+  parental_weeks_multiple_birth: number;
+  /** Non-transferable parental weeks for the second parent under EU WLB Directive (9) */
+  non_transferable_parental_weeks: number;
+  /** Paternity leave days (14) */
+  paternity_leave_days: number;
+  /** Maximum parts of parental leave (5) */
+  max_parental_leave_parts: number;
 }
 
-export interface OkresyILimity {
-  /** Okres wyczekiwania na chorobowe UoP w dniach (30) */
-  okres_wyczekiwania_uop_dni: number;
-  /** Okres wyczekiwania na chorobowe dobrowolne zlecenie/JDG w dniach (90) */
-  okres_wyczekiwania_dobrowolne_dni: number;
-  /** Dni wynagrodzenia chorobowego płatnego przez pracodawcę (33) */
-  dni_chorobowe_pracodawca_standard: number;
-  /** Dni wynagrodzenia chorobowego płatnego przez pracodawcę po 50 r.ż. (14) */
-  dni_chorobowe_pracodawca_50plus: number;
-  /** Wiek progowy pracodawcy (50) */
-  wiek_prog_pracodawca: number;
-  /** Maksymalny okres pobierania chorobowego w ciąży w dniach (270) */
-  max_okres_zasilkowy_ciaza_dni: number;
-  /** Standardowy maksymalny okres chorobowego w dniach (182) */
-  max_okres_zasilkowy_standard_dni: number;
-  /** Limit wieku dziecka na urlop ojcowski w miesiącach (12) */
-  limit_wieku_ojcowski_miesiace: number;
-  /** Limit wieku dziecka adoptowanego na ojcowski w latach (14) */
-  limit_wieku_adopcja_ojcowski_lat: number;
-  /** Termin na złożenie wniosku o zasiłek 81.5% w dniach (21) */
-  termin_wniosku_macierzynski_81_5_dni: number;
-  /** Płaca minimalna brutto w 2026 r. (4806.00 zł) */
-  placa_minimalna_2026: number;
-  /** Składki społeczne potrącane z brutto w % (13.71%) */
-  skladki_spoleczne_proc: number;
-  /** Próg dopuszczalnego zadłużenia JDG w ZUS jako % płacy minimalnej (1.0%) */
-  procent_zadluzenia_limit_zus: number;
+export interface PeriodsAndLimits {
+  /** Mandatory insurance waiting period in days for employment contract (30) */
+  mandatory_waiting_period_days: number;
+  /** Voluntary insurance waiting period in days for mandate/JDG (90) */
+  voluntary_waiting_period_days: number;
+  /** Sick leave days paid by employer (33) */
+  employer_sick_days_standard: number;
+  /** Sick leave days paid by employer after age 50 (14) */
+  employer_sick_days_senior: number;
+  /** Senior age threshold for employer sick leave (50) */
+  senior_age_threshold: number;
+  /** Maximum pregnancy sick leave period in days (270) */
+  max_pregnancy_sick_leave_days: number;
+  /** Standard maximum sick leave period in days (182) */
+  max_standard_sick_leave_days: number;
+  /** Maximum child age for paternity leave in months (12) */
+  max_child_age_paternity_months: number;
+  /** Maximum adopted child age for paternity leave in years (14) */
+  max_child_age_paternity_adoption_years: number;
+  /** Deadline for 81.5% long application in days from birth (21) */
+  long_application_deadline_days: number;
+  /** Statutory minimum gross monthly wage in 2026 (4806.00 PLN) */
+  min_wage_2026: number;
+  /** Social contributions deduction percentage (13.71%) */
+  social_contributions_rate: number;
+  /** ZUS debt limit percentage of minimum wage (1.0%) */
+  zus_debt_limit_percentage: number;
 }
 
-/** Pełny obiekt konfiguracji zwracany przez GET /api/admin/config */
+/** Full configuration object returned by GET /api/admin/config */
 export interface AdminConfig {
-  stopy_procentowe: StopyProcentowe;
-  wymiary_urlopow: WymiaryUrlopow;
-  okresy_i_limity: OkresyILimity;
+  benefit_rates: BenefitRates;
+  leave_durations: LeaveDurations;
+  periods_and_limits: PeriodsAndLimits;
 }
 
-/** Obiekt aktualizacji dla PUT /api/admin/config */
+/** Partial update payload for PUT /api/admin/config */
 export interface AdminConfigUpdate {
-  stopy_procentowe?: Partial<StopyProcentowe>;
-  wymiary_urlopow?: Partial<WymiaryUrlopow>;
-  okresy_i_limity?: Partial<OkresyILimity>;
+  benefit_rates?: Partial<BenefitRates>;
+  leave_durations?: Partial<LeaveDurations>;
+  periods_and_limits?: Partial<PeriodsAndLimits>;
 }
