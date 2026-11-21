@@ -7,21 +7,13 @@ class BenefitRates(BaseModel):
     pregnancy_sick_leave_rate: float = Field(
         default=100.0, description="% pregnancy sick leave (code B)"
     )
-    standard_sick_leave_rate: float = Field(
-        default=80.0, description="% standard sick leave"
-    )
+    standard_sick_leave_rate: float = Field(default=80.0, description="% standard sick leave")
     unified_benefit_rate: float = Field(
         default=81.5, description="% long application (maternity + parental)"
     )
-    full_maternity_rate: float = Field(
-        default=100.0, description="% full maternity allowance"
-    )
-    standard_parental_rate: float = Field(
-        default=70.0, description="% standard parental allowance"
-    )
-    paternity_benefit_rate: float = Field(
-        default=100.0, description="% paternity allowance"
-    )
+    full_maternity_rate: float = Field(default=100.0, description="% full maternity allowance")
+    standard_parental_rate: float = Field(default=70.0, description="% standard parental allowance")
+    paternity_benefit_rate: float = Field(default=100.0, description="% paternity allowance")
     rehabilitation_benefit_rate_first_3_months: float = Field(
         default=90.0, description="% rehabilitation benefit first 3 months"
     )

@@ -12,10 +12,17 @@ __all__ = [
     "CalculatorRouter",
     "HealthAPI",
     "HealthRouter",
+    "MaternityAPI",
+    "MaternityRouter",
+    "PaternityAPI",
+    "PaternityRouter",
     "PdfAPI",
     "PdfRouter",
+    "PregnancyAPI",
+    "PregnancyRouter",
     "SimulationAPI",
     "SimulationRouter",
     "SpecialCasesAPI",
     "SpecialCasesRouter",
 ]
+
