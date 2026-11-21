@@ -1,3 +1,4 @@
+import os
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
@@ -19,10 +20,23 @@ class AuthenticationManager:
     """
     Responsible for authenticating API requests using JWT bearer tokens.
     Extracts user identity and resolves their role into an AuthContext.
+    Supports optional development bypass when DEV_AUTH_BYPASS is enabled.
     """
 
-    def __init__(self, role_repo: RoleRepository | None = None) -> None:
+    def __init__(
+        self,
+        role_repo: RoleRepository | None = None,
+        dev_bypass: bool | None = None,
+    ) -> None:
         self.roles: RoleRepository = role_repo or role_repository
+        if dev_bypass is not None:
+            self.dev_bypass: bool = dev_bypass
+        else:
+            self.dev_bypass = os.getenv("DEV_AUTH_BYPASS", "false").strip().lower() in (
+                "true",
+                "1",
+                "yes",
+            )
 
     def get_auth_context(
         self,
@@ -30,11 +44,24 @@ class AuthenticationManager:
     ) -> AuthContext:
         """
         Validates the incoming Bearer token and returns an AuthContext.
+        If no token is supplied and dev_bypass is enabled, returns a default
+        developer AuthContext with full administrative permissions.
 
         Raises:
             HTTPException: 401 if token is missing, invalid, or expired.
         """
         if not access_token:
+            if self.dev_bypass:
+                dev_role: Role = self.roles.get("admin")
+                return AuthContext(
+                    pesel="00000000000",
+                    first_name="Dev",
+                    last_name="Swagger",
+                    user_role=dev_role,
+                    email="dev@swagger.local",
+                    token="dev-bypass-token",
+                )
+
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Authentication credentials were not provided",
