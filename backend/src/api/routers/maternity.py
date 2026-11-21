@@ -1,5 +1,6 @@
 from fastapi import APIRouter
-from src.calculators.maternity import (
+
+from src.api.calculators.maternity import (
     MaternityParentalInput,
     MaternityParentalResult,
     calculate_maternity_parental_benefit,

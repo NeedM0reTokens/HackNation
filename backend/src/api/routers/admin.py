@@ -7,12 +7,8 @@ from pydantic import BaseModel, Field
 
 
 class StopyProcentowe(BaseModel):
-    stopa_chorobowy_kod_b: float = Field(
-        100.0, description="% zasiłku chorobowego w ciąży (kod B)"
-    )
-    stopa_chorobowy_standard: float = Field(
-        80.0, description="% standardowego zasiłku chorobowego"
-    )
+    stopa_chorobowy_kod_b: float = Field(100.0, description="% zasiłku chorobowego w ciąży (kod B)")
+    stopa_chorobowy_standard: float = Field(80.0, description="% standardowego zasiłku chorobowego")
     stopa_macierzynski_jednolity: float = Field(
         81.5, description="% wniosek długi (macierzyński + rodzicielski)"
     )
