@@ -1,7 +1,8 @@
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
-from src.constants import (
+
+from app.constants import (
     EMPLOYER_SICK_DAYS_SENIOR,
     EMPLOYER_SICK_DAYS_STANDARD,
     MANDATORY_WAITING_PERIOD_DAYS,
@@ -155,9 +156,7 @@ def calculate_pregnancy_benefit(data: PregnancyBenefitInput) -> PregnancyBenefit
 
     daily_rate = round(calculation_base / 30, 2)
     benefit_rate = (
-        PREGNANCY_SICK_LEAVE_RATE
-        if data.has_pregnancy_code_b
-        else STANDARD_SICK_LEAVE_RATE
+        PREGNANCY_SICK_LEAVE_RATE if data.has_pregnancy_code_b else STANDARD_SICK_LEAVE_RATE
     )
 
     is_terminated = data.company_status in (
@@ -172,11 +171,13 @@ def calculate_pregnancy_benefit(data: PregnancyBenefitInput) -> PregnancyBenefit
         zus_days = data.sick_leave_duration_days
         zus_amount = round(daily_rate * zus_days * benefit_rate / 100, 2)
         legal_notes.append("Zasiłek w wysokości macierzyńskiego do dnia porodu (wypłaca ZUS).")
-        required_documents.extend([
-            "e-ZLA z kodem B lub zaświadczenie lekarskie",
-            "Świadectwo pracy lub prawomocny wyrok sądu",
-            "Oświadczenie o braku innego zatrudnienia",
-        ])
+        required_documents.extend(
+            [
+                "e-ZLA z kodem B lub zaświadczenie lekarskie",
+                "Świadectwo pracy lub prawomocny wyrok sądu",
+                "Oświadczenie o braku innego zatrudnienia",
+            ]
+        )
     elif data.exhausted_sickness_period:
         benefit_type = BenefitType.REHABILITATION_BENEFIT
         disbursing_entity = PayerType.ZUS
@@ -184,10 +185,12 @@ def calculate_pregnancy_benefit(data: PregnancyBenefitInput) -> PregnancyBenefit
         zus_days = data.sick_leave_duration_days
         zus_amount = round(daily_rate * zus_days * benefit_rate / 100, 2)
         legal_notes.append("Świadczenie rehabilitacyjne po 270 dniach zasiłku (100% w ciąży).")
-        required_documents.extend([
-            "Wniosek o świadczenie rehabilitacyjne",
-            "Zaświadczenie o stanie zdrowia",
-        ])
+        required_documents.extend(
+            [
+                "Wniosek o świadczenie rehabilitacyjne",
+                "Zaświadczenie o stanie zdrowia",
+            ]
+        )
     else:
         benefit_type = BenefitType.SICKNESS_BENEFIT
         if data.employment_type == EmploymentType.EMPLOYMENT_CONTRACT:
@@ -213,9 +216,7 @@ def calculate_pregnancy_benefit(data: PregnancyBenefitInput) -> PregnancyBenefit
             zus_days = data.sick_leave_duration_days
             zus_amount = round(daily_rate * zus_days * benefit_rate / 100, 2)
             disbursing_entity = (
-                PayerType.EMPLOYER
-                if data.payer_size == PayerSize.ABOVE_20
-                else PayerType.ZUS
+                PayerType.EMPLOYER if data.payer_size == PayerSize.ABOVE_20 else PayerType.ZUS
             )
 
     total_amount = round(employer_amount + zus_amount, 2)

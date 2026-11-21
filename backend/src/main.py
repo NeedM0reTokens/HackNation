@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.routers.maternity import router as maternity_router
-from src.routers.pregnancy import router as pregnancy_router
+
+from api.routers.maternity import router as maternity_router
+from api.routers.pregnancy import router as pregnancy_router
 
 app = FastAPI(title="Zasiłkowy Przewodnik Przyszłego Rodzica API")
 

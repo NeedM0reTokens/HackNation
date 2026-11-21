@@ -1,9 +1,9 @@
-from app.api.calculator import CalculatorRouter
-from app.api.health import HealthRouter
-from app.api.pdf import PdfRouter
-from app.api.simulation import SimulationRouter
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from routers.calculator import CalculatorRouter
+from routers.health import HealthRouter
+from routers.pdf import PdfRouter
+from routers.simulation import SimulationRouter
 
 
 class MainAPI(FastAPI):

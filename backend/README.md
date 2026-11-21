@@ -5,7 +5,7 @@ Serwis backendowy oparty o FastAPI.
 ## Uruchomienie lokalne
 
 ```bash
-uv run uvicorn src.main:app --reload
+uv run uvicorn app.main:app --reload
 # lub po aktywacji venv:
-uvicorn src.main:app --reload
+uvicorn app.main:app --reload
 ```

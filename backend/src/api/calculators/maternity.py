@@ -1,7 +1,8 @@
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
-from src.constants import (
+
+from app.constants import (
     FULL_MATERNITY_RATE,
     LONG_APPLICATION_DEADLINE_DAYS,
     MANDATORY_MOTHER_MATERNITY_WEEKS,
@@ -99,11 +100,7 @@ def get_parental_weeks(children_count: int, has_za_zyciem: bool) -> int:
             if children_count == 1
             else PARENTAL_WEEKS_ZA_ZYCIEM_MULTIPLE
         )
-    return (
-        PARENTAL_WEEKS_STANDARD
-        if children_count == 1
-        else PARENTAL_WEEKS_MULTIPLE_BIRTH
-    )
+    return PARENTAL_WEEKS_STANDARD if children_count == 1 else PARENTAL_WEEKS_MULTIPLE_BIRTH
 
 
 def calculate_maternity_parental_benefit(
