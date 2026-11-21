@@ -1,0 +1,553 @@
+﻿Title,Body,Status,Task ID,Section,Role,Priority,Assignee
+"SETUP-01: Utworzenie monorepo (backend/, frontend/, docs/) + .gitignore (blokada *.pdf i .venv)","## SETUP-01
+
+Utworzenie monorepo (backend/, frontend/, docs/) + .gitignore (blokada *.pdf i .venv)
+
+- Rola: FS
+- Priorytet: P1
+- Sekcja: START, ARCHITEKTURA I SETUP (Pierwsze 1-2h)
+- Osoba: Nieprzydzielone",Todo,SETUP-01,"START, ARCHITEKTURA I SETUP (Pierwsze 1-2h)",FS,P1,
+"SETUP-02: Szkielet FastAPI z CORS, strukturą routers/services, requirements.txt i /health","## SETUP-02
+
+Szkielet FastAPI z CORS, strukturą routers/services, requirements.txt i /health
+
+- Rola: FS
+- Priorytet: P1
+- Sekcja: START, ARCHITEKTURA I SETUP (Pierwsze 1-2h)
+- Osoba: Nieprzydzielone",Todo,SETUP-02,"START, ARCHITEKTURA I SETUP (Pierwsze 1-2h)",FS,P1,
+SETUP-03: Inicjalizacja Expo (TypeScript + react-native-web) i sprawdzenie startu w przeglądarce,"## SETUP-03
+
+Inicjalizacja Expo (TypeScript + react-native-web) i sprawdzenie startu w przeglądarce
+
+- Rola: FS
+- Priorytet: P1
+- Sekcja: START, ARCHITEKTURA I SETUP (Pierwsze 1-2h)
+- Osoba: Nieprzydzielone",Todo,SETUP-03,"START, ARCHITEKTURA I SETUP (Pierwsze 1-2h)",FS,P1,
+SETUP-04: Konfiguracja nawigacji (Expo Router / React Navigation) pod Web i Mobile,"## SETUP-04
+
+Konfiguracja nawigacji (Expo Router / React Navigation) pod Web i Mobile
+
+- Rola: FE
+- Priorytet: P1
+- Sekcja: START, ARCHITEKTURA I SETUP (Pierwsze 1-2h)
+- Osoba: Nieprzydzielone",Todo,SETUP-04,"START, ARCHITEKTURA I SETUP (Pierwsze 1-2h)",FE,P1,
+SETUP-05: Konfiguracja klienta API (fetch/axios) z bazowym URL z pliku .env,"## SETUP-05
+
+Konfiguracja klienta API (fetch/axios) z bazowym URL z pliku .env
+
+- Rola: FE
+- Priorytet: P1
+- Sekcja: START, ARCHITEKTURA I SETUP (Pierwsze 1-2h)
+- Osoba: Nieprzydzielone",Todo,SETUP-05,"START, ARCHITEKTURA I SETUP (Pierwsze 1-2h)",FE,P1,
+SETUP-06: Ustalenie kontraktu JSON (schematy Pydantic dla wejścia/wyjścia kalkulatora i PDF),"## SETUP-06
+
+Ustalenie kontraktu JSON (schematy Pydantic dla wejścia/wyjścia kalkulatora i PDF)
+
+- Rola: ALL
+- Priorytet: P1
+- Sekcja: START, ARCHITEKTURA I SETUP (Pierwsze 1-2h)
+- Osoba: Nieprzydzielone",Todo,SETUP-06,"START, ARCHITEKTURA I SETUP (Pierwsze 1-2h)",ALL,P1,
+"BE-01: Plik config.json z domyślnymi parametrami prawnymi (stopy 100/70/81.5%, wymiary tygodni, limity wieku)","## BE-01
+
+Plik config.json z domyślnymi parametrami prawnymi (stopy 100/70/81.5%, wymiary tygodni, limity wieku)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - KONFIGURACJA PARAMETRÓW I PANEL ADMINA
+- Osoba: Nieprzydzielone",Todo,BE-01,BACKEND - KONFIGURACJA PARAMETRÓW I PANEL ADMINA,BE,P1,
+BE-02: Serwis wczytujący i zapisujący parametry konfiguracyjne w locie (bez restartu serwera),"## BE-02
+
+Serwis wczytujący i zapisujący parametry konfiguracyjne w locie (bez restartu serwera)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - KONFIGURACJA PARAMETRÓW I PANEL ADMINA
+- Osoba: Nieprzydzielone",Todo,BE-02,BACKEND - KONFIGURACJA PARAMETRÓW I PANEL ADMINA,BE,P1,
+BE-03: Endpointy Panelu Admina: GET /api/admin/config oraz PUT /api/admin/config,"## BE-03
+
+Endpointy Panelu Admina: GET /api/admin/config oraz PUT /api/admin/config
+
+- Rola: BE
+- Priorytet: P2
+- Sekcja: BACKEND - KONFIGURACJA PARAMETRÓW I PANEL ADMINA
+- Osoba: Nieprzydzielone",Todo,BE-03,BACKEND - KONFIGURACJA PARAMETRÓW I PANEL ADMINA,BE,P2,
+BE-04: Logika weryfikacji prawa do zasiłku i okresu wyczekiwania (30 dni UoP vs 90 dni Zlecenie/JDG),"## BE-04
+
+Logika weryfikacji prawa do zasiłku i okresu wyczekiwania (30 dni UoP vs 90 dni Zlecenie/JDG)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - KALKULATOR CIĄŻY (CHOROBOWY I SYTUACJE SZCZEGÓLNE)
+- Osoba: Nieprzydzielone",Todo,BE-04,BACKEND - KALKULATOR CIĄŻY (CHOROBOWY I SYTUACJE SZCZEGÓLNE),BE,P1,
+"BE-05: Wyliczanie zasiłku chorobowego w ciąży (kod B = 100%, 33/14 dni pracodawca, limit 270 dni)","## BE-05
+
+Wyliczanie zasiłku chorobowego w ciąży (kod B = 100%, 33/14 dni pracodawca, limit 270 dni)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - KALKULATOR CIĄŻY (CHOROBOWY I SYTUACJE SZCZEGÓLNE)
+- Osoba: Nieprzydzielone",Todo,BE-05,BACKEND - KALKULATOR CIĄŻY (CHOROBOWY I SYTUACJE SZCZEGÓLNE),BE,P1,
+BE-06: Logika świadczenia rehabilitacyjnego po wyczerpaniu 270 dni zasiłku chorobowego,"## BE-06
+
+Logika świadczenia rehabilitacyjnego po wyczerpaniu 270 dni zasiłku chorobowego
+
+- Rola: BE
+- Priorytet: P2
+- Sekcja: BACKEND - KALKULATOR CIĄŻY (CHOROBOWY I SYTUACJE SZCZEGÓLNE)
+- Osoba: Nieprzydzielone",Todo,BE-06,BACKEND - KALKULATOR CIĄŻY (CHOROBOWY I SYTUACJE SZCZEGÓLNE),BE,P2,
+"BE-07: Logika zasiłku w wysokości macierzyńskiego (upadłość/likwidacja/śmierć pracodawcy, bezprawne zwolnienie)","## BE-07
+
+Logika zasiłku w wysokości macierzyńskiego (upadłość/likwidacja/śmierć pracodawcy, bezprawne zwolnienie)
+
+- Rola: BE
+- Priorytet: P2
+- Sekcja: BACKEND - KALKULATOR CIĄŻY (CHOROBOWY I SYTUACJE SZCZEGÓLNE)
+- Osoba: Nieprzydzielone",Todo,BE-07,BACKEND - KALKULATOR CIĄŻY (CHOROBOWY I SYTUACJE SZCZEGÓLNE),BE,P2,
+BE-08: Endpoint POST /api/calculator/pregnancy łączący powyższą logikę (z komunikatem o braku prawa),"## BE-08
+
+Endpoint POST /api/calculator/pregnancy łączący powyższą logikę (z komunikatem o braku prawa)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - KALKULATOR CIĄŻY (CHOROBOWY I SYTUACJE SZCZEGÓLNE)
+- Osoba: Nieprzydzielone",Todo,BE-08,BACKEND - KALKULATOR CIĄŻY (CHOROBOWY I SYTUACJE SZCZEGÓLNE),BE,P1,
+"BE-09: Logika wymiaru urlopu macierzyńskiego (wg liczby dzieci: 20/31/33/35/37 tyg., min. 14 tyg. matki)","## BE-09
+
+Logika wymiaru urlopu macierzyńskiego (wg liczby dzieci: 20/31/33/35/37 tyg., min. 14 tyg. matki)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO
+- Osoba: Nieprzydzielone",Todo,BE-09,BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO,BE,P1,
+"BE-10: Logika wymiaru urlopu rodzicielskiego (41/43 tyg., 9 tyg. nieprzenoszalne, max 5 części do 6 r.ż.)","## BE-10
+
+Logika wymiaru urlopu rodzicielskiego (41/43 tyg., 9 tyg. nieprzenoszalne, max 5 części do 6 r.ż.)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO
+- Osoba: Nieprzydzielone",Todo,BE-10,BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO,BE,P1,
+BE-11: Porównanie wariantów stawek: 81.5% (wniosek do 21 dni po porodzie) vs 100% + 70%,"## BE-11
+
+Porównanie wariantów stawek: 81.5% (wniosek do 21 dni po porodzie) vs 100% + 70%
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO
+- Osoba: Nieprzydzielone",Todo,BE-11,BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO,BE,P1,
+BE-12: Przeliczanie konkretnych kwot PLN na podstawie indywidualnej podstawy wymiaru zasiłku,"## BE-12
+
+Przeliczanie konkretnych kwot PLN na podstawie indywidualnej podstawy wymiaru zasiłku
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO
+- Osoba: Nieprzydzielone",Todo,BE-12,BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO,BE,P1,
+"BE-13: Przypadki szczególne: zaświadczenie ""Za życiem"" (wydłużony urlop rodzicielski)","## BE-13
+
+Przypadki szczególne: zaświadczenie ""Za życiem"" (wydłużony urlop rodzicielski)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO
+- Osoba: Nieprzydzielone",Todo,BE-13,BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO,BE,P1,
+BE-14: Przypadki szczególne: wcześniak / hospitalizacja (uzupełniający urlop macierzyński),"## BE-14
+
+Przypadki szczególne: wcześniak / hospitalizacja (uzupełniający urlop macierzyński)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO
+- Osoba: Nieprzydzielone",Todo,BE-14,BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO,BE,P1,
+BE-15: Przypadki szczególne: urodzenie martwego dziecka lub zgon (8 tyg. / min. 7 dni),"## BE-15
+
+Przypadki szczególne: urodzenie martwego dziecka lub zgon (8 tyg. / min. 7 dni)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO
+- Osoba: Nieprzydzielone",Todo,BE-15,BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO,BE,P1,
+"BE-16: Logika urlopu ojcowskiego (14 dni, 1 lub 2 części po 7 dni, limit 12 mies. / adopcja 14 lat)","## BE-16
+
+Logika urlopu ojcowskiego (14 dni, 1 lub 2 części po 7 dni, limit 12 mies. / adopcja 14 lat)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO
+- Osoba: Nieprzydzielone",Todo,BE-16,BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO,BE,P1,
+BE-17: Logika przejęcia urlopu macierzyńskiego przez ojca (po 14 tyg. lub wcześniej w sytuacjach szczególnych),"## BE-17
+
+Logika przejęcia urlopu macierzyńskiego przez ojca (po 14 tyg. lub wcześniej w sytuacjach szczególnych)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO
+- Osoba: Nieprzydzielone",Todo,BE-17,BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO,BE,P1,
+BE-18: Symulacja podziału opieki między oboje rodziców (równocześnie lub naprzemiennie + kwoty dla obu),"## BE-18
+
+Symulacja podziału opieki między oboje rodziców (równocześnie lub naprzemiennie + kwoty dla obu)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO
+- Osoba: Nieprzydzielone",Todo,BE-18,BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO,BE,P1,
+"BE-19: Logika łączenia urlopu rodzicielskiego z pracą (max 1/2 etatu, proporcjonalne wydłużenie i kwota)","## BE-19
+
+Logika łączenia urlopu rodzicielskiego z pracą (max 1/2 etatu, proporcjonalne wydłużenie i kwota)
+
+- Rola: BE
+- Priorytet: P2
+- Sekcja: BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO
+- Osoba: Nieprzydzielone",Todo,BE-19,BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO,BE,P2,
+"BE-20: Logika dla adopcji i rodziny zastępczej niezawodowej (urlop na warunkach macierzyńskiego, limity 7/10/14 lat)","## BE-20
+
+Logika dla adopcji i rodziny zastępczej niezawodowej (urlop na warunkach macierzyńskiego, limity 7/10/14 lat)
+
+- Rola: BE
+- Priorytet: P2
+- Sekcja: BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO
+- Osoba: Nieprzydzielone",Todo,BE-20,BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO,BE,P2,
+BE-21: Endpoint POST /api/calculator/parental spinający cały zintegrowany kalkulator + oś czasu (daty),"## BE-21
+
+Endpoint POST /api/calculator/parental spinający cały zintegrowany kalkulator + oś czasu (daty)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO
+- Osoba: Nieprzydzielone",Todo,BE-21,BACKEND - ZINTEGROWANY KALKULATOR MACIERZYŃSKIEGO I RODZICIELSKIEGO,BE,P1,
+BE-22: Ekstrakcja surowego tekstu z plików PDF (pypdf / pdfplumber),"## BE-22
+
+Ekstrakcja surowego tekstu z plików PDF (pypdf / pdfplumber)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - OBSŁUGA PDF I PRZYKŁADOWE SPRAWY ZUS
+- Osoba: Nieprzydzielone",Todo,BE-22,BACKEND - OBSŁUGA PDF I PRZYKŁADOWE SPRAWY ZUS,BE,P1,
+"BE-23: Parser danych z druków ZUS (ZAM, Z-3, Z-3a, poświadczenie ubezpieczenia) - regex lub wsparcie AI/LLM","## BE-23
+
+Parser danych z druków ZUS (ZAM, Z-3, Z-3a, poświadczenie ubezpieczenia) - regex lub wsparcie AI/LLM
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - OBSŁUGA PDF I PRZYKŁADOWE SPRAWY ZUS
+- Osoba: Nieprzydzielone",Todo,BE-23,BACKEND - OBSŁUGA PDF I PRZYKŁADOWE SPRAWY ZUS,BE,P1,
+BE-24: Walidator ubezpieczenia na podstawie PDF (czy ma prawo? + mapowanie pól do formatu kalkulatora),"## BE-24
+
+Walidator ubezpieczenia na podstawie PDF (czy ma prawo? + mapowanie pól do formatu kalkulatora)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - OBSŁUGA PDF I PRZYKŁADOWE SPRAWY ZUS
+- Osoba: Nieprzydzielone",Todo,BE-24,BACKEND - OBSŁUGA PDF I PRZYKŁADOWE SPRAWY ZUS,BE,P1,
+BE-25: Endpoint POST /api/pdf/parse obsługujący upload pliku (UploadFile),"## BE-25
+
+Endpoint POST /api/pdf/parse obsługujący upload pliku (UploadFile)
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - OBSŁUGA PDF I PRZYKŁADOWE SPRAWY ZUS
+- Osoba: Nieprzydzielone",Todo,BE-25,BACKEND - OBSŁUGA PDF I PRZYKŁADOWE SPRAWY ZUS,BE,P1,
+BE-26: Baza zanonimizowanych scenariuszy testowych + endpointy GET /api/cases i GET /api/cases/{id},"## BE-26
+
+Baza zanonimizowanych scenariuszy testowych + endpointy GET /api/cases i GET /api/cases/{id}
+
+- Rola: BE
+- Priorytet: P1
+- Sekcja: BACKEND - OBSŁUGA PDF I PRZYKŁADOWE SPRAWY ZUS
+- Osoba: Nieprzydzielone",Todo,BE-26,BACKEND - OBSŁUGA PDF I PRZYKŁADOWE SPRAWY ZUS,BE,P1,
+"BE-27: Mock mObywatela: POST /api/mock/mobywatel/login (3-4 profile: UoP, Zlecenie, JDG z długiem, Brak ubezp.)","## BE-27
+
+Mock mObywatela: POST /api/mock/mobywatel/login (3-4 profile: UoP, Zlecenie, JDG z długiem, Brak ubezp.)
+
+- Rola: BE
+- Priorytet: P2
+- Sekcja: BACKEND - SYMULACJE ZUS I DORADCA DOKUMENTOWY
+- Osoba: Nieprzydzielone",Todo,BE-27,BACKEND - SYMULACJE ZUS I DORADCA DOKUMENTOWY,BE,P2,
+"BE-28: Mock ZUS: GET /api/mock/zus/profile (status ubezpieczenia, podstawa, zadłużenie składek JDG)","## BE-28
+
+Mock ZUS: GET /api/mock/zus/profile (status ubezpieczenia, podstawa, zadłużenie składek JDG)
+
+- Rola: BE
+- Priorytet: P2
+- Sekcja: BACKEND - SYMULACJE ZUS I DORADCA DOKUMENTOWY
+- Osoba: Nieprzydzielone",Todo,BE-28,BACKEND - SYMULACJE ZUS I DORADCA DOKUMENTOWY,BE,P2,
+BE-29: Mock e-ZLA: GET /api/mock/zus/ezla (lista zaświadczeń lekarskich z kodem B i okresami),"## BE-29
+
+Mock e-ZLA: GET /api/mock/zus/ezla (lista zaświadczeń lekarskich z kodem B i okresami)
+
+- Rola: BE
+- Priorytet: P2
+- Sekcja: BACKEND - SYMULACJE ZUS I DORADCA DOKUMENTOWY
+- Osoba: Nieprzydzielone",Todo,BE-29,BACKEND - SYMULACJE ZUS I DORADCA DOKUMENTOWY,BE,P2,
+"BE-30: Mock wysyłki: POST /api/mock/submit (wniosek urlopowy, ZAM, akt urodzenia USC, zapytanie PUE/eZUS)","## BE-30
+
+Mock wysyłki: POST /api/mock/submit (wniosek urlopowy, ZAM, akt urodzenia USC, zapytanie PUE/eZUS)
+
+- Rola: BE
+- Priorytet: P2
+- Sekcja: BACKEND - SYMULACJE ZUS I DORADCA DOKUMENTOWY
+- Osoba: Nieprzydzielone",Todo,BE-30,BACKEND - SYMULACJE ZUS I DORADCA DOKUMENTOWY,BE,P2,
+"BE-31: Endpoint doradczy POST /api/advisor/documents (lista druków po 24.10.2026 bez ZUR/ZAO/Z-3b, terminy, płatnik >20 vs ZUS)","## BE-31
+
+Endpoint doradczy POST /api/advisor/documents (lista druków po 24.10.2026 bez ZUR/ZAO/Z-3b, terminy, płatnik >20 vs ZUS)
+
+- Rola: BE
+- Priorytet: P2
+- Sekcja: BACKEND - SYMULACJE ZUS I DORADCA DOKUMENTOWY
+- Osoba: Nieprzydzielone",Todo,BE-31,BACKEND - SYMULACJE ZUS I DORADCA DOKUMENTOWY,BE,P2,
+"FE-01: Plik motywu (kolory, fonty, odstępy) - spójny, czysty styl przyjazny rodzicom","## FE-01
+
+Plik motywu (kolory, fonty, odstępy) - spójny, czysty styl przyjazny rodzicom
+
+- Rola: FE
+- Priorytet: P1
+- Sekcja: FRONTEND - LAYOUT, STYL I KOMPONENTY BAZOWE (RWD)
+- Osoba: Nieprzydzielone",Todo,FE-01,"FRONTEND - LAYOUT, STYL I KOMPONENTY BAZOWE (RWD)",FE,P1,
+"FE-02: Responsywny Layout główny (menu boczne/górne na Desktop, dolny pasek zakładek na Mobile)","## FE-02
+
+Responsywny Layout główny (menu boczne/górne na Desktop, dolny pasek zakładek na Mobile)
+
+- Rola: FE
+- Priorytet: P1
+- Sekcja: FRONTEND - LAYOUT, STYL I KOMPONENTY BAZOWE (RWD)
+- Osoba: Nieprzydzielone",Todo,FE-02,"FRONTEND - LAYOUT, STYL I KOMPONENTY BAZOWE (RWD)",FE,P1,
+"FE-03: Biblioteka prostych komponentów UI (Przycisk, Karta, Input, Select/Picker, Suwak, Alert/Badge)","## FE-03
+
+Biblioteka prostych komponentów UI (Przycisk, Karta, Input, Select/Picker, Suwak, Alert/Badge)
+
+- Rola: FE
+- Priorytet: P1
+- Sekcja: FRONTEND - LAYOUT, STYL I KOMPONENTY BAZOWE (RWD)
+- Osoba: Nieprzydzielone",Todo,FE-03,"FRONTEND - LAYOUT, STYL I KOMPONENTY BAZOWE (RWD)",FE,P1,
+"FE-04: Ekran Startowy: wybór ścieżki (""Zaloguj przez mObywatel"", ""Wpisz dane ręcznie"", ""Wgraj/wybierz PDF"")","## FE-04
+
+Ekran Startowy: wybór ścieżki (""Zaloguj przez mObywatel"", ""Wpisz dane ręcznie"", ""Wgraj/wybierz PDF"")
+
+- Rola: FE
+- Priorytet: P1
+- Sekcja: FRONTEND - LAYOUT, STYL I KOMPONENTY BAZOWE (RWD)
+- Osoba: Nieprzydzielone",Todo,FE-04,"FRONTEND - LAYOUT, STYL I KOMPONENTY BAZOWE (RWD)",FE,P1,
+"FE-05: Formularz Kalkulatora - Krok 1: Tryb (ciąża/poród/adopcja/zastępcza), forma zatrudnienia, podstawa wymiaru","## FE-05
+
+Formularz Kalkulatora - Krok 1: Tryb (ciąża/poród/adopcja/zastępcza), forma zatrudnienia, podstawa wymiaru
+
+- Rola: FE
+- Priorytet: P1
+- Sekcja: FRONTEND - ZINTEGROWANY KALKULATOR (CORE UX)
+- Osoba: Nieprzydzielone",Todo,FE-05,FRONTEND - ZINTEGROWANY KALKULATOR (CORE UX),FE,P1,
+"FE-06: Formularz Kalkulatora - Krok 2: Liczba dzieci, daty, przełączniki (""Za życiem"", wcześniak, sytuacje trudne)","## FE-06
+
+Formularz Kalkulatora - Krok 2: Liczba dzieci, daty, przełączniki (""Za życiem"", wcześniak, sytuacje trudne)
+
+- Rola: FE
+- Priorytet: P1
+- Sekcja: FRONTEND - ZINTEGROWANY KALKULATOR (CORE UX)
+- Osoba: Nieprzydzielone",Todo,FE-06,FRONTEND - ZINTEGROWANY KALKULATOR (CORE UX),FE,P1,
+"FE-07: Formularz Kalkulatora - Krok 3: Podział urlopu (suwaki tygodni matka/ojciec), tryb równoczesny/naprzemienny","## FE-07
+
+Formularz Kalkulatora - Krok 3: Podział urlopu (suwaki tygodni matka/ojciec), tryb równoczesny/naprzemienny
+
+- Rola: FE
+- Priorytet: P1
+- Sekcja: FRONTEND - ZINTEGROWANY KALKULATOR (CORE UX)
+- Osoba: Nieprzydzielone",Todo,FE-07,FRONTEND - ZINTEGROWANY KALKULATOR (CORE UX),FE,P1,
+FE-08: Formularz Kalkulatora - Sekcja pracy: przełącznik łączenia rodzicielskiego z pracą (wybór ułamka etatu do 0.5),"## FE-08
+
+Formularz Kalkulatora - Sekcja pracy: przełącznik łączenia rodzicielskiego z pracą (wybór ułamka etatu do 0.5)
+
+- Rola: FE
+- Priorytet: P2
+- Sekcja: FRONTEND - ZINTEGROWANY KALKULATOR (CORE UX)
+- Osoba: Nieprzydzielone",Todo,FE-08,FRONTEND - ZINTEGROWANY KALKULATOR (CORE UX),FE,P2,
+FE-09: Widok wyników (Ciąża): karty z kwotą i długością zasiłku chorobowego/rehab. LUB jasny alert o braku prawa,"## FE-09
+
+Widok wyników (Ciąża): karty z kwotą i długością zasiłku chorobowego/rehab. LUB jasny alert o braku prawa
+
+- Rola: FE
+- Priorytet: P1
+- Sekcja: FRONTEND - ZINTEGROWANY KALKULATOR (CORE UX)
+- Osoba: Nieprzydzielone",Todo,FE-09,FRONTEND - ZINTEGROWANY KALKULATOR (CORE UX),FE,P1,
+FE-10: Widok wyników (Rodzicielstwo): karty kwot (mies./łącznie) + porównanie 81.5% vs 100%/70%,"## FE-10
+
+Widok wyników (Rodzicielstwo): karty kwot (mies./łącznie) + porównanie 81.5% vs 100%/70%
+
+- Rola: FE
+- Priorytet: P1
+- Sekcja: FRONTEND - ZINTEGROWANY KALKULATOR (CORE UX)
+- Osoba: Nieprzydzielone",Todo,FE-10,FRONTEND - ZINTEGROWANY KALKULATOR (CORE UX),FE,P1,
+FE-11: Komponent wizualnej osi czasu (Timeline) pokazujący bloki urlopów dla obojga rodziców,"## FE-11
+
+Komponent wizualnej osi czasu (Timeline) pokazujący bloki urlopów dla obojga rodziców
+
+- Rola: FE
+- Priorytet: P1
+- Sekcja: FRONTEND - ZINTEGROWANY KALKULATOR (CORE UX)
+- Osoba: Nieprzydzielone",Todo,FE-11,FRONTEND - ZINTEGROWANY KALKULATOR (CORE UX),FE,P1,
+FE-12: Komponent uploadu PDF (działający w przeglądarce!) + lista rozwijana z gotowymi sprawami ZUS,"## FE-12
+
+Komponent uploadu PDF (działający w przeglądarce!) + lista rozwijana z gotowymi sprawami ZUS
+
+- Rola: FE
+- Priorytet: P1
+- Sekcja: FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN
+- Osoba: Nieprzydzielone",Todo,FE-12,"FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN",FE,P1,
+"FE-13: Karta wyniku analizy PDF (badge: Ubezpieczony/Brak + przycisk ""Przenieś dane do kalkulatora"")","## FE-13
+
+Karta wyniku analizy PDF (badge: Ubezpieczony/Brak + przycisk ""Przenieś dane do kalkulatora"")
+
+- Rola: FE
+- Priorytet: P1
+- Sekcja: FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN
+- Osoba: Nieprzydzielone",Todo,FE-13,"FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN",FE,P1,
+FE-14: Ekran symulacji logowania mObywatel (wybór jednej z przykładowych person),"## FE-14
+
+Ekran symulacji logowania mObywatel (wybór jednej z przykładowych person)
+
+- Rola: FE
+- Priorytet: P2
+- Sekcja: FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN
+- Osoba: Nieprzydzielone",Todo,FE-14,"FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN",FE,P2,
+"FE-15: Dashboard danych z ZUS: status ubezpieczenia, alert o zadłużeniu JDG, podgląd listy e-ZLA","## FE-15
+
+Dashboard danych z ZUS: status ubezpieczenia, alert o zadłużeniu JDG, podgląd listy e-ZLA
+
+- Rola: FE
+- Priorytet: P2
+- Sekcja: FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN
+- Osoba: Nieprzydzielone",Todo,FE-15,"FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN",FE,P2,
+"FE-16: Ekran ""Dokumenty i Terminy"": dynamiczna checklista wniosków + info gdzie złożyć (Pracodawca vs ZUS)","## FE-16
+
+Ekran ""Dokumenty i Terminy"": dynamiczna checklista wniosków + info gdzie złożyć (Pracodawca vs ZUS)
+
+- Rola: FE
+- Priorytet: P2
+- Sekcja: FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN
+- Osoba: Nieprzydzielone",Todo,FE-16,"FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN",FE,P2,
+"FE-17: Kreator/Symulacja wniosków: wniosek o urlop do pracodawcy, symulacja ZAM, wniosek o akt urodzenia USC","## FE-17
+
+Kreator/Symulacja wniosków: wniosek o urlop do pracodawcy, symulacja ZAM, wniosek o akt urodzenia USC
+
+- Rola: FE
+- Priorytet: P2
+- Sekcja: FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN
+- Osoba: Nieprzydzielone",Todo,FE-17,"FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN",FE,P2,
+"FE-18: Modal/Ekran ""Połącz z PUE/eZUS"" (symulacja zadania pytania i podglądu konta)","## FE-18
+
+Modal/Ekran ""Połącz z PUE/eZUS"" (symulacja zadania pytania i podglądu konta)
+
+- Rola: FE
+- Priorytet: P2
+- Sekcja: FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN
+- Osoba: Nieprzydzielone",Todo,FE-18,"FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN",FE,P2,
+"FE-19: Ekran ""Zagrożenia i Ochrona"": ostrzeżenia (pozorna umowa, podwyższanie składek, przerwa) + ochrona z KP","## FE-19
+
+Ekran ""Zagrożenia i Ochrona"": ostrzeżenia (pozorna umowa, podwyższanie składek, przerwa) + ochrona z KP
+
+- Rola: FE
+- Priorytet: P2
+- Sekcja: FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN
+- Osoba: Nieprzydzielone",Todo,FE-19,"FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN",FE,P2,
+"FE-20: Ekran ""Wsparcie w trudnych sytuacjach"": baza fundacji/stowarzyszeń charytatywnych + linki (ZUS, MRPiPS, PIP)","## FE-20
+
+Ekran ""Wsparcie w trudnych sytuacjach"": baza fundacji/stowarzyszeń charytatywnych + linki (ZUS, MRPiPS, PIP)
+
+- Rola: FE
+- Priorytet: P2
+- Sekcja: FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN
+- Osoba: Nieprzydzielone",Todo,FE-20,"FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN",FE,P2,
+FS-01: Panel Administracyjny (UI): formularz edycji stawek i wymiarów urlopów + przycisk Zapisz,"## FS-01
+
+Panel Administracyjny (UI): formularz edycji stawek i wymiarów urlopów + przycisk Zapisz
+
+- Rola: FS
+- Priorytet: P2
+- Sekcja: FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN
+- Osoba: Nieprzydzielone",Todo,FS-01,"FRONTEND - PDF, SYMULACJE ZUS, BAZA WIEDZY I ADMIN",FS,P2,
+FS-02: Spięcie formularzy i wyników Kalkulatora z API Backendu (obsługa loaderów i błędów),"## FS-02
+
+Spięcie formularzy i wyników Kalkulatora z API Backendu (obsługa loaderów i błędów)
+
+- Rola: FS
+- Priorytet: P1
+- Sekcja: INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE
+- Osoba: Nieprzydzielone",Todo,FS-02,"INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE",FS,P1,
+FS-03: Spięcie uploadu PDF i wyboru spraw testowych z API Backendu,"## FS-03
+
+Spięcie uploadu PDF i wyboru spraw testowych z API Backendu
+
+- Rola: FS
+- Priorytet: P1
+- Sekcja: INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE
+- Osoba: Nieprzydzielone",Todo,FS-03,"INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE",FS,P1,
+"FS-04: Spięcie symulacji mObywatela, Dashboardu ZUS, Doradcy i Panelu Admina z API","## FS-04
+
+Spięcie symulacji mObywatela, Dashboardu ZUS, Doradcy i Panelu Admina z API
+
+- Rola: FS
+- Priorytet: P2
+- Sekcja: INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE
+- Osoba: Nieprzydzielone",Todo,FS-04,"INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE",FS,P2,
+QA-01: Weryfikacja poprawności wyliczeń kalkulatora i parsera na przykładowych sprawach PDF od ZUS,"## QA-01
+
+Weryfikacja poprawności wyliczeń kalkulatora i parsera na przykładowych sprawach PDF od ZUS
+
+- Rola: ALL
+- Priorytet: P1
+- Sekcja: INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE
+- Osoba: Nieprzydzielone",Todo,QA-01,"INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE",ALL,P1,
+QA-02: Testy responsywności (RWD) na różnych szerokościach ekranu (Desktop + Mobile),"## QA-02
+
+Testy responsywności (RWD) na różnych szerokościach ekranu (Desktop + Mobile)
+
+- Rola: FE
+- Priorytet: P1
+- Sekcja: INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE
+- Osoba: Nieprzydzielone",Todo,QA-02,"INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE",FE,P1,
+OPS-01: Deployment Backendu (Render / Railway) + weryfikacja działania /docs i CORS,"## OPS-01
+
+Deployment Backendu (Render / Railway) + weryfikacja działania /docs i CORS
+
+- Rola: FS
+- Priorytet: P1
+- Sekcja: INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE
+- Osoba: Nieprzydzielone",Todo,OPS-01,"INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE",FS,P1,
+OPS-02: Deployment Frontendu jako strony WWW (Vercel / Netlify) podpiętej do produkcyjnego API,"## OPS-02
+
+Deployment Frontendu jako strony WWW (Vercel / Netlify) podpiętej do produkcyjnego API
+
+- Rola: FS
+- Priorytet: P1
+- Sekcja: INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE
+- Osoba: Nieprzydzielone",Todo,OPS-02,"INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE",FS,P1,
+"DOC-01: Uzupełnienie README.md (opis, uruchomienie, link do demo, JAWNA lista miejsc z użyciem AI)","## DOC-01
+
+Uzupełnienie README.md (opis, uruchomienie, link do demo, JAWNA lista miejsc z użyciem AI)
+
+- Rola: FS
+- Priorytet: P1
+- Sekcja: INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE
+- Osoba: Nieprzydzielone",Todo,DOC-01,"INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE",FS,P1,
+DOC-02: Wykonanie zrzutów ekranu aplikacji (Desktop + Mobile) i wrzucenie do docs/,"## DOC-02
+
+Wykonanie zrzutów ekranu aplikacji (Desktop + Mobile) i wrzucenie do docs/
+
+- Rola: ALL
+- Priorytet: P1
+- Sekcja: INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE
+- Osoba: Nieprzydzielone",Todo,DOC-02,"INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE",ALL,P1,
+DOC-03: Przygotowanie prezentacji (MAKSYMALNIE 10 slajdów),"## DOC-03
+
+Przygotowanie prezentacji (MAKSYMALNIE 10 slajdów)
+
+- Rola: ALL
+- Priorytet: P1
+- Sekcja: INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE
+- Osoba: Nieprzydzielone",Todo,DOC-03,"INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE",ALL,P1,
+"DOC-04: Nagranie i publikacja filmiku demo (MAKSYMALNIE 3 minuty, otwarty link)","## DOC-04
+
+Nagranie i publikacja filmiku demo (MAKSYMALNIE 3 minuty, otwarty link)
+
+- Rola: ALL
+- Priorytet: P1
+- Sekcja: INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE
+- Osoba: Nieprzydzielone",Todo,DOC-04,"INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE",ALL,P1,
