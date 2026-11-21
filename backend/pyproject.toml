@@ -45,3 +45,5 @@ include = ["src"]
 pythonVersion = "3.12"
 typeCheckingMode = "standard"
 reportMissingTypeStubs = false
+venvPath = ".."
+venv = ".venv"

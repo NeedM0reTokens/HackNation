@@ -1,24 +1,25 @@
-from datetime import datetime
+from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 
 class HealthResponse(BaseModel):
-    status: str = Field(default="ok", example="ok")
-    message: str = Field(..., example="Backend ZUS Przewodnika działa poprawnie!")
-    version: str = Field(default="1.0.0", example="1.0.0")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    status: str = Field(examples=["ok"])
+    message: str = Field(examples=["Backend ZUS Przewodnika działa poprawnie!"])
+    version: str = Field(default="1.0.0", examples=["1.0.0"])
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class HealthRouter(APIRouter):
     """Osobna klasa routera dla sprawdzania stanu aplikacji (Healthcheck)."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(tags=["Health"], **kwargs)
         self._setup_routes()
 
-    def _setup_routes(self):
+    def _setup_routes(self) -> None:
         self.add_api_route(
             "/health",
             self.get_health,
