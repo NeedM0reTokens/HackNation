@@ -2,14 +2,13 @@ from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
-from src.api.models.maternity import (
+from .maternity import (
     BenefitPaymentVariant,
     MaternityEmploymentType,
     PeriodBreakdown,
 )
 
 
-# --- BE-16: Urlop ojcowski ---
 class PaternityLeavePart(BaseModel):
     part_number: int = Field(1, ge=1, le=2, description="Part number (1 or 2)")
     days: int = Field(7, ge=7, le=14, description="Days count (min 7, max 14)")
@@ -47,7 +46,6 @@ class PaternityLeaveResult(BaseModel):
     important_notes: list[str] = Field(default_factory=list)
 
 
-# --- BE-17: Przejęcie macierzyńskiego przez ojca ---
 class MaternityTransferReason(StrEnum):
     STANDARD_AFTER_14_WEEKS = "STANDARD_AFTER_14_WEEKS"
     MOTHER_HOSPITALIZATION = "MOTHER_HOSPITALIZATION"
@@ -82,7 +80,6 @@ class MaternityTransferResult(BaseModel):
     important_notes: list[str] = Field(default_factory=list)
 
 
-# --- BE-18: Symulacja podziału opieki ---
 class SharingMode(StrEnum):
     SEQUENTIAL = "SEQUENTIAL"
     SIMULTANEOUS = "SIMULTANEOUS"

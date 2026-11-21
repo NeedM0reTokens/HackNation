@@ -2,7 +2,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
-from src.api.models.maternity import (
+from .maternity import (
     BenefitPaymentVariant,
     MaternityEmploymentType,
     PeriodBreakdown,

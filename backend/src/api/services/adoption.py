@@ -1,8 +1,4 @@
-from src.api.models.maternity import (
-    BenefitPaymentVariant,
-    PeriodBreakdown,
-)
-from src.constants import (
+from ...constants import (
     ADOPTION_CHILD_DEFERRED_SCHOOL_AGE_LIMIT,
     ADOPTION_CHILD_STANDARD_AGE_LIMIT,
     ADOPTION_MAX_PARENTAL_LEAVE_CHILD_AGE,
@@ -18,11 +14,14 @@ from src.constants import (
     STANDARD_PARENTAL_RATE,
     UNIFIED_BENEFIT_RATE,
 )
-
 from ..models.adoption import (
     AdoptionLeaveInput,
     AdoptionLeaveResult,
     CaregiverType,
+)
+from ..models.maternity import (
+    BenefitPaymentVariant,
+    PeriodBreakdown,
 )
 
 

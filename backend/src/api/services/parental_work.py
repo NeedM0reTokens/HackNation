@@ -1,6 +1,6 @@
 import math
 
-from src.constants import (
+from ...constants import (
     PARENTAL_MAX_WORK_FRACTION,
     PARENTAL_WEEKS_MULTIPLE_BIRTH,
     PARENTAL_WEEKS_STANDARD,
@@ -12,7 +12,6 @@ from src.constants import (
     PARENTAL_WORK_EXT_LIMIT_ZA_ZYCIEM_SINGLE,
     SOCIAL_CONTRIBUTIONS_RATE,
 )
-
 from ..models.parental_work import (
     ParentalWorkInput,
     ParentalWorkPeriod,

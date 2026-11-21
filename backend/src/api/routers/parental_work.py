@@ -2,11 +2,11 @@ from typing import Any
 
 from fastapi import APIRouter
 
-from src.api.models.parental_work import (
+from ..models.parental_work import (
     ParentalWorkInput,
     ParentalWorkResult,
 )
-from src.api.services.parental_work import calculate_parental_work_combination
+from ..services.parental_work import calculate_parental_work_combination
 
 
 class ParentalWorkRouter(APIRouter):
