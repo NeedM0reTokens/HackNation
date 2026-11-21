@@ -52,7 +52,9 @@ cd frontend
 npm install
 npm run dev
 ```
-
+# Testy
+cd backend/tests
+python test_be13_be21_calculators.py
 ---
 
 ## Dokumentacja Komponentów Backendowych i Kontekst Agentowy (Agentic Context)
