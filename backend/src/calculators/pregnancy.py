@@ -1,293 +1,254 @@
-"""
-Kalkulator zasiłków w ciąży — logika obliczeniowa.
-
-Pokrywa:
-- zasiłek chorobowy w ciąży (kod B, 100% podstawy, max 270 dni)
-- wynagrodzenie chorobowe pracodawcy (33 / 14 dni)
-- okres wyczekiwania (30 / 90 dni)
-- świadczenie rehabilitacyjne po wyczerpaniu 270 dni
-- zasiłek w wysokości macierzyńskiego (upadłość / bezprawne zwolnienie)
-- zadłużenie JDG w ZUS
-"""
-
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
-
-# ---------------------------------------------------------------------------
-# Stałe (hardcoded — potem pójdą do bazy / configa)
-# ---------------------------------------------------------------------------
-
-STOPA_CIAZA = 100.0  # % podstawy wymiaru przy kodzie B
-STOPA_BEZ_KODU_B = 80.0
-MAX_OKRES_ZASILKOWY_CIAZA = 270  # dni
-SKLADKI_SPOLECZNE_PROC = 13.71  # % potrącane z brutto → podstawa wymiaru
-
-WYCZEKIWANIE_OBOWIAZKOWE = 30  # dni (UoP)
-WYCZEKIWANIE_DOBROWOLNE = 90  # dni (zlecenie, JDG)
-
-DNI_PRACODAWCA_STANDARD = 33  # dni wynagrodzenia chorobowego od pracodawcy
-DNI_PRACODAWCA_50PLUS = 14  # po ukończeniu 50 r.ż.
-WIEK_PROG_50 = 50
-
-PLACA_MINIMALNA_2026 = 4806.00  # zł brutto
-LIMIT_ZADLUZENIA_ZUS = round(PLACA_MINIMALNA_2026 * 0.01, 2)  # 1% → 48.06 zł
+from src.constants import (
+    EMPLOYER_SICK_DAYS_SENIOR,
+    EMPLOYER_SICK_DAYS_STANDARD,
+    MANDATORY_WAITING_PERIOD_DAYS,
+    MAX_PREGNANCY_SICK_LEAVE_DAYS,
+    MIN_WAGE_2026,
+    PREGNANCY_SICK_LEAVE_RATE,
+    SENIOR_AGE_THRESHOLD,
+    SOCIAL_CONTRIBUTIONS_RATE,
+    STANDARD_SICK_LEAVE_RATE,
+    VOLUNTARY_WAITING_PERIOD_DAYS,
+    ZUS_DEBT_LIMIT,
+)
 
 
-# ---------------------------------------------------------------------------
-# Enumy / modele wejścia-wyjścia
-# ---------------------------------------------------------------------------
+class EmploymentType(StrEnum):
+    EMPLOYMENT_CONTRACT = "EMPLOYMENT_CONTRACT"
+    MANDATE_CONTRACT = "MANDATE_CONTRACT"
+    B2B = "B2B"
+    NONE = "NONE"
 
 
-class FormaZatrudnienia(StrEnum):
-    UOP = "UOP"
-    ZLECENIE = "ZLECENIE"
-    JDG = "JDG"
-    BRAK = "BRAK"
+class PayerSize(StrEnum):
+    ABOVE_20 = "ABOVE_20"
+    UP_TO_20 = "UP_TO_20"
 
 
-class WielkoscPlatnika(StrEnum):
-    POWYZEJ_20 = "POWYZEJ_20"
-    DO_20 = "DO_20"
+class CompanyStatus(StrEnum):
+    NORMAL = "NORMAL"
+    BANKRUPTCY_OR_LIQUIDATION = "BANKRUPTCY_OR_LIQUIDATION"
+    UNLAWFUL_TERMINATION = "UNLAWFUL_TERMINATION"
 
 
-class StatusFirmy(StrEnum):
-    NORMALNY = "NORMALNY"
-    UPADLOSC_LIKWIDACJA = "UPADLOSC_LIKWIDACJA"
-    BEZPRAWNE_ZWOLNIENIE = "BEZPRAWNE_ZWOLNIENIE"
+class BenefitType(StrEnum):
+    NONE = "NONE"
+    SICK_PAY = "SICK_PAY"
+    SICKNESS_BENEFIT = "SICKNESS_BENEFIT"
+    REHABILITATION_BENEFIT = "REHABILITATION_BENEFIT"
+    MATERNITY_EQUIVALENT_BENEFIT = "MATERNITY_EQUIVALENT_BENEFIT"
 
 
-class PregnancyInput(BaseModel):
-    forma_zatrudnienia: FormaZatrudnienia
-    wynagrodzenie_brutto: float = Field(..., gt=0, description="Średnie brutto z 12 m-cy")
-    dni_ubezpieczenia: int = Field(
-        ..., ge=0, description="Dni nieprzerwanego ubezpieczenia chorobowego"
-    )
-    zwolniona_z_wyczekiwania: bool = Field(
-        False, description="Absolwentka do 90 dni od dyplomu / staż > 10 lat"
-    )
-    kod_b_ciaza: bool = Field(True, description="Czy e-ZLA ma kod literowy B (ciąża)")
-    wiek: int = Field(30, ge=16, le=100)
-    dni_choroby_w_roku: int = Field(
-        0, ge=0, description="Dni choroby już wykorzystane w bieżącym roku"
-    )
-    dni_zwolnienia: int = Field(30, gt=0, description="Ile dni trwa obecne zwolnienie lekarskie")
-    wielkosc_platnika: WielkoscPlatnika = WielkoscPlatnika.POWYZEJ_20
-    zadluzenie_zus: float = Field(0.0, ge=0.0, description="Kwota zaległości ZUS (istotne dla JDG)")
-    status_firmy: StatusFirmy = StatusFirmy.NORMALNY
-    tydzien_ciazy: int | None = Field(None, ge=1, le=42)
-    wyczerpany_okres_zasilkowy: bool = Field(False, description="Czy 270 dni już minęło")
+class PayerType(StrEnum):
+    NONE = "NONE"
+    EMPLOYER = "EMPLOYER"
+    ZUS = "ZUS"
+    EMPLOYER_AND_ZUS = "EMPLOYER_AND_ZUS"
 
 
-class PregnancyResult(BaseModel):
-    uprawniona: bool
-    rodzaj_swiadczenia: str
-    stopa_procentowa: float
-    kto_wyplaca: str
-
-    podstawa_wymiaru_netto: float
-    stawka_dzienna: float
-    kwota_calkowita: float
-
-    dni_pracodawca: int
-    kwota_pracodawca: float
-    dni_zus: int
-    kwota_zus: float
-
-    maksymalny_okres_dni: int
-
-    przyczyny_odmowy: list[str] = []
-    wymagane_dokumenty: list[str] = []
-    info_prawne: list[str] = []
+class PregnancyBenefitInput(BaseModel):
+    employment_type: EmploymentType
+    gross_monthly_income: float = Field(..., gt=0)
+    insurance_duration_days: int = Field(..., ge=0)
+    exempt_from_waiting_period: bool = Field(False)
+    has_pregnancy_code_b: bool = Field(True)
+    employee_age: int = Field(30, ge=16, le=100)
+    prior_sick_days_current_year: int = Field(0, ge=0)
+    sick_leave_duration_days: int = Field(30, gt=0)
+    payer_size: PayerSize = PayerSize.ABOVE_20
+    zus_debt_amount: float = Field(0.0, ge=0.0)
+    company_status: CompanyStatus = CompanyStatus.NORMAL
+    pregnancy_week: int | None = Field(None, ge=1, le=42)
+    exhausted_sickness_period: bool = Field(False)
 
 
-# ---------------------------------------------------------------------------
-# Pomocniki
-# ---------------------------------------------------------------------------
+class PregnancyBenefitResult(BaseModel):
+    is_eligible: bool
+    benefit_type: BenefitType
+    benefit_percentage: float
+    disbursing_entity: PayerType
+
+    calculation_base_net: float
+    daily_rate: float
+    total_amount: float
+
+    employer_days: int
+    employer_amount: float
+    zus_days: int
+    zus_amount: float
+
+    max_coverage_days: int
+
+    refusal_reasons: list[str] = []
+    required_documents: list[str] = []
+    legal_notes: list[str] = []
 
 
-def _podstawa_netto(brutto: float) -> float:
-    """Brutto pomniejszone o 13,71% składek społecznych."""
-    return round(brutto * (1 - SKLADKI_SPOLECZNE_PROC / 100), 2)
+def _calculate_net_base(gross: float) -> float:
+    return round(gross * (1 - SOCIAL_CONTRIBUTIONS_RATE / 100), 2)
 
 
-def _pusty_wynik(
-    odmowy: list[str],
-    dokumenty: list[str] | None = None,
-    info: list[str] | None = None,
-) -> PregnancyResult:
-    return PregnancyResult(
-        uprawniona=False,
-        rodzaj_swiadczenia="BRAK",
-        stopa_procentowa=0.0,
-        kto_wyplaca="BRAK",
-        podstawa_wymiaru_netto=0.0,
-        stawka_dzienna=0.0,
-        kwota_calkowita=0.0,
-        dni_pracodawca=0,
-        kwota_pracodawca=0.0,
-        dni_zus=0,
-        kwota_zus=0.0,
-        maksymalny_okres_dni=MAX_OKRES_ZASILKOWY_CIAZA,
-        przyczyny_odmowy=odmowy,
-        wymagane_dokumenty=dokumenty or [],
-        info_prawne=info or [],
+def _build_ineligible_result(
+    reasons: list[str],
+    documents: list[str] | None = None,
+    legal_notes: list[str] | None = None,
+) -> PregnancyBenefitResult:
+    return PregnancyBenefitResult(
+        is_eligible=False,
+        benefit_type=BenefitType.NONE,
+        benefit_percentage=0.0,
+        disbursing_entity=PayerType.NONE,
+        calculation_base_net=0.0,
+        daily_rate=0.0,
+        total_amount=0.0,
+        employer_days=0,
+        employer_amount=0.0,
+        zus_days=0,
+        zus_amount=0.0,
+        max_coverage_days=MAX_PREGNANCY_SICK_LEAVE_DAYS,
+        refusal_reasons=reasons,
+        required_documents=documents or [],
+        legal_notes=legal_notes or [],
     )
 
 
-# ---------------------------------------------------------------------------
-# Główna funkcja
-# ---------------------------------------------------------------------------
+def calculate_pregnancy_benefit(data: PregnancyBenefitInput) -> PregnancyBenefitResult:
+    refusal_reasons: list[str] = []
+    legal_notes: list[str] = []
+    required_documents: list[str] = []
 
-
-def oblicz_zasilek_ciaza(dane: PregnancyInput) -> PregnancyResult:
-    """Oblicza zasiłek chorobowy w ciąży na podstawie danych wejściowych."""
-
-    odmowy: list[str] = []
-    info: list[str] = []
-    dokumenty: list[str] = []
-
-    # ── 1. Brak ubezpieczenia ──────────────────────────────────────────
-    if dane.forma_zatrudnienia == FormaZatrudnienia.BRAK:
-        return _pusty_wynik(
-            odmowy=["Brak tytułu do ubezpieczenia chorobowego."],
-            dokumenty=["Wniosek o świadczenie rodzicielskie (1 000 zł/mc) — MOPS/GOPS"],
-            info=[
-                "Osobom bez ubezpieczenia przysługuje świadczenie rodzicielskie (tzw. kosiniakowe)."
-            ],
+    if data.employment_type == EmploymentType.NONE:
+        return _build_ineligible_result(
+            reasons=["Brak tytułu do ubezpieczenia chorobowego."],
+            documents=["Wniosek o świadczenie rodzicielskie (tzw. kosiniakowe) do MOPS/GOPS"],
+            legal_notes=["Osobom nieubezpieczonym przysługuje świadczenie rodzicielskie."],
         )
 
-    # ── 2. Okres wyczekiwania (art. 4 ustawy zasiłkowej) ──────────────
-    wymagany = (
-        WYCZEKIWANIE_OBOWIAZKOWE
-        if dane.forma_zatrudnienia == FormaZatrudnienia.UOP
-        else WYCZEKIWANIE_DOBROWOLNE
+    required_waiting_days = (
+        MANDATORY_WAITING_PERIOD_DAYS
+        if data.employment_type == EmploymentType.EMPLOYMENT_CONTRACT
+        else VOLUNTARY_WAITING_PERIOD_DAYS
     )
-    if not dane.zwolniona_z_wyczekiwania and dane.dni_ubezpieczenia < wymagany:
-        brak = wymagany - dane.dni_ubezpieczenia
-        msg = (
-            f"Nie upłynął okres wyczekiwania: wymagane {wymagany} dni, "
-            + f"masz {dane.dni_ubezpieczenia} (brakuje {brak})."
-        )
-        odmowy.append(msg)
-
-    # ── 3. Zadłużenie ZUS dla JDG ─────────────────────────────────────
-    if (
-        dane.forma_zatrudnienia == FormaZatrudnienia.JDG
-        and dane.zadluzenie_zus > LIMIT_ZADLUZENIA_ZUS
-    ):
-        msg = (
-            f"Zadłużenie w ZUS: {dane.zadluzenie_zus:.2f} zł przekracza limit "
-            + f"{LIMIT_ZADLUZENIA_ZUS:.2f} zł (1% płacy minimalnej). "
-            + "Spłata w ciągu 6 mies. przywraca prawo do zasiłku."
-        )
-        odmowy.append(msg)
-
-    if odmowy:
-        return _pusty_wynik(odmowy)
-
-    # ── 4. Podstawa wymiaru ────────────────────────────────────────────
-    podstawa = _podstawa_netto(dane.wynagrodzenie_brutto)
-
-    # Gwarancja minimum dla pełnego etatu UoP
-    if dane.forma_zatrudnienia == FormaZatrudnienia.UOP:
-        min_podstawa = _podstawa_netto(PLACA_MINIMALNA_2026)
-        podstawa = max(podstawa, min_podstawa)
-
-    stawka = round(podstawa / 30, 2)
-    stopa = STOPA_CIAZA if dane.kod_b_ciaza else STOPA_BEZ_KODU_B
-
-    # ── 5. Przypadki szczególne ────────────────────────────────────────
-    if dane.status_firmy in (StatusFirmy.UPADLOSC_LIKWIDACJA, StatusFirmy.BEZPRAWNE_ZWOLNIENIE):
-        dni_p, kw_p = 0, 0.0
-        dni_z = dane.dni_zwolnienia
-        kw_z = round(stawka * dni_z * stopa / 100, 2)
-        rodzaj = "ZASIŁEK_W_WYSOKOŚCI_MACIERZYŃSKIEGO"
-        kto = "ZUS"
-        info.append(
-            "Świadczenie od ZUS do dnia porodu — utrata pracy w okolicznościach chronionych."
-        )
-        dokumenty.extend(
-            [
-                "e-ZLA z kodem B",
-                "Świadectwo pracy lub wyrok sądu",
-                "Oświadczenie o braku innego zatrudnienia",
-            ]
+    if not data.exempt_from_waiting_period and data.insurance_duration_days < required_waiting_days:
+        missing_days = required_waiting_days - data.insurance_duration_days
+        refusal_reasons.append(
+            f"Nie upłynął wymagany okres wyczekiwania: {required_waiting_days} dni. "
+            + f"Aktualny staż: {data.insurance_duration_days} dni (brakuje {missing_days} dni)."
         )
 
-    elif dane.wyczerpany_okres_zasilkowy:
-        dni_p, kw_p = 0, 0.0
-        dni_z = dane.dni_zwolnienia
-        kw_z = round(stawka * dni_z * stopa / 100, 2)
-        rodzaj = "ŚWIADCZENIE_REHABILITACYJNE"
-        kto = "ZUS"
-        info.append("Po 270 dniach — świadczenie rehabilitacyjne 100% podstawy (maks. 12 mies.).")
-        dokumenty.extend(
-            [
-                "Wniosek o świadczenie rehabilitacyjne (zał. nr 5)",
-                "Zaświadczenie lekarskie o stanie zdrowia",
-            ]
+    if data.employment_type == EmploymentType.B2B and data.zus_debt_amount > ZUS_DEBT_LIMIT:
+        refusal_reasons.append(
+            f"Zadłużenie w ZUS ({data.zus_debt_amount:.2f} zł) przekracza limit "
+            + f"{ZUS_DEBT_LIMIT:.2f} zł. Spłata w ciągu 6 miesięcy przywraca prawo do zasiłku."
         )
 
+    if refusal_reasons:
+        return _build_ineligible_result(refusal_reasons)
+
+    calculation_base = _calculate_net_base(data.gross_monthly_income)
+    if data.employment_type == EmploymentType.EMPLOYMENT_CONTRACT:
+        min_base = _calculate_net_base(MIN_WAGE_2026)
+        calculation_base = max(calculation_base, min_base)
+
+    daily_rate = round(calculation_base / 30, 2)
+    benefit_rate = (
+        PREGNANCY_SICK_LEAVE_RATE
+        if data.has_pregnancy_code_b
+        else STANDARD_SICK_LEAVE_RATE
+    )
+
+    is_terminated = data.company_status in (
+        CompanyStatus.BANKRUPTCY_OR_LIQUIDATION,
+        CompanyStatus.UNLAWFUL_TERMINATION,
+    )
+
+    if is_terminated:
+        benefit_type = BenefitType.MATERNITY_EQUIVALENT_BENEFIT
+        disbursing_entity = PayerType.ZUS
+        employer_days, employer_amount = 0, 0.0
+        zus_days = data.sick_leave_duration_days
+        zus_amount = round(daily_rate * zus_days * benefit_rate / 100, 2)
+        legal_notes.append("Zasiłek w wysokości macierzyńskiego do dnia porodu (wypłaca ZUS).")
+        required_documents.extend([
+            "e-ZLA z kodem B lub zaświadczenie lekarskie",
+            "Świadectwo pracy lub prawomocny wyrok sądu",
+            "Oświadczenie o braku innego zatrudnienia",
+        ])
+    elif data.exhausted_sickness_period:
+        benefit_type = BenefitType.REHABILITATION_BENEFIT
+        disbursing_entity = PayerType.ZUS
+        employer_days, employer_amount = 0, 0.0
+        zus_days = data.sick_leave_duration_days
+        zus_amount = round(daily_rate * zus_days * benefit_rate / 100, 2)
+        legal_notes.append("Świadczenie rehabilitacyjne po 270 dniach zasiłku (100% w ciąży).")
+        required_documents.extend([
+            "Wniosek o świadczenie rehabilitacyjne",
+            "Zaświadczenie o stanie zdrowia",
+        ])
     else:
-        rodzaj = "ZASIŁEK_CHOROBOWY_CIĄŻA"
+        benefit_type = BenefitType.SICKNESS_BENEFIT
+        if data.employment_type == EmploymentType.EMPLOYMENT_CONTRACT:
+            employer_limit = (
+                EMPLOYER_SICK_DAYS_SENIOR
+                if data.employee_age >= SENIOR_AGE_THRESHOLD
+                else EMPLOYER_SICK_DAYS_STANDARD
+            )
+            available_employer_days = max(0, employer_limit - data.prior_sick_days_current_year)
+            employer_days = min(data.sick_leave_duration_days, available_employer_days)
+            zus_days = data.sick_leave_duration_days - employer_days
+            employer_amount = round(daily_rate * employer_days * benefit_rate / 100, 2)
+            zus_amount = round(daily_rate * zus_days * benefit_rate / 100, 2)
 
-        if dane.forma_zatrudnienia == FormaZatrudnienia.UOP:
-            limit = DNI_PRACODAWCA_50PLUS if dane.wiek >= WIEK_PROG_50 else DNI_PRACODAWCA_STANDARD
-            wolne = max(0, limit - dane.dni_choroby_w_roku)
-            dni_p = min(dane.dni_zwolnienia, wolne)
-            dni_z = dane.dni_zwolnienia - dni_p
-            kw_p = round(stawka * dni_p * stopa / 100, 2)
-            kw_z = round(stawka * dni_z * stopa / 100, 2)
-
-            if dni_p > 0 and dni_z > 0:
-                kto = "PRACODAWCA + ZUS"
-            elif dni_p > 0:
-                kto = "PRACODAWCA"
+            if employer_days > 0 and zus_days > 0:
+                disbursing_entity = PayerType.EMPLOYER_AND_ZUS
+            elif employer_days > 0:
+                disbursing_entity = PayerType.EMPLOYER
             else:
-                kto = "ZUS"
+                disbursing_entity = PayerType.ZUS
         else:
-            # Zlecenie / JDG — brak wynagrodzenia chorobowego
-            dni_p, kw_p = 0, 0.0
-            dni_z = dane.dni_zwolnienia
-            kw_z = round(stawka * dni_z * stopa / 100, 2)
-            kto = (
-                "PRACODAWCA (wypłata w imieniu ZUS)"
-                if dane.wielkosc_platnika == WielkoscPlatnika.POWYZEJ_20
-                else "ZUS"
+            employer_days, employer_amount = 0, 0.0
+            zus_days = data.sick_leave_duration_days
+            zus_amount = round(daily_rate * zus_days * benefit_rate / 100, 2)
+            disbursing_entity = (
+                PayerType.EMPLOYER
+                if data.payer_size == PayerSize.ABOVE_20
+                else PayerType.ZUS
             )
 
-    kwota_total = round(kw_p + kw_z, 2)
+    total_amount = round(employer_amount + zus_amount, 2)
 
-    # ── 6. Dokumenty i info prawne ─────────────────────────────────────
-    if dane.forma_zatrudnienia == FormaZatrudnienia.UOP:
-        dokumenty.append("e-ZLA z kodem B (trafia automatycznie do ZUS i pracodawcy)")
-        if dane.wielkosc_platnika == WielkoscPlatnika.DO_20:
-            dokumenty.append("Z-3 — zaświadczenie płatnika składek (pracodawca → ZUS)")
-        info.append("Ochrona przed wypowiedzeniem w ciąży — art. 177 KP.")
-        if dane.tydzien_ciazy and dane.tydzien_ciazy >= 13:
-            info.append("Umowa na czas określony przedłuża się do dnia porodu — art. 177 § 3 KP.")
-    elif dane.forma_zatrudnienia == FormaZatrudnienia.ZLECENIE:
-        dokumenty.extend(["e-ZLA z kodem B", "Z-3a — zaświadczenie płatnika składek"])
-    elif dane.forma_zatrudnienia == FormaZatrudnienia.JDG:
-        dokumenty.extend(["e-ZLA z kodem B", "ZAS-53 — wniosek o zasiłek chorobowy"])
+    if data.employment_type == EmploymentType.EMPLOYMENT_CONTRACT:
+        required_documents.append("e-ZLA z kodem B (elektronicznie do ZUS i pracodawcy)")
+        if data.payer_size == PayerSize.UP_TO_20:
+            required_documents.append("Zaświadczenie płatnika składek Z-3")
+        legal_notes.append("Ochrona stosunku pracy pracownicy w ciąży (art. 177 KP).")
+        if data.pregnancy_week and data.pregnancy_week >= 13:
+            legal_notes.append("Przedłużenie umowy do dnia porodu (art. 177 § 3 KP).")
+    elif data.employment_type == EmploymentType.MANDATE_CONTRACT:
+        required_documents.extend(["e-ZLA z kodem B", "Zaświadczenie płatnika składek Z-3a"])
+    elif data.employment_type == EmploymentType.B2B:
+        required_documents.extend(["e-ZLA z kodem B", "Wniosek o zasiłek chorobowy ZAS-53"])
 
-    info.append(f"Maks. okres zasiłkowy w ciąży: {MAX_OKRES_ZASILKOWY_CIAZA} dni (zamiast 182).")
-    info.append(f"Wysokość: {stopa}% podstawy wymiaru od 1. dnia zwolnienia z kodem B.")
+    legal_notes.append(f"Maksymalny okres zasiłkowy w ciąży: {MAX_PREGNANCY_SICK_LEAVE_DAYS} dni.")
+    legal_notes.append(f"Wysokość świadczenia: {benefit_rate}% podstawy wymiaru.")
 
-    return PregnancyResult(
-        uprawniona=True,
-        rodzaj_swiadczenia=rodzaj,
-        stopa_procentowa=stopa,
-        kto_wyplaca=kto,
-        podstawa_wymiaru_netto=podstawa,
-        stawka_dzienna=stawka,
-        kwota_calkowita=kwota_total,
-        dni_pracodawca=dni_p,
-        kwota_pracodawca=kw_p,
-        dni_zus=dni_z,
-        kwota_zus=kw_z,
-        maksymalny_okres_dni=MAX_OKRES_ZASILKOWY_CIAZA,
-        wymagane_dokumenty=dokumenty,
-        info_prawne=info,
+    return PregnancyBenefitResult(
+        is_eligible=True,
+        benefit_type=benefit_type,
+        benefit_percentage=benefit_rate,
+        disbursing_entity=disbursing_entity,
+        calculation_base_net=calculation_base,
+        daily_rate=daily_rate,
+        total_amount=total_amount,
+        employer_days=employer_days,
+        employer_amount=employer_amount,
+        zus_days=zus_days,
+        zus_amount=zus_amount,
+        max_coverage_days=MAX_PREGNANCY_SICK_LEAVE_DAYS,
+        refusal_reasons=[],
+        required_documents=required_documents,
+        legal_notes=legal_notes,
     )
