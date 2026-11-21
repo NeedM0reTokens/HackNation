@@ -1,9 +1,15 @@
+from app.api.admin import AdminRouter
 from app.api.calculator import CalculatorRouter
 from app.api.health import HealthRouter
 from app.api.pdf import PdfRouter
 from app.api.simulation import SimulationRouter
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+try:
+    from src.routers.pregnancy import router as pregnancy_router
+except ImportError:
+    pregnancy_router = None
 
 
 class MainAPI(FastAPI):
@@ -47,13 +53,18 @@ class MainAPI(FastAPI):
         self.calculator_router = CalculatorRouter()
         self.pdf_router = PdfRouter()
         self.simulation_router = SimulationRouter()
+        self.admin_router = AdminRouter()
 
         # Podpinanie routerów do głównej klasy API
         self.include_router(self.health_router)
         self.include_router(self.calculator_router, prefix="/api")
         self.include_router(self.pdf_router, prefix="/api")
         self.include_router(self.simulation_router, prefix="/api")
+        self.include_router(self.admin_router, prefix="/api")
+
+        if pregnancy_router:
+            self.include_router(pregnancy_router)
 
 
-# Instancja głównej klasy API (uruchamiana przez uvicorn app.main:app)
+# Instancja głównej klasy API (uruchamiana przez uvicorn app.API:app lub app.main:app)
 app = MainAPI()
