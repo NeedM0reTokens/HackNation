@@ -15,7 +15,7 @@ WAŻNA ZASADA: NIE wrzucamy przykładowych plików PDF od ZUS do publicznego rep
 --------------------------------------------------------------------------------
 [ ] [FS] P1 | Inicjalizacja monorepo na GitHubie (backend/, frontend/, docs/, .gitignore)
     Osoba: ___________
-[ ] [FS] P1 | Szkielet FastAPI z włączonym CORS i endpointem /health
+[x] [FS] P1 | Szkielet FastAPI z włączonym CORS i endpointem /health
     Osoba: ___________
 [ ] [FS] P1 | Szkielet Expo (React Native + Web) z podstawową nawigacją i RWD
     Osoba: ___________
