@@ -8,6 +8,7 @@ from .routers.maternity import router as maternity_router
 from .routers.pdf import PdfRouter
 from .routers.pregnancy import router as pregnancy_router
 from .routers.simulation import SimulationRouter
+from .routers.special_cases import SpecialCasesRouter
 
 
 class MainAPI(FastAPI):
@@ -52,6 +53,7 @@ class MainAPI(FastAPI):
         self.pdf_router = PdfRouter()
         self.simulation_router = SimulationRouter()
         self.admin_router = AdminRouter()
+        self.special_cases_router = SpecialCasesRouter()
 
         # Podpinanie routerów do głównej klasy API
         self.include_router(self.health_router)
@@ -59,6 +61,7 @@ class MainAPI(FastAPI):
         self.include_router(self.pdf_router, prefix="/api")
         self.include_router(self.simulation_router, prefix="/api")
         self.include_router(self.admin_router, prefix="/api")
+        self.include_router(self.special_cases_router, prefix="/api")
 
         self.include_router(pregnancy_router)
         self.include_router(maternity_router)
