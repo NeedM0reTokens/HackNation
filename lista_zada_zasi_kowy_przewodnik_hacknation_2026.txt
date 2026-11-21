@@ -1,0 +1,119 @@
+================================================================================
+HACKNATION 2026 - ZUS: ZASIŁKOWY PRZEWODNIK PRZYSZŁEGO RODZICA
+TABLICA ZADAŃ ZESPOŁOWYCH (Stack: React Native/Expo Web + Python FastAPI)
+================================================================================
+
+LEGENDA:
+[ ] - Do zrobienia | [/] - W trakcie | [x] - Gotowe
+P1 - Krytyczne (MVP do oceny) | P2 - Ważne (punkty za kompletność) | P3 - Dodatkowe
+Role: [BE] Backend, [FE] Frontend, [FS] Fullstack, [ALL] Zespół
+
+WAŻNA ZASADA: NIE wrzucamy przykładowych plików PDF od ZUS do publicznego repo!
+
+--------------------------------------------------------------------------------
+1. START, ARCHITEKTURA I SETUP (Pierwsze 1-2h)
+--------------------------------------------------------------------------------
+[ ] [FS] P1 | Inicjalizacja monorepo na GitHubie (backend/, frontend/, docs/, .gitignore)
+    Osoba: ___________
+[ ] [FS] P1 | Szkielet FastAPI z włączonym CORS i endpointem /health
+    Osoba: ___________
+[ ] [FS] P1 | Szkielet Expo (React Native + Web) z podstawową nawigacją i RWD
+    Osoba: ___________
+[ ] [ALL] P1 | Ustalenie kontraktu JSON (schemat danych wejściowych i wyjściowych dla kalkulatora)
+    Osoba: ___________
+
+--------------------------------------------------------------------------------
+2. BACKEND - SILNIK KALKULATORÓW I LOGIKA PRAWNA (Python)
+--------------------------------------------------------------------------------
+[ ] [BE] P1 | Baza konfiguracji parametrów (JSON/SQLite): stopy 100%/70%/81.5%, wymiary tygodni, limity wieku
+    Osoba: ___________
+[ ] [BE] P1 | Endpoint: Zasiłki w ciąży (chorobowy kod B 100%, okres wyczekiwania 30/90 dni, 33/14 dni pracodawca, max 270 dni, świadczenie rehab., zasiłek w wys. macierzyńskiego przy upadłości/bezprawnym zwolnieniu)
+    Osoba: ___________
+[ ] [BE] P1 | Endpoint: Zintegrowany kalkulator macierzyńskiego i rodzicielskiego (liczba dzieci, 14 tyg. matki, 41/43 tyg. rodzicielskiego, 9 tyg. nieprzenoszalne, max 5 części, opcja 81.5% vs 100%/70%)
+    Osoba: ___________
+[ ] [BE] P1 | Logika przypadków szczególnych w kalkulatorze: zaświadczenie "Za życiem", wcześniak/hospitalizacja (uzupełniający urlop), urodzenie martwego dziecka/zgon
+    Osoba: ___________
+[ ] [BE] P1 | Logika urlopu ojcowskiego (14 dni, 1 lub 2 części po 7 dni, limit 12 mies. / adopcja do 14 r.ż.) i przejęcia urlopu przez ojca
+    Osoba: ___________
+[ ] [BE] P1 | Moduł kalkulatora: Podział opieki między oboje rodziców (symulacja równoczesna i naprzemienna + wyliczenie kwot dla obu stron)
+    Osoba: ___________
+[ ] [BE] P2 | Moduł kalkulatora: Łączenie urlopu rodzicielskiego z pracą (max 1/2 etatu, proporcjonalne wydłużenie urlopu i przeliczenie zasiłku)
+    Osoba: ___________
+[ ] [BE] P2 | Moduł kalkulatora: Rodzice adopcyjni i rodzina zastępcza niezawodowa (urlop na warunkach macierzyńskiego, limity wieku 7/10/14 lat)
+    Osoba: ___________
+[ ] [BE] P1 | Wyliczanie kwot dla indywidualnej podstawy wymiaru zasiłku (uwzględnienie konkretnych spraw testowych od ZUS)
+    Osoba: ___________
+[ ] [BE] P2 | Endpointy Panelu Admina (GET/PUT parametry: zmiana stawek procentowych i wymiarów urlopów bez restartu aplikacji)
+    Osoba: ___________
+
+--------------------------------------------------------------------------------
+3. BACKEND - OBSŁUGA PDF, SYMULACJE ZUS I BAZA WIEDZY (Python)
+--------------------------------------------------------------------------------
+[ ] [BE] P1 | Endpoint uploadu PDF (POST /api/parse-pdf) - wyciąganie tekstu z formularzy ZUS (ZAM, Z-3, Z-3a, poświadczenia) za pomocą pypdf/LLM
+    Osoba: ___________
+[ ] [BE] P1 | Walidator spraw ZUS: weryfikacja na podstawie wyciągniętych danych, czy osoba ma ubezpieczenie i mapowanie danych do kalkulatora
+    Osoba: ___________
+[ ] [BE] P1 | Endpoint z listą zanonimizowanych scenariuszy testowych (wybór gotowej przykładowej sprawy z listy zamiast uploadu pliku)
+    Osoba: ___________
+[ ] [BE] P2 | Mock API: Symulacja logowania mObywatel i pobrania profilu ubezpieczonego z ZUS (np. 3 profile: UoP, Zlecenie, JDG z zadłużeniem)
+    Osoba: ___________
+[ ] [BE] P2 | Mock API: Stan zadłużenia ze składek (dla JDG) + podgląd wystawionych e-ZLA (z kodem B)
+    Osoba: ___________
+[ ] [BE] P2 | Mock API: Symulacja wysyłki wniosków (urlopy, ZAM/ZAS-53, odpis aktu urodzenia USC) oraz zapytania do PUE/eZUS
+    Osoba: ___________
+[ ] [BE] P2 | Endpoint doradczy: Jakie dokumenty złożyć, jakie terminy i gdzie (płatnik >20 osób vs ZUS, aktualne druki po 24.10.2026 - bez ZUR/ZAO/Z-3b)
+    Osoba: ___________
+
+--------------------------------------------------------------------------------
+4. FRONTEND - ZINTEGROWANY KALKULATOR I CORE UX (React Native / Web)
+--------------------------------------------------------------------------------
+[ ] [FE] P1 | Layout główny aplikacji (RWD: menu boczne/górne na desktopie, dolna nawigacja na mobile) + spójny styl wizualny
+    Osoba: ___________
+[ ] [FE] P1 | Ekran wyboru trybu startowego: "Zaloguj przez mObywatel (symulacja)", "Wprowadź dane ręcznie", "Wgraj/wybierz PDF ze sprawą"
+    Osoba: ___________
+[ ] [FE] P1 | Formularz Zintegrowanego Kalkulatora - Krok 1: Status (UoP, Zlecenie, JDG, brak), ciąża/poród/adopcja/rodzina zastępcza, podstawa wymiaru
+    Osoba: ___________
+[ ] [FE] P1 | Formularz Zintegrowanego Kalkulatora - Krok 2: Liczba dzieci, daty, "Za życiem", wcześniak, sytuacje trudne
+    Osoba: ___________
+[ ] [FE] P1 | Formularz Zintegrowanego Kalkulatora - Krok 3: Podział urlopu między rodziców (suwaki/wybór tygodni) + opcja łączenia z pracą (ułamek etatu)
+    Osoba: ___________
+[ ] [FE] P1 | Widok wyników kalkulatora: Czytelne karty z kwotami (miesięcznie/łącznie), porównanie opcji 81.5% vs 100%/70%, wizualna oś czasu urlopów
+    Osoba: ___________
+[ ] [FE] P1 | Widok wyników dla ciąży: Info o zasiłku chorobowym/rehabilitacyjnym lub wyraźny komunikat o braku uprawnień + powód
+    Osoba: ___________
+
+--------------------------------------------------------------------------------
+5. FRONTEND - SYMULACJE ZUS, WNIOSKI, WSPARCIE I ADMIN
+--------------------------------------------------------------------------------
+[ ] [FE] P1 | Komponent uploadu PDF i wyboru przykładowej sprawy ZUS + wyświetlenie wyniku weryfikacji ubezpieczenia i przeniesienie do kalkulatora
+    Osoba: ___________
+[ ] [FE] P2 | Ekran symulacji mObywatela (wybór przykładowego użytkownika) + Dashboard danych z ZUS (status ubezpieczenia, podgląd e-ZLA, alert o zadłużeniu JDG)
+    Osoba: ___________
+[ ] [FE] P2 | Moduł "Gdzie i jakie dokumenty": Dynamiczna checklista wniosków, terminów i wskazanie odbiorcy (Pracodawca vs ZUS)
+    Osoba: ___________
+[ ] [FE] P2 | Kreator/Symulacja wniosków: Formularz urlopowy do pracodawcy, symulacja ZAM, symulacja wniosku o akt urodzenia (USC) + przycisk "Połącz z PUE/eZUS"
+    Osoba: ___________
+[ ] [FE] P2 | Sekcja "Zagrożenia i Ochrona": Ostrzeżenia (pozorna umowa, podwyższanie składek w ciąży, przerwa przed porodem) + info o ochronie z Kodeksu Pracy
+    Osoba: ___________
+[ ] [FE] P2 | Sekcja "Wsparcie w trudnych sytuacjach": Baza fundacji/stowarzyszeń charytatywnych (poronienie, śmierć dziecka, wcześniak, choroba) + linki (ZUS, MRPiPS, PIP)
+    Osoba: ___________
+[ ] [FS] P2 | Panel Administracyjny (UI): Prosty ekran do podglądu i edycji stawek/limitów zasiłków spięty z API
+    Osoba: ___________
+
+--------------------------------------------------------------------------------
+6. INTEGRACJA, TESTY, DEPLOYMENT I MATERIAŁY KONKURSOWE
+--------------------------------------------------------------------------------
+[ ] [FS] P1 | Spięcie wszystkich widoków Frontendu z prawdziwym API Backendu (obsługa stanów ładowania i błędów)
+    Osoba: ___________
+[ ] [ALL] P1 | Przetestowanie kalkulatora i parsera PDF na kilkunastu przykładowych sprawach od ZUS (zgodność wyliczeń!)
+    Osoba: ___________
+[ ] [FS] P1 | Wdrożenie (Deployment) działającej wersji WWW (np. Backend na Render/Railway + Frontend Web na Vercel/Netlify)
+    Osoba: ___________
+[ ] [FS] P1 | Aktualizacja README.md: opis projektu, instrukcja uruchomienia, link do demo, JAWNE wskazanie gdzie użyto AI
+    Osoba: ___________
+[ ] [ALL] P1 | Zrzuty ekranu aplikacji (desktop + mobile) do folderu docs/
+    Osoba: ___________
+[ ] [ALL] P1 | Prezentacja projektu (MAKSYMALNIE 10 slajdów!)
+    Osoba: ___________
+[ ] [ALL] P1 | Nagranie i wrzucenie filmiku demo (MAKSYMALNIE 3 minuty, otwarty link np. YouTube/Drive)
+    Osoba: ___________
