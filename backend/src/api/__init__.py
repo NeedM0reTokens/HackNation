@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from src.api.routers.admin import AdminAPI, AdminRouter
 from src.api.routers.adoption import AdoptionAPI, AdoptionRouter
 from src.api.routers.calculator import CalculatorAPI, CalculatorRouter
@@ -10,14 +9,6 @@ from src.api.routers.pdf import PdfAPI, PdfRouter
 from src.api.routers.pregnancy import PregnancyAPI, PregnancyRouter
 from src.api.routers.simulation import SimulationAPI, SimulationRouter
 from src.api.routers.special_cases import SpecialCasesAPI, SpecialCasesRouter
-=======
-from .routers.admin import AdminAPI, AdminRouter
-from .routers.calculator import CalculatorAPI, CalculatorRouter
-from .routers.health import HealthAPI, HealthRouter
-from .routers.pdf import PdfAPI, PdfRouter
-from .routers.simulation import SimulationAPI, SimulationRouter
-from .routers.special_cases import SpecialCasesAPI, SpecialCasesRouter
->>>>>>> a3cd1111f932ac2b808db105a2959fc16f85b061
 
 __all__ = [
     "AdminAPI",
@@ -43,5 +34,3 @@ __all__ = [
     "SpecialCasesAPI",
     "SpecialCasesRouter",
 ]
-
-
