@@ -1581,3 +1581,872 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+.zus-benefits-catalog-section {
+  padding: 40px 0 60px 0;
+  background-color: var(--zus-quick-bg);
+  border-top: 1px solid var(--zus-border);
+  border-bottom: 1px solid var(--zus-border);
+}
+
+.zus-catalog-header {
+  margin-bottom: 28px;
+}
+
+.zus-catalog-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.zus-catalog-auth-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--zus-card-bg);
+  border: 1px solid var(--zus-border);
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  color: var(--zus-text-secondary);
+}
+
+.zus-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.zus-status-dot.online {
+  background-color: var(--zus-green);
+  box-shadow: 0 0 0 3px rgba(0, 120, 52, 0.2);
+}
+
+.zus-status-dot.manual {
+  background-color: var(--zus-orange);
+  box-shadow: 0 0 0 3px rgba(243, 168, 71, 0.25);
+}
+
+.zus-status-mode-label {
+  font-weight: 600;
+}
+
+.zus-catalog-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--zus-text-main);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin-bottom: 8px;
+}
+
+.zus-catalog-subtitle {
+  color: var(--zus-text-secondary);
+  font-size: 1rem;
+  max-width: 820px;
+  line-height: 1.55;
+}
+
+.zus-auth-summary-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  background-color: var(--zus-card-bg);
+  border: 2px solid var(--zus-green-border);
+  border-left: 6px solid var(--zus-green);
+  border-radius: var(--zus-radius-md);
+  padding: 22px 24px;
+  margin-bottom: 28px;
+  box-shadow: var(--zus-shadow);
+}
+
+.zus-auth-summary-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--zus-radius-md);
+  background-color: var(--zus-green-light);
+  color: var(--zus-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zus-auth-summary-content {
+  flex: 1;
+}
+
+.zus-auth-summary-headline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.zus-auth-summary-headline strong {
+  font-size: 1.12rem;
+  color: var(--zus-green-dark);
+}
+
+.zus-auth-verified-pill {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--zus-green);
+  background-color: var(--zus-green-light);
+  border: 1px solid var(--zus-green-border);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.zus-auth-summary-desc {
+  font-size: 0.92rem;
+  color: var(--zus-text-secondary);
+  margin-bottom: 14px;
+}
+
+.zus-auth-tags-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.zus-auth-param-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--zus-card-alt);
+  border: 1px solid var(--zus-border);
+  padding: 6px 10px;
+  border-radius: var(--zus-radius-sm);
+  font-size: 0.82rem;
+}
+
+.zus-param-label {
+  color: var(--zus-text-muted);
+}
+
+.zus-param-value {
+  font-weight: 700;
+  color: var(--zus-text-main);
+}
+
+.zus-text-success {
+  color: var(--zus-green) !important;
+}
+
+.zus-text-warning {
+  color: #B45309 !important;
+}
+
+.zus-auth-summary-actions {
+  flex-shrink: 0;
+}
+
+.zus-btn-auth-switch {
+  background-color: transparent;
+  color: var(--zus-navy);
+  border: 1px solid var(--zus-border);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: var(--zus-radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.zus-btn-auth-switch:hover {
+  background-color: var(--zus-navy-light);
+  border-color: var(--zus-navy);
+}
+
+.zus-filter-panel-box {
+  background-color: var(--zus-card-bg);
+  border: 1px solid var(--zus-border);
+  border-radius: var(--zus-radius-lg);
+  box-shadow: var(--zus-shadow);
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+
+.zus-filter-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 24px;
+  background-color: var(--zus-card-alt);
+  border-bottom: 1px solid var(--zus-border);
+}
+
+.zus-filter-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--zus-navy);
+}
+
+.zus-filter-header-title h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--zus-text-main);
+}
+
+.zus-filter-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.zus-btn-secondary-link {
+  background: none;
+  border: none;
+  color: var(--zus-text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: var(--zus-radius-sm);
+  transition: color 0.15s;
+}
+
+.zus-btn-secondary-link:hover {
+  color: var(--zus-green);
+  text-decoration: underline;
+}
+
+.zus-btn-quick-mobywatel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--zus-green-light);
+  color: var(--zus-green-dark);
+  border: 1px solid var(--zus-green-border);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: var(--zus-radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.zus-btn-quick-mobywatel:hover {
+  background-color: var(--zus-green);
+  color: #FFFFFF;
+}
+
+.zus-filter-body-grid {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.zus-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.zus-filter-group-label {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--zus-text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zus-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--zus-navy);
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+/* KROK 1: Rola / sytuacja życiowa */
+.zus-role-toggle-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.zus-role-chip-btn {
+  background-color: var(--zus-card-alt);
+  border: 1px solid var(--zus-border);
+  color: var(--zus-text-main);
+  padding: 8px 14px;
+  border-radius: var(--zus-radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zus-role-chip-btn:hover {
+  border-color: var(--zus-green-border);
+  background-color: #FFFFFF;
+}
+
+.zus-role-chip-btn.active {
+  background-color: var(--zus-green);
+  border-color: var(--zus-green);
+  color: #FFFFFF;
+  box-shadow: 0 2px 4px rgba(0, 120, 52, 0.25);
+}
+
+/* KROK 2: Forma zatrudnienia */
+.zus-employment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.zus-choice-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--zus-border);
+  border-radius: var(--zus-radius-md);
+  background-color: var(--zus-card-alt);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.zus-choice-card input[type="radio"] {
+  margin-top: 3px;
+  accent-color: var(--zus-green);
+  cursor: pointer;
+}
+
+.zus-choice-card:hover {
+  border-color: var(--zus-green-border);
+  background-color: #FFFFFF;
+}
+
+.zus-choice-card.selected {
+  background-color: var(--zus-green-light);
+  border-color: var(--zus-green);
+  box-shadow: inset 0 0 0 1px var(--zus-green);
+}
+
+.zus-choice-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.zus-choice-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--zus-text-main);
+  margin-bottom: 2px;
+}
+
+.zus-choice-desc {
+  font-size: 0.78rem;
+  color: var(--zus-text-muted);
+  line-height: 1.35;
+}
+
+/* KROK 3: Checkboxy */
+.zus-checkboxes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 10px 16px;
+}
+
+.zus-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background-color: var(--zus-card-alt);
+  border: 1px solid var(--zus-border);
+  border-radius: var(--zus-radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.zus-checkbox-row:hover {
+  background-color: #FFFFFF;
+  border-color: var(--zus-border-focus);
+}
+
+.zus-checkbox-row input[type="checkbox"] {
+  margin-top: 3px;
+  accent-color: var(--zus-green);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.zus-checkbox-dimmed {
+  opacity: 0.65;
+}
+
+.zus-checkbox-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.zus-checkbox-text strong {
+  font-size: 0.88rem;
+  color: var(--zus-text-main);
+}
+
+.zus-checkbox-sub {
+  font-size: 0.77rem;
+  color: var(--zus-text-muted);
+  margin-top: 2px;
+}
+
+.zus-catalog-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 14px 18px;
+  background-color: var(--zus-card-bg);
+  border: 1px solid var(--zus-border);
+  border-radius: var(--zus-radius-md);
+  box-shadow: var(--zus-shadow-sm);
+}
+
+.zus-toolbar-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.zus-toolbar-result-badge {
+  font-size: 0.95rem;
+  color: var(--zus-text-main);
+}
+
+.zus-toolbar-result-badge strong {
+  color: var(--zus-green);
+  font-size: 1.15rem;
+}
+
+.zus-toolbar-sub-badge {
+  font-size: 0.82rem;
+  color: var(--zus-text-muted);
+}
+
+.zus-toolbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.zus-filter-tabs {
+  display: flex;
+  background-color: var(--zus-quick-bg);
+  border: 1px solid var(--zus-border);
+  border-radius: var(--zus-radius-sm);
+  padding: 2px;
+  gap: 2px;
+}
+
+.zus-filter-tab-btn {
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--zus-text-secondary);
+  border-radius: var(--zus-radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.zus-filter-tab-btn:hover {
+  color: var(--zus-text-main);
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.zus-filter-tab-btn.active {
+  background-color: #FFFFFF;
+  color: var(--zus-text-main);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-weight: 700;
+}
+
+.zus-filter-tab-btn.eligible.active {
+  color: var(--zus-green);
+}
+
+.zus-filter-tab-btn.not-eligible.active {
+  color: #B91C1C;
+}
+
+.zus-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.zus-search-input-wrap svg {
+  position: absolute;
+  left: 10px;
+  color: var(--zus-text-muted);
+}
+
+.zus-catalog-search-input {
+  padding: 7px 28px 7px 32px;
+  border: 1px solid var(--zus-border);
+  border-radius: var(--zus-radius-sm);
+  font-size: 0.85rem;
+  color: var(--zus-text-main);
+  background-color: #FFFFFF;
+  width: 210px;
+  transition: all 0.15s ease;
+}
+
+.zus-catalog-search-input:focus {
+  outline: none;
+  border-color: var(--zus-green);
+  box-shadow: 0 0 0 2px rgba(0, 120, 52, 0.15);
+  width: 250px;
+}
+
+.zus-search-clear-btn {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--zus-text-muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.zus-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+.zus-benefit-card {
+  background-color: var(--zus-card-bg);
+  border: 1px solid var(--zus-border);
+  border-radius: var(--zus-radius-md);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--zus-shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  position: relative;
+}
+
+.zus-benefit-card:hover {
+  box-shadow: var(--zus-shadow);
+  transform: translateY(-2px);
+}
+
+.zus-benefit-card.is-eligible {
+  border-top: 4px solid var(--zus-green);
+}
+
+.zus-benefit-card.is-not-eligible {
+  border-top: 4px solid #CBD5E1;
+  background-color: #FAFAFA;
+}
+
+.zus-card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.zus-card-category-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: var(--zus-radius-sm);
+  background-color: var(--zus-navy-light);
+  color: var(--zus-navy);
+}
+
+.zus-card-order-tag {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--zus-text-muted);
+}
+
+.zus-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--zus-text-main);
+  line-height: 1.35;
+  margin-bottom: 6px;
+  min-height: 2.7em;
+}
+
+.zus-card-desc {
+  font-size: 0.88rem;
+  color: var(--zus-text-secondary);
+  line-height: 1.45;
+  margin-bottom: 16px;
+  flex-grow: 0;
+}
+
+.zus-card-qualification-box {
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: var(--zus-radius-sm);
+  background-color: #FFFFFF;
+  border: 1px solid var(--zus-border);
+}
+
+.zus-benefit-card.is-eligible .zus-card-qualification-box {
+  background-color: var(--zus-green-light);
+  border-color: var(--zus-green-border);
+}
+
+.zus-benefit-card.is-not-eligible .zus-card-qualification-box {
+  background-color: #c2c2c2;
+  border-color: #655151;
+}
+
+.zus-badge-qualification {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  margin-bottom: 6px;
+}
+
+.zus-badge-qualification.badge-green {
+  background-color: var(--zus-green);
+  color: #FFFFFF;
+}
+
+.zus-badge-qualification.badge-red {
+  background-color: #3e1212;
+  color: #FFFFFF;
+}
+
+.zus-card-reason-text {
+  font-size: 0.86rem;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+.zus-card-reason-text.text-eligible {
+  color: var(--zus-green-dark);
+  font-weight: 600;
+}
+
+.zus-card-reason-text.text-not-eligible {
+  color: #4b0000;
+  font-weight: 500;
+}
+
+.zus-card-specs-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px dashed var(--zus-border);
+  border-bottom: 1px dashed var(--zus-border);
+  margin-bottom: 14px;
+}
+
+.zus-spec-col {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.zus-spec-label {
+  color: var(--zus-text-muted);
+  flex-shrink: 0;
+}
+
+.zus-spec-val {
+  color: var(--zus-text-main);
+  text-align: right;
+  font-weight: 600;
+}
+
+.zus-spec-val.highlight-rate {
+  color: var(--zus-green);
+  font-weight: 800;
+}
+
+/* Rozwijana sekcja zasad */
+.zus-card-expanded-content {
+  margin-top: 4px;
+  margin-bottom: 14px;
+  padding: 12px;
+  background-color: var(--zus-card-alt);
+  border-radius: var(--zus-radius-sm);
+  font-size: 0.83rem;
+  line-height: 1.45;
+}
+
+.zus-rules-heading {
+  display: block;
+  font-weight: 700;
+  color: var(--zus-text-main);
+  margin-bottom: 6px;
+}
+
+.zus-rules-list {
+  padding-left: 18px;
+  color: var(--zus-text-secondary);
+  margin-bottom: 10px;
+}
+
+.zus-rules-list li {
+  margin-bottom: 4px;
+}
+
+.zus-legal-basis-box {
+  border-top: 1px solid var(--zus-border);
+  padding-top: 8px;
+  color: var(--zus-text-muted);
+  font-size: 0.78rem;
+}
+
+.zus-legal-label {
+  font-weight: 700;
+  color: var(--zus-navy);
+  margin-right: 4px;
+}
+
+/* Stopka karty */
+.zus-card-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 8px;
+}
+
+.zus-card-expand-btn {
+  background: none;
+  border: none;
+  color: var(--zus-navy);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 0;
+  transition: color 0.15s ease;
+}
+
+.zus-card-expand-btn:hover {
+  color: var(--zus-green);
+  text-decoration: underline;
+}
+
+.zus-card-pdf-action {
+  background-color: var(--zus-card-alt);
+  border: 1px solid var(--zus-border);
+  color: var(--zus-text-main);
+  padding: 5px 10px;
+  border-radius: var(--zus-radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.zus-card-pdf-action:hover {
+  background-color: var(--zus-navy-light);
+  border-color: var(--zus-navy);
+  color: var(--zus-navy);
+}
+
+.zus-catalog-empty {
+  text-align: center;
+  padding: 48px 20px;
+  background-color: var(--zus-card-bg);
+  border: 1px dashed var(--zus-border);
+  border-radius: var(--zus-radius-md);
+  color: var(--zus-text-muted);
+}
+
+.zus-catalog-empty p {
+  font-size: 1rem;
+  margin-bottom: 14px;
+}
+
+/* RWD DLA KATALOGU */
+@media (max-width: 900px) {
+  .zus-auth-summary-bar {
+    flex-direction: column;
+  }
+  .zus-catalog-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .zus-toolbar-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .zus-filter-tabs {
+    flex-direction: column;
+  }
+  .zus-catalog-search-input {
+    width: 100%;
+  }
+  .zus-catalog-search-input:focus {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .zus-benefits-grid {
+    grid-template-columns: 1fr;
+  }
+  .zus-checkboxes-grid {
+    grid-template-columns: 1fr;
+  }
+  .zus-employment-grid {
+    grid-template-columns: 1fr;
+  }
+  .zus-role-toggle-group {
+    flex-direction: column;
+  }
+  .zus-role-chip-btn {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

@@ -10,6 +10,7 @@ import { AppStateProvider, useAppState } from './components/app-state';
 import { AssistantFab } from './components/assistant/assistant-fab';
 import { AssistantPanel } from './components/assistant/assistant-panel';
 import { GuideFlow } from './components/guide/guide-flow';
+import { BenefitsCatalogSection } from './components/benefits/BenefitsCatalogSection';
 
 import { PregnancyView } from './components/views/PregnancyView';
 import { PaternityView } from './components/views/PaternityView';
@@ -201,29 +202,11 @@ const AppContent: React.FC = () => {
       <main>
         {activeTab === 'start' && (
           <>
-            <HeroSection
+            <BenefitsCatalogSection
               isLoggedIn={Boolean(user)}
               onLoginToggle={handleLoginToggle}
               onOpenPdfModal={() => setIsPdfModalOpen(true)}
-              onSelectRoleAction={handleRoleAction}
             />
-            <QuickActionsBar onActionClick={handleQuickAction} />
-
-            {/* Zintegrowany kalkulator bezpośrednio na stronie głównej */}
-            <div className="zus-container" style={{ paddingBottom: '60px', paddingTop: '20px' }}>
-              <div style={{ marginBottom: '20px' }}>
-                <span className="zus-official-pill">Interaktywne Narzędzie</span>
-                <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#1A1A1A', marginTop: '6px' }}>
-                  Zintegrowany Kalkulator Zasiłkowy (Wersja Podstawowa)
-                </h2>
-                <p style={{ color: '#4A4A4A', fontSize: '0.95rem' }}>
-                  Możesz przetestować obliczenia bezpośrednio tutaj lub otworzyć pełny kalkulator w zakładce menu.
-                </p>
-              </div>
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '24px' }}>
-                <GuideFlow />
-              </div>
-            </div>
           </>
         )}
 
