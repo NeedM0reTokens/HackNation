@@ -6,7 +6,7 @@
     "date_of_birth": "1992-01-15",
     "email": "anna.kowalska@obywatel.gov.pl",
     "role": "user",
-    "label": "Anna Kowalska - Przyszła Matka (Obywatel)"
+    "label": "Anna Kowalska - Przyszła Matka (UoP, Ciąża)"
   },
   {
     "pesel": "89032005678",
@@ -15,7 +15,34 @@
     "date_of_birth": "1989-03-20",
     "email": "piotr.zielinski@obywatel.gov.pl",
     "role": "user",
-    "label": "Piotr Zieliński - Przyszły Ojciec (Obywatel)"
+    "label": "Piotr Zieliński - Przyszły Ojciec (UoP, Ojcowski)"
+  },
+  {
+    "pesel": "95081012345",
+    "first_name": "Karolina",
+    "last_name": "Wiśniewska",
+    "date_of_birth": "1995-08-10",
+    "email": "karolina.wisniewska@obywatel.gov.pl",
+    "role": "user",
+    "label": "Karolina Wiśniewska - Zleceniobiorca (Dobrowolne chorobowe)"
+  },
+  {
+    "pesel": "85040398765",
+    "first_name": "Tomasz",
+    "last_name": "Lewandowski",
+    "date_of_birth": "1985-04-03",
+    "email": "tomasz.lewandowski@obywatel.gov.pl",
+    "role": "user",
+    "label": "Tomasz Lewandowski - Przedsiębiorca (JDG, Zaległość ZUS)"
+  },
+  {
+    "pesel": "99010155555",
+    "first_name": "Julia",
+    "last_name": "Dąbrowska",
+    "date_of_birth": "1999-01-01",
+    "email": "julia.dabrowska@obywatel.gov.pl",
+    "role": "user",
+    "label": "Julia Dąbrowska - Brak ubezpieczenia (Obywatel)"
   },
   {
     "pesel": "80051209876",

@@ -1,12 +1,11 @@
 from typing import Any
 
-from fastapi import APIRouter, Security
+from fastapi import APIRouter
 
 from ..models.adoption import (
     AdoptionLeaveInput,
     AdoptionLeaveResult,
 )
-from ..security import Permission, authorization_manager
 from ..services.adoption import calculate_adoption_leave
 
 
@@ -23,12 +22,6 @@ class AdoptionRouter(APIRouter):
             self.calculate_adoption_leave_route,
             methods=["POST"],
             response_model=AdoptionLeaveResult,
-            dependencies=[
-                Security(
-                    authorization_manager.require,
-                    scopes=[Permission.calculator_maternity],
-                )
-            ],
             summary="Urlop na warunkach macierzyńskiego dla adopcji i rodziny zastępczej (BE-20)",
             description=(
                 "Oblicza wymiary urlopów i zasiłków dla rodziców adopcyjnych i rodzin zastępczych "

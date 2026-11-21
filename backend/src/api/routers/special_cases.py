@@ -1,9 +1,8 @@
 from typing import Any
 
-from fastapi import APIRouter, Security
+from fastapi import APIRouter
 
 from ..models.special_cases import SpecialCasesInput, SpecialCasesResult
-from ..security import Permission, authorization_manager
 from ..services.special_cases import calculate_special_cases
 
 
@@ -25,12 +24,6 @@ class SpecialCasesRouter(APIRouter):
                 self.calculate_special_cases_route,
                 methods=["POST"],
                 response_model=SpecialCasesResult,
-                dependencies=[
-                    Security(
-                        authorization_manager.require,
-                        scopes=[Permission.calculator_maternity],
-                    )
-                ],
                 summary="Zunifikowany kalkulator przypadków szczególnych (BE-13, BE-14, BE-15)",
                 description=(
                     "Kompleksowy moduł obliczający uprawnienia i świadczenia w sytuacjach "
