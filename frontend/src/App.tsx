@@ -219,9 +219,7 @@ const AppContent: React.FC = () => {
                 Wprowadź swoje dane, wybierz rodzaj umowy i sprawdź kwoty zasiłku macierzyńskiego, rodzicielskiego oraz terminy składania wniosków.
               </p>
             </div>
-            <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '28px' }}>
-              <GuideFlow />
-            </div>
+            <GuideFlow />
           </div>
         )}
 
@@ -229,7 +227,14 @@ const AppContent: React.FC = () => {
         {activeTab === 'macierzynski' && <PaternityView />}
         {activeTab === 'wnioski' && <DocumentsView />}
         {activeTab === 'trudne-sytuacje' && <SpecialCasesView />}
-        {activeTab === 'strefa-pdf' && <PdfZoneView />}
+        {activeTab === 'strefa-pdf' && (
+          <PdfZoneView
+            onNavigateToTab={(tab) => {
+              setActiveTab(tab);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
         {activeTab === 'admin' && <AdminView />}
       </main>
 

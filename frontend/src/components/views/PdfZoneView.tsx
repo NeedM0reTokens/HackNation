@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { parsePdfDocument } from '@/lib/api-client';
 
-export const PdfZoneView: React.FC = () => {
+interface PdfZoneViewProps {
+  onNavigateToTab?: (tab: string) => void;
+}
+
+export const PdfZoneView: React.FC<PdfZoneViewProps> = ({ onNavigateToTab }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -268,6 +272,25 @@ export const PdfZoneView: React.FC = () => {
                       <li key={idx}>{msg}</li>
                     ))}
                   </ul>
+                </div>
+              )}
+
+              {onNavigateToTab && (
+                <div style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="zus-btn-secondary"
+                    onClick={() => onNavigateToTab('chorobowy')}
+                  >
+                    Kalkulator Chorobowego (Kod B)
+                  </button>
+                  <button
+                    type="button"
+                    className="zus-btn-primary"
+                    onClick={() => onNavigateToTab('kalkulator')}
+                  >
+                    Przelicz w Zintegrowanym Kalkulatorze &gt;
+                  </button>
                 </div>
               )}
             </div>
