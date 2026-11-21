@@ -13,7 +13,7 @@ WAŻNA ZASADA: NIE wrzucamy przykładowych plików PDF od ZUS do publicznego rep
 --------------------------------------------------------------------------------
 1. START, ARCHITEKTURA I SETUP (Pierwsze 1-2h)
 --------------------------------------------------------------------------------
-[ ] [FS] P1 | Inicjalizacja monorepo na GitHubie (backend/, frontend/, docs/, .gitignore)
+[x] [FS] P1 | Inicjalizacja monorepo na GitHubie (backend/, frontend/, docs/, .gitignore)
     Osoba: ___________
 [ ] [FS] P1 | Szkielet FastAPI z włączonym CORS i endpointem /health
     Osoba: ___________
@@ -27,7 +27,7 @@ WAŻNA ZASADA: NIE wrzucamy przykładowych plików PDF od ZUS do publicznego rep
 --------------------------------------------------------------------------------
 [ ] [BE] P1 | Baza konfiguracji parametrów (JSON/SQLite): stopy 100%/70%/81.5%, wymiary tygodni, limity wieku
     Osoba: ___________
-[ ] [BE] P1 | Endpoint: Zasiłki w ciąży (chorobowy kod B 100%, okres wyczekiwania 30/90 dni, 33/14 dni pracodawca, max 270 dni, świadczenie rehab., zasiłek w wys. macierzyńskiego przy upadłości/bezprawnym zwolnieniu)
+[X] [BE] P1 | Endpoint: Zasiłki w ciąży (chorobowy kod B 100%, okres wyczekiwania 30/90 dni, 33/14 dni pracodawca, max 270 dni, świadczenie rehab., zasiłek w wys. macierzyńskiego przy upadłości/bezprawnym zwolnieniu)
     Osoba: ___________
 [ ] [BE] P1 | Endpoint: Zintegrowany kalkulator macierzyńskiego i rodzicielskiego (liczba dzieci, 14 tyg. matki, 41/43 tyg. rodzicielskiego, 9 tyg. nieprzenoszalne, max 5 części, opcja 81.5% vs 100%/70%)
     Osoba: ___________

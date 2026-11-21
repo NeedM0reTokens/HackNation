@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from src.routers.pregnancy import router as pregnancy_router
 
 app = FastAPI(title="Zasiłkowy Przewodnik Przyszłego Rodzica API")
 
@@ -10,6 +11,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Routery
+app.include_router(pregnancy_router)
 
 
 @app.get("/api/health")
