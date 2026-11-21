@@ -29,13 +29,13 @@ WAŻNA ZASADA: NIE wrzucamy przykładowych plików PDF od ZUS do publicznego rep
     Osoba: ___________
 [X] [BE] P1 | Endpoint: Zasiłki w ciąży (chorobowy kod B 100%, okres wyczekiwania 30/90 dni, 33/14 dni pracodawca, max 270 dni, świadczenie rehab., zasiłek w wys. macierzyńskiego przy upadłości/bezprawnym zwolnieniu)
     Osoba: ___________
-[ ] [BE] P1 | Endpoint: Zintegrowany kalkulator macierzyńskiego i rodzicielskiego (liczba dzieci, 14 tyg. matki, 41/43 tyg. rodzicielskiego, 9 tyg. nieprzenoszalne, max 5 części, opcja 81.5% vs 100%/70%)
+[X] [BE] P1 | Endpoint: Zintegrowany kalkulator macierzyńskiego i rodzicielskiego (liczba dzieci, 14 tyg. matki, 41/43 tyg. rodzicielskiego, 9 tyg. nieprzenoszalne, max 5 części, opcja 81.5% vs 100%/70%)
     Osoba: ___________
 [X] [BE] P1 | Logika przypadków szczególnych w kalkulatorze: zaświadczenie "Za życiem", wcześniak/hospitalizacja (uzupełniający urlop), urodzenie martwego dziecka/zgon
     Osoba: ___________
-[ ] [BE] P1 | Logika urlopu ojcowskiego (14 dni, 1 lub 2 części po 7 dni, limit 12 mies. / adopcja do 14 r.ż.) i przejęcia urlopu przez ojca
+[X] [BE] P1 | Logika urlopu ojcowskiego (14 dni, 1 lub 2 części po 7 dni, limit 12 mies. / adopcja do 14 r.ż.) i przejęcia urlopu przez ojca
     Osoba: ___________
-[ ] [BE] P1 | Moduł kalkulatora: Podział opieki między oboje rodziców (symulacja równoczesna i naprzemienna + wyliczenie kwot dla obu stron)
+[X] [BE] P1 | Moduł kalkulatora: Podział opieki między oboje rodziców (symulacja równoczesna i naprzemienna + wyliczenie kwot dla obu stron)
     Osoba: ___________
 [ ] [BE] P2 | Moduł kalkulatora: Łączenie urlopu rodzicielskiego z pracą (max 1/2 etatu, proporcjonalne wydłużenie urlopu i przeliczenie zasiłku)
     Osoba: ___________
