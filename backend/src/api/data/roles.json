@@ -1,0 +1,58 @@
+{
+  "permissions": [
+    {
+      "scope": "admin:config:read",
+      "description": "Odczyt konfiguracji prawnej i parametrów"
+    },
+    {
+      "scope": "admin:config:update",
+      "description": "Aktualizacja konfiguracji prawnej i parametrów w locie"
+    },
+    {
+      "scope": "calculator:maternity",
+      "description": "Korzystanie z kalkulatora zasiłku i urlopu macierzyńskiego/rodzicielskiego"
+    },
+    {
+      "scope": "calculator:pregnancy",
+      "description": "Korzystanie z kalkulatora zasiłku chorobowego w ciąży"
+    },
+    {
+      "scope": "simulation:run",
+      "description": "Uruchamianie symulacji wariantów zasiłkowych"
+    },
+    {
+      "scope": "pdf:generate",
+      "description": "Generowanie wniosków i dokumentów PDF"
+    },
+    {
+      "scope": "profile:read",
+      "description": "Odczyt profilu zalogowanego obywatela z mObywatela"
+    }
+  ],
+  "roles": [
+    {
+      "name": "admin",
+      "description": "Administrator systemu (np. pracownik ZUS / urzędnik)",
+      "permissions": [
+        "admin:config:read",
+        "admin:config:update",
+        "calculator:maternity",
+        "calculator:pregnancy",
+        "simulation:run",
+        "pdf:generate",
+        "profile:read"
+      ]
+    },
+    {
+      "name": "user",
+      "description": "Zwykły obywatel / przyszły rodzic uwierzytelniony przez mObywatel",
+      "permissions": [
+        "calculator:maternity",
+        "calculator:pregnancy",
+        "simulation:run",
+        "pdf:generate",
+        "profile:read"
+      ]
+    }
+  ]
+}
