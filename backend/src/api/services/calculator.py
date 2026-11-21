@@ -623,7 +623,7 @@ def calculate_integrated_parental_service(
             action_required="Wykorzystanie 14 dni urlopu ojcowskiego przed 1. urodzinami.",
         ),
         TimelineMilestone(
-            milestone_date=_add_years(b_date, 14 if is_adoption else 6),
+            milestone_date=date(b_date.year + (14 if is_adoption else 6), 12, 31),
             title=f"Koniec terminu na urlop rodzicielski ({14 if is_adoption else 6} lat)",
             importance="INFO",
             legal_basis="Art. 182(1a) Kodeksu Pracy",
