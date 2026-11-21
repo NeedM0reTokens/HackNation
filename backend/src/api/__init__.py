@@ -1,14 +1,15 @@
 from .api import MainAPI, app
 from .routers.admin import AdminAPI, AdminRouter
 from .routers.adoption import AdoptionAPI, AdoptionRouter
+from .routers.auth import AuthAPI, AuthRouter
 from .routers.calculator import CalculatorAPI, CalculatorRouter
 from .routers.health import HealthAPI, HealthRouter
 from .routers.maternity import MaternityAPI, MaternityRouter
+from .routers.mock import MockAPI, MockRouter, SimulationAPI, SimulationRouter
 from .routers.parental_work import ParentalWorkAPI, ParentalWorkRouter
 from .routers.paternity import PaternityAPI, PaternityRouter
 from .routers.pdf import PdfAPI, PdfRouter
 from .routers.pregnancy import PregnancyAPI, PregnancyRouter
-from .routers.simulation import SimulationAPI, SimulationRouter
 from .routers.special_cases import SpecialCasesAPI, SpecialCasesRouter
 
 __all__ = [
@@ -16,6 +17,8 @@ __all__ = [
     "AdminRouter",
     "AdoptionAPI",
     "AdoptionRouter",
+    "AuthAPI",
+    "AuthRouter",
     "CalculatorAPI",
     "CalculatorRouter",
     "HealthAPI",
@@ -23,6 +26,8 @@ __all__ = [
     "MainAPI",
     "MaternityAPI",
     "MaternityRouter",
+    "MockAPI",
+    "MockRouter",
     "ParentalWorkAPI",
     "ParentalWorkRouter",
     "PaternityAPI",

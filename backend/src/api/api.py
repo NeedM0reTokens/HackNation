@@ -7,11 +7,11 @@ from .routers.auth import AuthRouter
 from .routers.calculator import CalculatorRouter
 from .routers.health import HealthRouter
 from .routers.maternity import MaternityRouter
+from .routers.mock import MockRouter
 from .routers.parental_work import ParentalWorkRouter
 from .routers.paternity import PaternityRouter
 from .routers.pdf import PdfRouter
 from .routers.pregnancy import PregnancyRouter
-from .routers.simulation import SimulationRouter
 from .routers.special_cases import SpecialCasesRouter
 
 OPENAPI_TAGS = [
@@ -94,10 +94,10 @@ OPENAPI_TAGS = [
         ),
     },
     {
-        "name": "Symulacja mObywatel / ZUS",
+        "name": "Symulacje zewnętrznych serwisów (Mock)",
         "description": (
-            "Profile testowe ubezpieczonych oraz weryfikacja dopuszczalnego limitu zadłużenia "
-            "składkowego w ZUS dla przedsiębiorców (BE-26)."
+            "Środowisko mockowe symulujące integrację z zewnętrznymi rejestrami państwowymi "
+            "i usługami rządowymi (mObywatel, PUE ZUS / eZUS) na potrzeby demonstracji i testów."
         ),
     },
 ]
@@ -143,7 +143,8 @@ class MainAPI(FastAPI):
         self.health_router = HealthRouter()
         self.calculator_router = CalculatorRouter()
         self.pdf_router = PdfRouter()
-        self.simulation_router = SimulationRouter()
+        self.mock_router = MockRouter()
+        self.simulation_router = self.mock_router
         self.admin_router = AdminRouter()
         self.pregnancy_router = PregnancyRouter()
         self.maternity_router = MaternityRouter()
@@ -156,7 +157,7 @@ class MainAPI(FastAPI):
         self.include_router(self.health_router)
         self.include_router(self.calculator_router, prefix="/api")
         self.include_router(self.pdf_router, prefix="/api")
-        self.include_router(self.simulation_router, prefix="/api")
+        self.include_router(self.mock_router, prefix="/api")
         self.include_router(self.admin_router, prefix="/api")
         self.include_router(self.pregnancy_router)
         self.include_router(self.maternity_router)
