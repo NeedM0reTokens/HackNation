@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter, Security
+from fastapi import APIRouter
 
 from ..models.auth import (
     CitizenIdentity,
@@ -8,13 +8,24 @@ from ..models.auth import (
     TokenResponse,
 )
 from ..models.simulation import UserProfileResponse
-from ..security import Permission, authorization_manager
 from ..services.mobywatel import MobywatelService, mobywatel_service
 from ..services.simulation import get_mock_user_profile_service
 
+ZUS_ENDPOINT_DESCRIPTION = (
+    "Symuluje pobranie danych z systemów ZUS (Centralny Rejestr Ubezpieczonych / eZUS / PUE ZUS) "
+    "dla wskazanego numeru PESEL w celu ustalenia uprawnień do świadczeń:\n\n"
+    "- **Dane ubezpieczenia**: status ubezpieczenia (aktywne, brak), tytuł ubezpieczenia.\n"
+    "- **Ubezpieczenie chorobowe**: tryb (obowiązkowe/dobrowolne), data objęcia, staż.\n"
+    "- **Okres wyczekiwania (karencja)**: weryfikacja 30 dni dla UoP / 90 dni dla innych.\n"
+    "- **Podstawa wymiaru składek**: średnia z 12 miesięcy i wykaz miesięczny (-13,71%).\n"
+    "- **Płatnik składek**: NIP, nazwa, status wielkości płatnika (>20 pracowników).\n"
+    "- **Zadłużenie (art. 2a ustawy)**: limit 1% minimalnego wynagrodzenia (48,06 zł).\n"
+    "- **Zaświadczenia e-ZLA**: aktywne zwolnienia lekarskich (kod B) i limit dni."
+)
+
 
 class MockRouter(APIRouter):
-    """Router for mocking external government services (mObywatel IdP, PUE ZUS)."""
+    """Router for mocking external government services (mObywatel IdP, PUE ZUS / eZUS)."""
 
     def __init__(
         self,
@@ -33,12 +44,6 @@ class MockRouter(APIRouter):
             self.get_mock_user_profile_route,
             methods=["GET"],
             response_model=UserProfileResponse,
-            dependencies=[
-                Security(
-                    authorization_manager.require,
-                    scopes=[Permission.simulation_run],
-                )
-            ],
             summary="Pobranie profilu ubezpieczonego z symulacji PUE ZUS / mObywatel",
             description=(
                 "Zwraca zamockowany profil obywatela z PUE ZUS / mObywatel na potrzeby "
@@ -54,6 +59,32 @@ class MockRouter(APIRouter):
                 200: {"description": "Pomyślnie pobrano profil użytkownika."},
                 404: {"description": "Użytkownik o podanym ID nie został znaleziony w bazie."},
             },
+        )
+
+        self.add_api_route(
+            "/zus/insurance/{pesel}",
+            self.get_zus_insurance_data_route,
+            methods=["GET"],
+            response_model=UserProfileResponse,
+            summary="Pobranie danych o ubezpieczeniu osoby z systemów ZUS (PESEL)",
+            description=ZUS_ENDPOINT_DESCRIPTION,
+            response_description="Dane o ubezpieczeniu osoby z systemów ZUS",
+            responses={
+                200: {"description": "Pomyślnie pobrano dane ubezpieczeniowe z ZUS."},
+                404: {
+                    "description": "Osoba o podanym PESEL nie została znaleziona w rejestrze ZUS."
+                },
+            },
+        )
+
+        self.add_api_route(
+            "/insurance/{pesel}",
+            self.get_zus_insurance_data_route,
+            methods=["GET"],
+            response_model=UserProfileResponse,
+            summary="Pobranie danych o ubezpieczeniu osoby (alias do /zus/insurance/{pesel})",
+            description="Alias dla pobierania danych o ubezpieczeniu z ZUS po numerze PESEL.",
+            include_in_schema=False,
         )
 
         self.add_api_route(
@@ -102,6 +133,10 @@ class MockRouter(APIRouter):
         """Returns mock PUE ZUS profile (BE-28)."""
         return get_mock_user_profile_service(user_id)
 
+    def get_zus_insurance_data_route(self, pesel: str) -> UserProfileResponse:
+        """Returns simulated ZUS insurance data for the given PESEL."""
+        return get_mock_user_profile_service(pesel)
+
     def list_mobywatel_identities_route(self) -> list[CitizenIdentity]:
         """Returns mock citizen identities for mObywatel login simulation."""
         return self.mobywatel.list_identities()
@@ -111,7 +146,72 @@ class MockRouter(APIRouter):
         return self.mobywatel.authenticate(payload.pesel)
 
 
+class ZusRouter(APIRouter):
+    """Direct router for simulated ZUS government registry endpoints (prefix /zus)."""
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(prefix="/zus", tags=["Symulacje zewnętrznych serwisów (Mock)"], **kwargs)
+        self._setup_routes()
+
+    def _setup_routes(self) -> None:
+        self.add_api_route(
+            "/insurance/{pesel}",
+            self.get_zus_insurance_data_route,
+            methods=["GET"],
+            response_model=UserProfileResponse,
+            summary="Pobranie danych o ubezpieczeniu osoby z systemów ZUS (PESEL)",
+            description=ZUS_ENDPOINT_DESCRIPTION,
+            response_description="Dane o ubezpieczeniu osoby z systemów ZUS",
+            responses={
+                200: {"description": "Pomyślnie pobrano dane ubezpieczeniowe z ZUS."},
+                404: {
+                    "description": "Osoba o podanym PESEL nie została znaleziona w rejestrze ZUS."
+                },
+            },
+        )
+
+    def get_zus_insurance_data_route(self, pesel: str) -> UserProfileResponse:
+        """Returns simulated ZUS insurance data for the given PESEL."""
+        return get_mock_user_profile_service(pesel)
+
+
+class SimulationRouter(APIRouter):
+    """Router for simulation endpoints under /simulation."""
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(
+            prefix="/simulation", tags=["Symulacje zewnętrznych serwisów (Mock)"], **kwargs
+        )
+        self._setup_routes()
+
+    def _setup_routes(self) -> None:
+        self.add_api_route(
+            "/profile/{user_id}",
+            self.get_simulation_profile_route,
+            methods=["GET"],
+            response_model=UserProfileResponse,
+            summary="Pobranie profilu symulacji ZUS po PESEL / ID",
+            description="Alias dla symulacji profilu ubezpieczeniowego ZUS.",
+            include_in_schema=False,
+        )
+        self.add_api_route(
+            "/zus/insurance/{pesel}",
+            self.get_simulation_profile_route,
+            methods=["GET"],
+            response_model=UserProfileResponse,
+            include_in_schema=False,
+        )
+        self.add_api_route(
+            "/insurance/{pesel}",
+            self.get_simulation_profile_route,
+            methods=["GET"],
+            response_model=UserProfileResponse,
+            include_in_schema=False,
+        )
+
+    def get_simulation_profile_route(self, user_id: str) -> UserProfileResponse:
+        return get_mock_user_profile_service(user_id)
+
 router = MockRouter()
 MockAPI = MockRouter
-SimulationRouter = MockRouter
-SimulationAPI = MockRouter
+SimulationAPI = SimulationRouter

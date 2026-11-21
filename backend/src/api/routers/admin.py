@@ -16,12 +16,6 @@ router = APIRouter(prefix="/admin", tags=["Admin Panel"])
 @router.get(
     "/config",
     response_model=AdminConfig,
-    dependencies=[
-        Security(
-            authorization_manager.require,
-            scopes=[Permission.admin_config_read],
-        )
-    ],
     summary="Pobierz aktualne parametry prawne i konfiguracyjne",
     description=(
         "Zwraca zestaw aktualnie obowiązujących wskaźników prawnych ZUS i parametrów makro: "
@@ -73,12 +67,6 @@ class AdminRouter(APIRouter):
             self.get_admin_config,
             methods=["GET"],
             response_model=AdminConfig,
-            dependencies=[
-                Security(
-                    authorization_manager.require,
-                    scopes=[Permission.admin_config_read],
-                )
-            ],
             summary="Pobierz aktualne parametry prawne i konfiguracyjne",
             description=(
                 "Zwraca zestaw aktualnych wskaźników prawnych ZUS i parametrów makro: "

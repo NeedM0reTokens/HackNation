@@ -8,7 +8,7 @@ from .routers.calculator import CalculatorRouter
 from .routers.cases import CasesRouter
 from .routers.health import HealthRouter
 from .routers.maternity import MaternityRouter
-from .routers.mock import MockRouter
+from .routers.mock import MockRouter, SimulationRouter, ZusRouter
 from .routers.parental_work import ParentalWorkRouter
 from .routers.paternity import PaternityRouter
 from .routers.pdf import PdfRouter

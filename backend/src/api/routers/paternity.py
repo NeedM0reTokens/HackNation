@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter, Security
+from fastapi import APIRouter
 
 from ..models.paternity import (
     MaternityTransferInput,
@@ -10,7 +10,6 @@ from ..models.paternity import (
     PaternityLeaveInput,
     PaternityLeaveResult,
 )
-from ..security import Permission, authorization_manager
 from ..services.paternity import (
     calculate_maternity_transfer,
     calculate_parental_sharing,
@@ -39,12 +38,6 @@ class PaternityRouter(APIRouter):
                 self.calculate_paternity_leave_route,
                 methods=["POST"],
                 response_model=PaternityLeaveResult,
-                dependencies=[
-                    Security(
-                        authorization_manager.require,
-                        scopes=[Permission.calculator_maternity],
-                    )
-                ],
                 summary="Kalkulator urlopu ojcowskiego (14 dni, 100%, 12/14 m-cy) (BE-16)",
                 description=(
                     "Oblicza urlop ojcowski przysługujący wyłącznie ojcu (nieprzenoszalny):\n\n"
@@ -66,12 +59,6 @@ class PaternityRouter(APIRouter):
                 self.calculate_maternity_transfer_route,
                 methods=["POST"],
                 response_model=MaternityTransferResult,
-                dependencies=[
-                    Security(
-                        authorization_manager.require,
-                        scopes=[Permission.calculator_maternity],
-                    )
-                ],
                 summary=(
                     "Przejęcie urlopu macierzyńskiego przez ojca "
                     "(standard 14 tyg. / sytuacje szczególne) (BE-17)"
@@ -97,12 +84,6 @@ class PaternityRouter(APIRouter):
                 self.calculate_parental_sharing_route,
                 methods=["POST"],
                 response_model=ParentalSharingResult,
-                dependencies=[
-                    Security(
-                        authorization_manager.require,
-                        scopes=[Permission.calculator_maternity],
-                    )
-                ],
                 summary="Symulacja podziału opieki i budżetu domowego rodziców (BE-18)",
                 description=(
                     "Kompleksowa symulacja podziału urlopu rodzicielskiego (41 tygodni):\n\n"

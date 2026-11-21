@@ -144,9 +144,9 @@ button {
 }
 
 .zus-topbar-inner {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  justify-content: space-between;
   gap: 20px;
 }
 
@@ -195,10 +195,21 @@ button {
 
 /* Akcje po prawej stronie */
 .zus-topbar-actions {
-  display: flex;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
   align-items: center;
   gap: 12px;
-  flex-wrap: wrap;
+  white-space: nowrap;
+}
+
+.zus-user-logged-group {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
 }
 
 /* Przyciski dostępności (Navy A+ / Kontrast) */
@@ -1201,14 +1212,15 @@ button {
 /* Ekrany mobilne (< 768px) */
 @media (max-width: 768px) {
   .zus-topbar-inner {
-    flex-direction: column;
-    align-items: flex-start;
+    grid-template-columns: 1fr;
     gap: 14px;
   }
 
   .zus-topbar-actions {
     width: 100%;
-    justify-content: space-between;
+    grid-auto-flow: column;
+    justify-content: flex-start;
+    overflow-x: auto;
   }
 
   .zus-nav-list {
@@ -1282,12 +1294,8 @@ button {
   }
 
   .zus-topbar-actions {
-    flex-direction: column;
+    grid-auto-flow: row;
     align-items: stretch;
-  }
-
-  .zus-a11y-group {
-    justify-content: center;
   }
 
   .zus-btn-outline-pue,
@@ -1581,3 +1589,346 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   WIZARD STEPPER (KROK PO KROKU W KALKULATORZE)
+   ========================================================================== */
+.zus-stepper-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #FFFFFF;
+  border: 1.5px solid var(--zus-border);
+  border-radius: var(--zus-radius-md);
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  box-shadow: var(--zus-shadow-sm);
+  gap: 12px;
+}
+
+.zus-step-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  background: none;
+  border: 1.5px solid transparent;
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: var(--zus-radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.zus-step-item:hover:not(:disabled) {
+  background-color: var(--zus-card-alt);
+}
+
+.zus-step-item.active {
+  background-color: var(--zus-green-light);
+  border-color: var(--zus-green-border);
+}
+
+.zus-step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.95rem;
+  background-color: #E2E8F0;
+  color: var(--zus-text-secondary);
+  flex-shrink: 0;
+}
+
+.zus-step-item.active .zus-step-number {
+  background-color: var(--zus-green);
+  color: #FFFFFF;
+}
+
+.zus-step-item.completed .zus-step-number {
+  background-color: #FFFFFF;
+  border: 2px solid var(--zus-green);
+  color: var(--zus-green);
+}
+
+.zus-step-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.zus-step-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--zus-text-main);
+  line-height: 1.25;
+}
+
+.zus-step-item.active .zus-step-title {
+  color: var(--zus-green-dark);
+}
+
+.zus-step-desc {
+  font-size: 0.76rem;
+  color: var(--zus-text-muted);
+  margin-top: 2px;
+}
+
+.zus-step-separator {
+  display: flex;
+  align-items: center;
+  color: #A0AEC0;
+  flex-shrink: 0;
+}
+
+.zus-calc-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.95fr);
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .zus-calc-grid {
+    grid-template-columns: 1fr;
+  }
+  .zus-stepper-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px;
+  }
+  .zus-step-separator {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   AKORDEON ZUS (ETYKIETA "WIĘCEJ" / "MNIEJ" ZAMIAST STRZAŁEK)
+   ========================================================================== */
+.zus-accordion-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 6px;
+  background-color: var(--zus-green-light);
+  color: var(--zus-green);
+  border: 1.5px solid var(--zus-green-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  text-decoration: none !important;
+  box-shadow: 0 1px 2px rgba(0, 120, 52, 0.1);
+  user-select: none;
+}
+
+.zus-accordion-toggle:hover {
+  background-color: var(--zus-green);
+  color: #FFFFFF;
+  border-color: var(--zus-green-hover);
+  transform: translateY(-1px);
+}
+
+.zus-accordion-toggle .zus-label-less {
+  display: none;
+}
+
+.zus-accordion-toggle .zus-label-more {
+  display: inline;
+}
+
+/* Po rozwinięciu (Base-UI data-panel-open lub aria-expanded="true") */
+[data-panel-open] .zus-accordion-toggle .zus-label-more,
+[aria-expanded="true"] .zus-accordion-toggle .zus-label-more {
+  display: none !important;
+}
+
+[data-panel-open] .zus-accordion-toggle .zus-label-less,
+[aria-expanded="true"] .zus-accordion-toggle .zus-label-less {
+  display: inline !important;
+}
+
+[data-panel-open] .zus-accordion-toggle,
+[aria-expanded="true"] .zus-accordion-toggle {
+  background-color: var(--zus-navy);
+  color: #FFFFFF;
+  border-color: var(--zus-navy-hover);
+}
+
+[data-panel-open] .zus-accordion-toggle:hover,
+[aria-expanded="true"] .zus-accordion-toggle:hover {
+  background-color: var(--zus-navy-hover);
+  color: #FFFFFF;
+}
+
+/* ==========================================================================
+   PIONOWA OŚ CZASU ZUS (GÓRA DO DOŁU, BEZ SCROLLA I BEZ EMOJI)
+   ========================================================================== */
+.zus-vertical-timeline-container {
+  background-color: #FFFFFF;
+  border: 1px solid var(--zus-border);
+  border-radius: var(--zus-radius-md);
+  padding: 24px;
+  box-shadow: var(--zus-shadow-sm);
+  margin-bottom: 24px;
+}
+
+.zus-vertical-timeline {
+  position: relative;
+  padding: 10px 0 10px 10px;
+}
+
+.zus-vertical-timeline-line {
+  position: absolute;
+  top: 24px;
+  bottom: 30px;
+  left: 28px;
+  width: 3px;
+  background: linear-gradient(180deg, #007834 0%, #007834 50%, #003B6F 100%);
+  z-index: 1;
+}
+
+.zus-vtimeline-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 20px;
+  z-index: 2;
+}
+
+.zus-vtimeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.zus-vtimeline-node {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: #FFFFFF;
+  border: 3px solid #007834;
+  color: #007834;
+  font-size: 0.88rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.zus-vtimeline-item:hover .zus-vtimeline-node {
+  transform: scale(1.12);
+  border-color: #00441c;
+  background-color: #E6F4EC;
+  box-shadow: 0 3px 10px rgba(0, 120, 52, 0.3);
+}
+
+.zus-vtimeline-node.critical {
+  border: 3px solid #DC2626;
+  color: #FFFFFF;
+  background-color: #DC2626;
+  font-weight: 900;
+  box-shadow: 0 0 0 4px #FEE2E2, 0 2px 6px rgba(220, 38, 38, 0.35);
+}
+
+.zus-vtimeline-item:hover .zus-vtimeline-node.critical {
+  border-color: #B91C1C;
+  background-color: #B91C1C;
+  box-shadow: 0 0 0 5px #FCA5A5, 0 3px 12px rgba(220, 38, 38, 0.45);
+}
+
+.zus-vtimeline-node.father {
+  border-color: #003B6F;
+  color: #003B6F;
+  background-color: #E8F1F8;
+}
+
+.zus-vtimeline-item:hover .zus-vtimeline-node.father {
+  border-color: #00274A;
+  background-color: #E6EFF7;
+  box-shadow: 0 3px 10px rgba(0, 59, 111, 0.35);
+}
+
+.zus-vtimeline-node.mother {
+  border: 3px solid #D47094;
+  color: #942754;
+  background-color: #FDF2F5;
+  box-shadow: 0 0 0 3px #FDF2F5, 0 2px 5px rgba(212, 112, 148, 0.2);
+}
+
+.zus-vtimeline-item:hover .zus-vtimeline-node.mother {
+  border-color: #BF537B;
+  background-color: #FCE8EE;
+  box-shadow: 0 0 0 4px #F5B8CB, 0 3px 10px rgba(212, 112, 148, 0.35);
+}
+
+.zus-vtimeline-card {
+  flex: 1;
+  background-color: #FFFFFF;
+  border: 1.5px solid var(--zus-border);
+  border-left: 4px solid #007834;
+  border-radius: var(--zus-radius-sm);
+  padding: 16px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.zus-vtimeline-item:hover .zus-vtimeline-card {
+  border-color: #CBD5E0;
+  border-left-color: #00441c;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  background-color: #F8FAFC;
+}
+
+.zus-vtimeline-card.critical {
+  border: 2px solid #FCA5A5;
+  border-left: 6px solid #DC2626;
+  background-color: #FEF2F2;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.12);
+}
+
+.zus-vtimeline-item:hover .zus-vtimeline-card.critical {
+  border-color: #EF4444;
+  border-left-color: #B91C1C;
+  background-color: #FEE2E2;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.22);
+}
+
+.zus-vtimeline-card.father {
+  border-left-color: #003B6F;
+  background-color: #FAFCFE;
+}
+
+.zus-vtimeline-item:hover .zus-vtimeline-card.father {
+  border-left-color: #00274A;
+  background-color: #F1F6FA;
+}
+
+.zus-vtimeline-card.mother {
+  border: 1.5px solid #F8CBDC;
+  border-left: 5px solid #D47094;
+  background-color: #FFF7FA;
+  box-shadow: 0 1px 3px rgba(212, 112, 148, 0.05);
+}
+
+.zus-vtimeline-item:hover .zus-vtimeline-card.mother {
+  border-color: #F5B8CB;
+  border-left-color: #BF537B;
+  background-color: #FDF0F5;
+  box-shadow: 0 4px 14px rgba(212, 112, 148, 0.15);
+}
+
+@keyframes zusFadeIn {
+  from { opacity: 0; transform: translate(-50%, 6px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+
+
