@@ -1,0 +1,326 @@
+[
+  {
+    "id": "case-1",
+    "title": "Zestaw 1: Pracownica w ciąży – e-ZLA z kodem B (Formularz Z-3)",
+    "description": "Umowa o pracę, wynagrodzenie 6 850 zł brutto, niezdolność od 14. tygodnia ciąży z kodem B, płatnik powyżej 20 ubezpieczonych.",
+    "tag": "Ciąża 100% (kod B)",
+    "category": "Ciąża i chorobowe",
+    "document_type": "Z-3",
+    "person": {
+      "first_name": "Anna",
+      "last_name": "Kowalska",
+      "pesel": "92051203456",
+      "is_pesel_valid": true,
+      "birth_date": "1992-05-12"
+    },
+    "payer": {
+      "name": "TechSolutions Sp. z o.o.",
+      "nip": "5250001098",
+      "is_nip_valid": true,
+      "employee_count_status": "ABOVE_20"
+    },
+    "extracted_data": {
+      "document_code": "Z-3",
+      "gross_salary": 6850.0,
+      "insurance_start_date": "2021-03-01",
+      "has_active_ezla_code_b": true,
+      "sick_leave_duration_days": 30,
+      "pregnancy_week": 14,
+      "is_hospital_stay": false
+    },
+    "validation_messages": [
+      "Zaświadczenie Z-3 oraz e-ZLA zweryfikowane pomyślnie.",
+      "Zwolnienie lekarskie zawiera kod B (100% podstawy zasiłku).",
+      "Płatnik zatrudnia powyżej 20 osób – pierwsze 33 dni wypłaca pracodawca.",
+      "Spełniony ustawowy okres wyczekiwania 30 dni dla umowy o pracę."
+    ],
+    "calculator_input": {
+      "employment_type": "EMPLOYMENT_CONTRACT",
+      "gross_monthly_income": 6850.0,
+      "insurance_duration_days": 720,
+      "sick_leave_duration_days": 30,
+      "has_code_b": true,
+      "payer_size": "ABOVE_20"
+    },
+    "expected_decision": {
+      "is_eligible": true,
+      "benefit_percentage": 100.0,
+      "disbursing_entity": "EMPLOYER",
+      "max_coverage_days": 270,
+      "legal_basis": "Art. 9 i art. 11 ust. 2 pkt 1 Ustawy zasiłkowej (Dz.U. 2026 poz. 854)",
+      "key_rules": [
+        "100% podstawy wymiaru przy kodzie B",
+        "Wydłużony okres zasiłkowy do 270 dni w czasie ciąży",
+        "Wypłata przez pracodawcę (powyżej 20 ubezpieczonych)"
+      ]
+    },
+    "pdf_filename": "Anna Ko_4_zas. chorobowy w ciąży.pdf"
+  },
+  {
+    "id": "case-2",
+    "title": "Zestaw 2: Przedsiębiorczyni (JDG) – Wniosek ZAM o macierzyński",
+    "description": "Jednoosobowa działalność gospodarcza od 3 lat, opłacona dobrowolna składka chorobowa, wniosek ZAM w 21 dni, brak zadłużenia.",
+    "tag": "Macierzyński 81,5% (ZAM)",
+    "category": "Macierzyński i rodzicielski",
+    "document_type": "ZAM",
+    "person": {
+      "first_name": "Magdalena",
+      "last_name": "Nowak",
+      "pesel": "88112009876",
+      "is_pesel_valid": true,
+      "birth_date": "1988-11-20"
+    },
+    "payer": {
+      "name": "Kancelaria Nowak Magdalena",
+      "nip": "7821098471",
+      "is_nip_valid": true,
+      "employee_count_status": "SELF_EMPLOYED"
+    },
+    "extracted_data": {
+      "document_code": "ZAM",
+      "gross_salary": 5400.0,
+      "insurance_start_date": "2022-01-10",
+      "has_active_ezla_code_b": false,
+      "applied_within_21_days": true,
+      "children_count": 1
+    },
+    "validation_messages": [
+      "Wniosek ZAM złożony elektronicznie w terminie 21 dni od porodu.",
+      "Zasiłek wypłaca bezpośrednio ZUS.",
+      "Brak zaległości składkowych przekraczających 1% minimalnego wynagrodzenia (art. 2a).",
+      "Wybór stawki ujednoliconej 81,5% za cały okres urlopu."
+    ],
+    "calculator_input": {
+      "employment_type": "B2B",
+      "gross_monthly_income": 5400.0,
+      "children_born_count": 1,
+      "is_insured_at_birth": true,
+      "applied_within_21_days": true,
+      "chosen_variant": "UNIFIED_81_5"
+    },
+    "expected_decision": {
+      "is_eligible": true,
+      "benefit_percentage": 81.5,
+      "disbursing_entity": "ZUS",
+      "max_coverage_days": 427,
+      "legal_basis": "Art. 30a i 31 Ustawy zasiłkowej (Dz.U. 2026 poz. 854)",
+      "key_rules": [
+        "Złożenie wniosku w 21 dni uprawnia do stawki uśrednionej 81,5%",
+        "Bezpośrednia wypłata przez Zakład Ubezpieczeń Społecznych",
+        "Wymiar łączny: 20 tyg. macierzyńskiego + 41 tyg. rodzicielskiego (z czego 9 tyg. dla ojca)"
+      ]
+    },
+    "pdf_filename": "Alicja Cho_3_Zasiłek macierzyński za okres urlopu macierzyńskiego i rodzicielskiego.pdf"
+  },
+  {
+    "id": "case-3",
+    "title": "Zestaw 3: Wcześniak – Zaświadczenie szpitalne (Art. 180(2) KP)",
+    "description": "Dziecko urodzone w 26. tygodniu ciąży, masa 910 g, hospitalizacja 9 tygodni. Wniosek o uzupełniający urlop macierzyński.",
+    "tag": "Wcześniak (+9 tyg. 100%)",
+    "category": "Przypadki szczególne",
+    "document_type": "HOSPITAL_CERTIFICATE",
+    "person": {
+      "first_name": "Katarzyna",
+      "last_name": "Zielińska",
+      "pesel": "94080112345",
+      "is_pesel_valid": true,
+      "birth_date": "1994-08-01"
+    },
+    "payer": {
+      "name": "Szpital Specjalistyczny im. Świętej Rodziny",
+      "nip": "1180099231",
+      "is_nip_valid": true,
+      "employee_count_status": "HEALTHCARE"
+    },
+    "extracted_data": {
+      "document_code": "HOSPITAL_CERT",
+      "gross_salary": 8200.0,
+      "birth_week": 26,
+      "birth_weight_grams": 910,
+      "hospital_stay_weeks": 9
+    },
+    "validation_messages": [
+      "Zaświadczenie szpitalne spełnia kryteria art. 180(2) § 1 pkt 1 Kodeksu pracy.",
+      "Narodziny przed 28. tygodniem ciąży lub masa poniżej 1000g.",
+      "Przysługuje 9 dodatkowych tygodni uzupełniającego urlopu macierzyńskiego.",
+      "Świadczenie za okres uzupełniający wynosi 100% podstawy wymiaru."
+    ],
+    "calculator_input": {
+      "case_type": "PREMATURE_HOSPITALIZATION",
+      "gross_monthly_income": 8200.0,
+      "child_birth_week": 26,
+      "birth_weight_grams": 910,
+      "hospital_stay_weeks": 9
+    },
+    "expected_decision": {
+      "is_eligible": true,
+      "benefit_percentage": 100.0,
+      "disbursing_entity": "ZUS",
+      "max_coverage_days": 63,
+      "legal_basis": "Art. 180(2) Kodeksu pracy oraz art. 29a Ustawy zasiłkowej",
+      "key_rules": [
+        "Uzupełniający urlop macierzyński do maksymalnie 15 tygodni",
+        "Wymiar równy okresowi hospitalizacji noworodka (9 tygodni)",
+        "Stawka 100% podstawy wymiaru"
+      ]
+    },
+    "pdf_filename": "Agnieszka Poz._zas.mac. za okres mac., uzup., rodz. - skrajny wcześniak masa poniżej 1000 - decyzja przyznająca.pdf"
+  },
+  {
+    "id": "case-4",
+    "title": "Zestaw 4: Ojciec dziecka – Urlop ojcowski (14 dni) + 9 tyg. rodzicielskiego",
+    "description": "Ojciec zatrudniony na umowę o pracę, 9 200 zł brutto. Wiek dziecka 5 miesięcy. Wykorzystanie 14 dni ojcowskiego oraz 9 tyg. nieprzenoszalnego rodzicielskiego.",
+    "tag": "Ojcowski + 9 tyg. taty",
+    "category": "Ojcowski i transfer opieki",
+    "document_type": "Z-3A",
+    "person": {
+      "first_name": "Piotr",
+      "last_name": "Zieliński",
+      "pesel": "89032005678",
+      "is_pesel_valid": true,
+      "birth_date": "1989-03-20"
+    },
+    "payer": {
+      "name": "PolSoft Solutions SA",
+      "nip": "5261020304",
+      "is_nip_valid": true,
+      "employee_count_status": "ABOVE_20"
+    },
+    "extracted_data": {
+      "document_code": "Z-3A",
+      "gross_salary": 9200.0,
+      "child_age_months": 5,
+      "requested_paternity_days": 14,
+      "requested_parental_weeks": 9
+    },
+    "validation_messages": [
+      "Dziecko ma 5 miesięcy – zachowany termin 12 miesięcy od dnia narodzin (art. 182(3) KP).",
+      "Prawo do 14 dni urlopu ojcowskiego (100% podstawy).",
+      "Prawo do 9 nieprzenoszalnych tygodni urlopu rodzicielskiego (70% podstawy per dyrektywa Work-Life Balance)."
+    ],
+    "calculator_input": {
+      "gross_monthly_income": 9200.0,
+      "child_age_months": 5,
+      "employment_type": "EMPLOYMENT_CONTRACT",
+      "is_insured": true
+    },
+    "expected_decision": {
+      "is_eligible": true,
+      "benefit_percentage": 100.0,
+      "disbursing_entity": "EMPLOYER",
+      "max_coverage_days": 14,
+      "legal_basis": "Art. 182(3) Kodeksu pracy i art. 182(1a) KP",
+      "key_rules": [
+        "14 dni urlopu ojcowskiego płatne 100%",
+        "Wykorzystanie do ukończenia 12. miesiąca życia dziecka",
+        "Niezależne 9 tygodni urlopu rodzicielskiego płatne 70%"
+      ]
+    },
+    "pdf_filename": "Dariusz Go_3_zas. mac. za okres urlopu ojcowskiego.pdf"
+  },
+  {
+    "id": "case-5",
+    "title": "Zestaw 5: Upadłość pracodawcy w trakcie ciąży (Art. 30 Ustawy zasiłkowej)",
+    "description": "Rozwiązanie umowy o pracę z powodu likwidacji zakładu po upływie 3. miesiąca ciąży. Wypłata zasiłku w wysokości macierzyńskiego przez ZUS.",
+    "tag": "Upadłość / Likwidacja (Art. 30)",
+    "category": "Ochrona i trudne sytuacje",
+    "document_type": "SWIADECTWO_PRACY",
+    "person": {
+      "first_name": "Ewa",
+      "last_name": "Dąbrowska",
+      "pesel": "93041511223",
+      "is_pesel_valid": true,
+      "birth_date": "1993-04-15"
+    },
+    "payer": {
+      "name": "Zakład Produkcyjny w Likwidacji Sp. z o.o.",
+      "nip": "9510022334",
+      "is_nip_valid": true,
+      "employee_count_status": "UP_TO_20"
+    },
+    "extracted_data": {
+      "document_code": "Z-3_UPADLOSC",
+      "gross_salary": 6200.0,
+      "termination_reason": "LIQUIDATION",
+      "pregnancy_month_at_termination": 4
+    },
+    "validation_messages": [
+      "Rozwiązanie stosunku pracy nastąpiło z powodu likwidacji pracodawcy.",
+      "Pracownica w 4. miesiącu ciąży w dacie rozwiązania umowy.",
+      "ZUS wypłaca świadczenie w wysokości zasiłku macierzyńskiego na podstawie art. 30 ust. 3 ustawy zasiłkowej."
+    ],
+    "calculator_input": {
+      "employment_type": "EMPLOYMENT_CONTRACT",
+      "gross_monthly_income": 6200.0,
+      "company_status": "BANKRUPTCY_OR_LIQUIDATION",
+      "pregnancy_week": 16,
+      "sick_leave_duration_days": 30,
+      "insurance_duration_days": 300
+    },
+    "expected_decision": {
+      "is_eligible": true,
+      "benefit_percentage": 100.0,
+      "disbursing_entity": "ZUS",
+      "max_coverage_days": 270,
+      "legal_basis": "Art. 30 ust. 3 Ustawy zasiłkowej (Dz.U. 2026 poz. 854)",
+      "key_rules": [
+        "Zasiłek w wysokości zasiłku macierzyńskiego do dnia porodu",
+        "Bezpośrednia wypłata przez ZUS po ustaniu zatrudnienia",
+        "Następnie pełne prawo do urlopu macierzyńskiego i rodzicielskiego"
+      ]
+    },
+    "pdf_filename": "Joanna Łód_3_Zasiłek w wysokości zas. mac. i macierzyński z powodu likwidacji - przyznanie prawa.pdf"
+  },
+  {
+    "id": "case-6",
+    "title": "Zestaw 6: Samozatrudniona z zadłużeniem składkowym w ZUS (Art. 2a)",
+    "description": "Działalność gospodarcza, zaległość składkowa 450 zł (> 1% minimalnego wynagrodzenia). Blokada wypłaty zasiłku do spłaty w terminie 6 miesięcy.",
+    "tag": "Zadłużenie JDG (Art. 2a)",
+    "category": "Ryzyka i zadłużenie",
+    "document_type": "ZASW_ZUS_DEBT",
+    "person": {
+      "first_name": "Karolina",
+      "last_name": "Wiśniewska",
+      "pesel": "90120108765",
+      "is_pesel_valid": true,
+      "birth_date": "1990-12-01"
+    },
+    "payer": {
+      "name": "Wiśniewska Consulting JDG",
+      "nip": "6761002030",
+      "is_nip_valid": true,
+      "employee_count_status": "SELF_EMPLOYED"
+    },
+    "extracted_data": {
+      "document_code": "ZASW_DLUG",
+      "gross_salary": 7500.0,
+      "zus_debt_amount": 450.0,
+      "sickness_insurance_active": true
+    },
+    "validation_messages": [
+      "Wykryto zaległości w opłacaniu składek na ubezpieczenia społeczne: 450,00 zł.",
+      "Zadłużenie przekracza 1% minimalnego wynagrodzenia (ok. 48,06 zł w 2026 r.).",
+      "Zasiłek nie przysługuje do czasu spłaty całości zadłużenia (art. 2a ustawy zasiłkowej).",
+      "Termin zawity na spłatę: 6 miesięcy od dnia powstania prawa (po tym terminie prawo ulega przedawnieniu)."
+    ],
+    "calculator_input": {
+      "employment_type": "B2B",
+      "gross_monthly_income": 7500.0,
+      "is_insured_at_birth": true,
+      "debt_amount": 450.0
+    },
+    "expected_decision": {
+      "is_eligible": false,
+      "benefit_percentage": 0.0,
+      "disbursing_entity": "ZUS",
+      "max_coverage_days": 0,
+      "legal_basis": "Art. 2a Ustawy zasiłkowej (Dz.U. 2026 poz. 854)",
+      "key_rules": [
+        "Zadłużenie > 1% minimalnego wynagrodzenia wstrzymuje wypłatę świadczenia",
+        "Spłata w ciągu 6 miesięcy przywraca prawo do zasiłku wstecz",
+        "Brak spłaty w 6 miesięcy powoduje przedawnienie roszczenia"
+      ]
+    },
+    "pdf_filename": "Piotr Cho_5_zas. mac. za okres urlopu ojcowskiego, odmowa z powodu zadłużenia, osoba prowadząca działalność.pdf"
+  }
+]

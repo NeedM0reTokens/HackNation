@@ -19,14 +19,15 @@ class MockRouter(APIRouter):
     def __init__(
         self,
         mobywatel: MobywatelService | None = None,
+        prefix: str = "/mock",
         **kwargs: Any,
     ) -> None:
-        super().__init__(prefix="/mock", tags=["Symulacje zewnętrznych serwisów (Mock)"], **kwargs)
+        super().__init__(prefix=prefix, tags=["Symulacje zewnętrznych serwisów (Mock)"], **kwargs)
         self.mobywatel: MobywatelService = mobywatel or mobywatel_service
         self._setup_routes()
 
     def _setup_routes(self) -> None:
-        # PUE ZUS mock profile (BE-26)
+        # PUE ZUS mock profile (BE-26 / BE-28)
         self.add_api_route(
             "/profile/{user_id}",
             self.get_mock_user_profile_route,
@@ -38,7 +39,7 @@ class MockRouter(APIRouter):
                     scopes=[Permission.simulation_run],
                 )
             ],
-            summary="Pobranie profilu ubezpieczonego z symulacji PUE ZUS / mObywatel (BE-26)",
+            summary="Pobranie profilu ubezpieczonego z symulacji PUE ZUS / mObywatel",
             description=(
                 "Zwraca zamockowany profil obywatela z PUE ZUS / mObywatel na potrzeby "
                 "demonstracji:\n\n"
@@ -53,6 +54,18 @@ class MockRouter(APIRouter):
                 200: {"description": "Pomyślnie pobrano profil użytkownika."},
                 404: {"description": "Użytkownik o podanym ID nie został znaleziony w bazie."},
             },
+        )
+
+        self.add_api_route(
+            "/zus/profile",
+            self.get_zus_profile_route,
+            methods=["GET"],
+            response_model=UserProfileResponse,
+            summary="Pobranie profilu ubezpieczenia ZUS (BE-28)",
+            description=(
+                "Alias dla integracji z mockiem ZUS "
+                "(zwraca status ubezpieczenia i weryfikację zadłużenia)."
+            ),
         )
 
         # mObywatel IdP mock endpoints (BE-27)
@@ -83,6 +96,10 @@ class MockRouter(APIRouter):
 
     def get_mock_user_profile_route(self, user_id: str) -> UserProfileResponse:
         """Returns mock PUE ZUS profile for given user ID / PESEL."""
+        return get_mock_user_profile_service(user_id)
+
+    def get_zus_profile_route(self, user_id: str = "anna-kowalska") -> UserProfileResponse:
+        """Returns mock PUE ZUS profile (BE-28)."""
         return get_mock_user_profile_service(user_id)
 
     def list_mobywatel_identities_route(self) -> list[CitizenIdentity]:

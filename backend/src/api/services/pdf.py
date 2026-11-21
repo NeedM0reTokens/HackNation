@@ -1,8 +1,10 @@
 import io
 import re
 from datetime import date, datetime
+from typing import Any
 
 from fastapi import HTTPException, UploadFile
+
 try:
     from pypdf import PdfReader
 except ImportError:
@@ -26,6 +28,7 @@ from ..models.pdf import (
     PdfParseResponse,
     PersonData,
 )
+from .ocr import ocr_pdf_with_gemini
 
 
 def _validate_pesel(pesel: str) -> tuple[bool, str | None, str | None]:
@@ -387,7 +390,7 @@ def _extract_claim_data(text: str, doc_type: DocumentType) -> BenefitClaimData:
         claim.sick_leave_duration_days = 0
 
     birth_date_patterns = [
-        r"(?:urodzenia dziecka|urodzonego|urodzonej|data urodzenia|poród|porodu)[:\s]+"
+        r"(?:urodzenia dziecka|urodzonego|urodzonej|data urodzenia|poród|porod|porodu)[:\s]+"
         + r"(\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4})",
         r"(?:urodził[ao] się w dniu|urodzona w dniu|urodzony w dniu)[:\s]+"
         + r"(\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4})",
@@ -540,8 +543,280 @@ def _assess_eligibility(
     )
 
 
+def _build_response_from_ocr(
+    ocr: dict[str, Any],
+    filename: str,
+    file_size_bytes: int,
+    page_count: int,
+) -> PdfParseResponse:
+    pesel_raw = str(ocr.get("pesel") or "").strip()
+    is_pesel_valid, b_date_from_pesel, gender_from_pesel = (
+        _validate_pesel(pesel_raw) if pesel_raw else (False, None, None)
+    )
+    first_name = ocr.get("first_name")
+    gender = gender_from_pesel
+    if not gender and first_name:
+        gender = "FEMALE" if first_name.lower().endswith("a") else "MALE"
+
+    person = PersonData(
+        first_name=first_name,
+        last_name=ocr.get("last_name"),
+        pesel=pesel_raw if pesel_raw else None,
+        is_pesel_valid=is_pesel_valid,
+        birth_date=b_date_from_pesel,
+        gender=gender,
+    )
+
+    nip_raw = str(ocr.get("nip") or "").strip()
+    is_nip_valid = _validate_nip(nip_raw) if nip_raw else False
+    payer_size = str(ocr.get("payer_size") or "UP_TO_20").upper()
+    if payer_size not in ("ABOVE_20", "UP_TO_20"):
+        payer_size = "UP_TO_20"
+    company_name = ocr.get("company_name")
+    payer = PayerData(
+        company_name=company_name,
+        name=company_name or "Płatnik składek",
+        nip=nip_raw if nip_raw else None,
+        is_nip_valid=is_nip_valid,
+        regon=None,
+        payer_size=payer_size,
+        employee_count_status=payer_size,
+    )
+
+    gross_income = float(ocr.get("gross_monthly_income") or 0.0)
+    net_base = round(gross_income * (1 - SOCIAL_CONTRIBUTIONS_RATE / 100), 2)
+    emp_type = str(ocr.get("employment_type") or "EMPLOYMENT_CONTRACT").upper()
+    if emp_type not in ("EMPLOYMENT_CONTRACT", "MANDATE_CONTRACT", "B2B", "NONE"):
+        emp_type = "EMPLOYMENT_CONTRACT"
+    ins_duration = int(ocr.get("insurance_duration_days") or 0)
+    has_debt = bool(ocr.get("has_overdue_debt", False))
+    debt_amount = float(ocr.get("debt_amount") or 0.0)
+    if debt_amount > 0 and not has_debt:
+        has_debt = True
+
+    insurance = InsuranceData(
+        employment_type=emp_type,
+        insurance_title_code=None,
+        insurance_start_date="2023-01-01",
+        insurance_end_date=None,
+        insurance_duration_days=ins_duration,
+        is_currently_insured=ins_duration > 0,
+        has_sickness_insurance=True,
+        has_overdue_debt=has_debt,
+        debt_amount=debt_amount,
+        gross_monthly_income=gross_income,
+        calculation_base_net=net_base,
+    )
+
+    doc_type_str = str(ocr.get("document_type") or "OTHER")
+    claim_type = "SICKNESS" if doc_type_str == "e-ZLA" else "MATERNITY"
+    has_code_b = bool(ocr.get("has_pregnancy_code_b", False))
+    has_za_zyciem = bool(ocr.get("has_za_zyciem_certificate", False))
+    is_premature = bool(ocr.get("is_premature_or_hospitalized", False))
+    children_count = max(1, int(ocr.get("children_count") or 1))
+    child_birth_date = ocr.get("child_birth_date")
+    sick_days = int(ocr.get("sick_leave_duration_days") or 0)
+
+    claim = BenefitClaimData(
+        claim_type=claim_type,
+        has_pregnancy_code_b=has_code_b,
+        child_birth_date=child_birth_date,
+        children_count=children_count,
+        has_za_zyciem_certificate=has_za_zyciem,
+        is_premature_or_hospitalized=is_premature,
+        sick_leave_start_date=None,
+        sick_leave_end_date=None,
+        sick_leave_duration_days=sick_days,
+    )
+
+    status_str = str(ocr.get("status_badge") or "ELIGIBLE").upper()
+    try:
+        status_badge = InsuranceStatusBadge(status_str)
+    except ValueError:
+        status_badge = InsuranceStatusBadge.ELIGIBLE
+
+    is_eligible = bool(ocr.get("is_eligible", status_badge == InsuranceStatusBadge.ELIGIBLE))
+    summary_text = str(ocr.get("summary") or f"Dokument {doc_type_str} przeanalizowany przez OCR.")
+    val_msgs_raw = ocr.get("validation_messages")
+    if isinstance(val_msgs_raw, list) and val_msgs_raw:
+        val_msgs = [str(m) for m in val_msgs_raw]
+    else:
+        val_msgs = [summary_text]
+
+    eligibility = EligibilityAssessment(
+        is_eligible=is_eligible,
+        status_badge=status_badge,
+        confidence_score=0.95,
+        summary=summary_text,
+        reasons=[summary_text],
+        advisory_notes=val_msgs,
+        required_followup_documents=[],
+    )
+
+    is_female = person.gender != "MALE"
+    m_income = insurance.gross_monthly_income if is_female else 0.0
+    f_income = insurance.gross_monthly_income if not is_female else 0.0
+    m_emp = insurance.employment_type if is_female else "EMPLOYMENT_CONTRACT"
+    f_emp = insurance.employment_type if not is_female else "EMPLOYMENT_CONTRACT"
+
+    special_case: str | None = None
+    if claim.has_za_zyciem_certificate:
+        special_case = "ZA_ZYCIEM"
+    elif claim.is_premature_or_hospitalized:
+        special_case = "PREMATURE"
+
+    today_str = date.today().isoformat()
+    birth_date_str = claim.child_birth_date or today_str
+
+    calculator_prefill = CalculatorPreFill(
+        employment_type=insurance.employment_type,
+        gross_monthly_income=insurance.gross_monthly_income,
+        insurance_duration_days=insurance.insurance_duration_days,
+        is_insured_at_birth=insurance.is_currently_insured,
+        has_pregnancy_code_b=claim.has_pregnancy_code_b,
+        has_za_zyciem_certificate=claim.has_za_zyciem_certificate,
+        children_born_count=claim.children_count,
+        sick_leave_duration_days=claim.sick_leave_duration_days,
+        payer_size=payer.payer_size,
+        child_birth_date=birth_date_str,
+        applied_within_21_days=True,
+        chosen_variant="UNIFIED_81_5",
+        special_case_type=special_case,
+        mother_gross_monthly_income=m_income,
+        mother_employment_type=m_emp,
+        is_mother_insured=insurance.is_currently_insured if is_female else True,
+        father_gross_monthly_income=f_income,
+        father_employment_type=f_emp,
+        is_father_insured=insurance.is_currently_insured if not is_female else True,
+    )
+
+    return PdfParseResponse(
+        filename=filename,
+        file_size_bytes=file_size_bytes,
+        page_count=page_count,
+        document_type=doc_type_str,
+        document_title=str(ocr.get("document_title") or "Dokument ZUS"),
+        raw_text_preview=f"[OCR Gemini] {summary_text}",
+        person=person,
+        payer=payer,
+        insurance=insurance,
+        claim=claim,
+        eligibility=eligibility,
+        calculator_prefill=calculator_prefill,
+        insurance_status=status_badge.value,
+        confidence_score=0.95,
+        extracted_data={
+            "document_code": doc_type_str,
+            "gross_salary": insurance.gross_monthly_income,
+            "insurance_start_date": insurance.insurance_start_date or "2023-01-01",
+            "has_active_ezla_code_b": claim.has_pregnancy_code_b,
+            "sick_leave_duration_days": claim.sick_leave_duration_days,
+            "ocr_extracted": True,
+        },
+        validation_messages=val_msgs,
+    )
+
+
 def parse_and_validate_pdf(file_bytes: bytes, filename: str) -> PdfParseResponse:
     raw_text, page_count = _extract_text_from_pdf_bytes(file_bytes)
+
+    if len(raw_text.strip()) == 0:
+        ocr_result = ocr_pdf_with_gemini(file_bytes, filename)
+        if not ocr_result:
+            return PdfParseResponse(
+                filename=filename,
+                file_size_bytes=len(file_bytes),
+                page_count=page_count,
+                document_type=DocumentType.OTHER.value,
+                document_title="Dokument zeskanowany (brak warstwy tekstowej)",
+                raw_text_preview="",
+                person=PersonData(
+                    first_name=None,
+                    last_name=None,
+                    pesel=None,
+                    is_pesel_valid=False,
+                    gender=None,
+                ),
+                payer=PayerData(
+                    company_name=None,
+                    name="Brak danych płatnika",
+                    nip=None,
+                    is_nip_valid=False,
+                    regon=None,
+                    payer_size="UP_TO_20",
+                    employee_count_status="UP_TO_20",
+                ),
+                insurance=InsuranceData(
+                    employment_type="EMPLOYMENT_CONTRACT",
+                    insurance_title_code=None,
+                    insurance_start_date=None,
+                    insurance_end_date=None,
+                    insurance_duration_days=0,
+                    is_currently_insured=False,
+                    has_sickness_insurance=True,
+                    has_overdue_debt=False,
+                    debt_amount=0.0,
+                    gross_monthly_income=0.0,
+                    calculation_base_net=0.0,
+                ),
+                claim=BenefitClaimData(
+                    claim_type="MATERNITY",
+                    has_pregnancy_code_b=False,
+                    child_birth_date=None,
+                    children_count=1,
+                    has_za_zyciem_certificate=False,
+                    is_premature_or_hospitalized=False,
+                    sick_leave_start_date=None,
+                    sick_leave_end_date=None,
+                    sick_leave_duration_days=0,
+                ),
+                eligibility=EligibilityAssessment(
+                    is_eligible=False,
+                    status_badge=InsuranceStatusBadge.NEEDS_ADDITIONAL_DOCUMENTS,
+                    confidence_score=0.0,
+                    summary=(
+                        "Plik PDF jest skanem bez cyfrowej warstwy tekstowej. "
+                        "Wklej darmowy klucz GEMINI_API_KEY w pliku backend/.env, "
+                        "aby włączyć automatyczne rozpoznawanie skanów ZUS."
+                    ),
+                    reasons=["Plik nie zawiera cyfrowej warstwy tekstowej."],
+                    advisory_notes=[
+                        "Aby automatycznie odczytać ten skan przez Gemini Flash, "
+                        "dodaj GEMINI_API_KEY w backend/.env."
+                    ],
+                    required_followup_documents=[],
+                ),
+                calculator_prefill=CalculatorPreFill(
+                    employment_type="EMPLOYMENT_CONTRACT",
+                    gross_monthly_income=0.0,
+                    insurance_duration_days=0,
+                    is_insured_at_birth=False,
+                    has_pregnancy_code_b=False,
+                    has_za_zyciem_certificate=False,
+                    children_born_count=1,
+                    sick_leave_duration_days=0,
+                    payer_size="UP_TO_20",
+                    child_birth_date=date.today().isoformat(),
+                    applied_within_21_days=True,
+                    chosen_variant="UNIFIED_81_5",
+                    special_case_type=None,
+                    mother_gross_monthly_income=0.0,
+                    mother_employment_type="EMPLOYMENT_CONTRACT",
+                    is_mother_insured=False,
+                    father_gross_monthly_income=0.0,
+                    father_employment_type="EMPLOYMENT_CONTRACT",
+                    is_father_insured=False,
+                ),
+                insurance_status=InsuranceStatusBadge.NEEDS_ADDITIONAL_DOCUMENTS.value,
+                confidence_score=0.0,
+                extracted_data={"error": "NO_TEXT_LAYER_AND_NO_OCR"},
+                validation_messages=[
+                    "Plik PDF jest skanem bez cyfrowej warstwy tekstowej. "
+                    "Skonfiguruj GEMINI_API_KEY w backend/.env."
+                ],
+            )
+        return _build_response_from_ocr(ocr_result, filename, len(file_bytes), page_count)
+
     doc_type, doc_title = _classify_document(raw_text)
 
     person = _extract_person_data(raw_text)
@@ -590,11 +865,27 @@ def parse_and_validate_pdf(file_bytes: bytes, filename: str) -> PdfParseResponse
 
     preview = (raw_text[:600] + "...") if len(raw_text) > 600 else raw_text
 
+    if not payer.name:
+        payer.name = payer.company_name or "Pracodawca / Płatnik składek"
+    payer.employee_count_status = payer.payer_size
+
+    extracted_dict: dict[str, Any] = {
+        "document_code": doc_type.value,
+        "gross_salary": insurance.gross_monthly_income,
+        "insurance_start_date": insurance.insurance_start_date or "2023-01-01",
+        "has_active_ezla_code_b": claim.has_pregnancy_code_b,
+        "sick_leave_duration_days": claim.sick_leave_duration_days,
+    }
+
+    all_messages = eligibility.reasons + eligibility.advisory_notes
+    if not all_messages:
+        all_messages = ["Dokument przetworzony pomyślnie przez silnik walidacji ZUS."]
+
     return PdfParseResponse(
         filename=filename,
         file_size_bytes=len(file_bytes),
         page_count=page_count,
-        document_type=doc_type,
+        document_type=doc_type.value,
         document_title=doc_title,
         raw_text_preview=preview.strip(),
         person=person,
@@ -603,6 +894,10 @@ def parse_and_validate_pdf(file_bytes: bytes, filename: str) -> PdfParseResponse
         claim=claim,
         eligibility=eligibility,
         calculator_prefill=calculator_prefill,
+        insurance_status=eligibility.status_badge.value,
+        confidence_score=eligibility.confidence_score,
+        extracted_data=extracted_dict,
+        validation_messages=all_messages,
     )
 
 

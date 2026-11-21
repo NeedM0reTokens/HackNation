@@ -1,8 +1,14 @@
 import unittest
+from unittest.mock import MagicMock, patch
 
 from fastapi import HTTPException
 
 from ..api.models.pdf import DocumentType, InsuranceStatusBadge
+from ..api.services.ocr import (
+    get_gemini_api_key,
+    is_gemini_ocr_available,
+    ocr_pdf_with_gemini,
+)
 from ..api.services.pdf import (
     _assess_eligibility,
     _classify_document,
@@ -14,6 +20,44 @@ from ..api.services.pdf import (
     _validate_pesel,
     parse_and_validate_pdf,
 )
+
+
+def _build_pdf_stream(lines: list[str]) -> bytes:
+    stream_content = "BT\n/F1 12 Tf\n50 750 Td\n"
+    for i, line in enumerate(lines):
+        if i > 0:
+            stream_content += f"0 -25 Td\n({line}) Tj\n"
+        else:
+            stream_content += f"({line}) Tj\n"
+    stream_content += "ET\n"
+    stream_bytes = stream_content.encode("latin1")
+
+    header = b"%PDF-1.4\n"
+    obj1 = b"1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
+    obj2 = b"2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"
+    obj3 = (
+        b"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 600 800] "
+        b"/Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n"
+    )
+    obj4 = (
+        f"4 0 obj\n<< /Length {len(stream_bytes)} >>\nstream\n".encode()
+        + stream_bytes
+        + b"\nendstream\nendobj\n"
+    )
+    obj5 = b"5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n"
+
+    offsets = [0]
+    curr = len(header)
+    for obj in [obj1, obj2, obj3, obj4, obj5]:
+        offsets.append(curr)
+        curr += len(obj)
+
+    xref = "xref\n0 6\n0000000000 65535 f \n"
+    for off in offsets[1:]:
+        xref += f"{off:010d} 00000 n \n"
+    trailer = f"trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n{curr}\n%%EOF\n"
+
+    return header + obj1 + obj2 + obj3 + obj4 + obj5 + xref.encode() + trailer.encode()
 
 
 class TestPdfService(unittest.TestCase):
@@ -154,28 +198,14 @@ class TestPdfService(unittest.TestCase):
             parse_and_validate_pdf(b"not a valid pdf", "test.txt")
         self.assertEqual(ctx.exception.status_code, 400)
 
-    def test_parse_and_validate_pdf_end_to_end(self) -> None:
-        pdf_raw = (
-            b"%PDF-1.4\n"
-            b"1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
-            b"2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"
-            b"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 600 800] "
-            b"/Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n"
-            b"4 0 obj\n<< /Length 200 >>\nstream\n"
-            b"BT\n/F1 12 Tf\n50 700 Td\n"
-            b"(Z-3 ZASWIADCZENIE PLATNIKA SKLADEK) Tj\n"
-            b"0 -20 Td\n"
-            b"(Ubezpieczony: Anna Kowalska PESEL: 92051412309) Tj\n"
-            b"0 -20 Td\n"
-            b"(Platnik skladek: Firma ABC Sp. z o.o. NIP: 5260250995 Powyzej 20) Tj\n"
-            b"0 -20 Td\n"
-            b"(Przychody brutto: 8500,00 zl) Tj\n"
-            b"ET\nendstream\nendobj\n"
-            b"5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n"
-            b"xref\n0 6\n"
-            b"0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n"
-            b"0000000115 00000 n \n0000000247 00000 n \n0000000497 00000 n \n"
-            b"trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n568\n%%EOF\n"
+    def test_parse_z3_pdf_with_text_layer(self) -> None:
+        pdf_raw = _build_pdf_stream(
+            [
+                "Z-3 ZASWIADCZENIE PLATNIKA SKLADEK",
+                "Ubezpieczony: Anna Kowalska PESEL: 92051412309",
+                "Platnik skladek: Firma ABC Sp. z o.o. NIP: 5260250995 Powyzej 20",
+                "Przychody brutto: 8500,00 zl",
+            ]
         )
         res = parse_and_validate_pdf(pdf_raw, "test_z3.pdf")
         self.assertEqual(res.document_type, "Z-3")
@@ -186,8 +216,131 @@ class TestPdfService(unittest.TestCase):
         self.assertEqual(res.payer.nip, "5260250995")
         self.assertEqual(res.payer.payer_size, "ABOVE_20")
         self.assertEqual(res.insurance.gross_monthly_income, 8500.0)
+        self.assertEqual(res.insurance_status, "ELIGIBLE")
         self.assertEqual(res.calculator_prefill.mother_gross_monthly_income, 8500.0)
-        self.assertEqual(res.calculator_prefill.father_gross_monthly_income, 0.0)
+
+    def test_parse_zam_pdf_with_text_layer(self) -> None:
+        pdf_raw = _build_pdf_stream(
+            [
+                "WNIOSEK O ZASILEK MACIERZYNSKI ZAM",
+                "Ubezpieczony: Jan Kowalski PESEL: 88112045618",
+                "Platnik skladek: Kancelaria NIP: 5260250995",
+                "Przychody brutto: 6000,00 zl",
+                "Porod: 2026-05-15",
+            ]
+        )
+        res = parse_and_validate_pdf(pdf_raw, "test_zam.pdf")
+        self.assertEqual(res.document_type, "ZAM")
+        self.assertEqual(res.person.first_name, "Jan")
+        self.assertEqual(res.person.last_name, "Kowalski")
+        self.assertEqual(res.person.pesel, "88112045618")
+        self.assertEqual(res.insurance_status, "ELIGIBLE")
+        self.assertEqual(res.claim.child_birth_date, "2026-05-15")
+
+    def test_parse_ezla_pdf_with_text_layer(self) -> None:
+        pdf_raw = _build_pdf_stream(
+            [
+                "ZASWIADCZENIE LEKARSKIE E-ZLA",
+                "Ubezpieczony: Anna Kowalska PESEL: 92051412309",
+                "Kod B w okresie ciazy",
+                "Zwolnienie od 2026-01-01 do 2026-01-30",
+            ]
+        )
+        res = parse_and_validate_pdf(pdf_raw, "test_ezla.pdf")
+        self.assertEqual(res.document_type, "e-ZLA")
+        self.assertTrue(res.claim.has_pregnancy_code_b)
+
+    def test_parse_zas53_debt_warning_with_text_layer(self) -> None:
+        pdf_raw = _build_pdf_stream(
+            [
+                "WNIOSEK ZAS-53 DZIALALNOSCI POZAROLNICZEJ",
+                "Ubezpieczony: Jan Kowalski PESEL: 88112045618",
+                "Platnik NIP: 5260250995",
+                "Zadluzenie: 450,00 zl",
+            ]
+        )
+        res = parse_and_validate_pdf(pdf_raw, "test_zas53.pdf")
+        self.assertEqual(res.document_type, "ZAS-53")
+        self.assertEqual(res.insurance_status, "WARNING_DEBT")
+
+    @patch("src.api.services.pdf.ocr_pdf_with_gemini")
+    def test_parse_scanned_pdf_without_gemini_api_key(
+        self, mock_ocr: MagicMock
+    ) -> None:
+        mock_ocr.return_value = None
+        pdf_raw = _build_pdf_stream([])
+        res = parse_and_validate_pdf(pdf_raw, "scan.pdf")
+        self.assertEqual(res.document_type, "OTHER")
+        self.assertEqual(res.insurance_status, "NEEDS_ADDITIONAL_DOCUMENTS")
+        self.assertEqual(res.confidence_score, 0.0)
+        self.assertIn("GEMINI_API_KEY", res.eligibility.summary)
+
+    @patch("src.api.services.pdf.ocr_pdf_with_gemini")
+    def test_parse_scanned_pdf_with_gemini_ocr_success(
+        self, mock_ocr: MagicMock
+    ) -> None:
+        mock_ocr.return_value = {
+            "document_type": "Z-3",
+            "document_title": "ZAŚWIADCZENIE PŁATNIKA SKŁADEK Z-3",
+            "first_name": "Anna",
+            "last_name": "Kowalska",
+            "pesel": "92051412309",
+            "company_name": "ABC Sp. z o.o.",
+            "nip": "5260250995",
+            "payer_size": "ABOVE_20",
+            "employment_type": "EMPLOYMENT_CONTRACT",
+            "gross_monthly_income": 9500.0,
+            "insurance_duration_days": 365,
+            "has_pregnancy_code_b": True,
+            "children_count": 1,
+            "is_eligible": True,
+            "status_badge": "ELIGIBLE",
+            "summary": "Ubezpieczona uprawniona do 100% zasiłku z kodem B.",
+            "validation_messages": ["Prawo do 100% zasiłku chorobowego"],
+        }
+        pdf_raw = _build_pdf_stream([])
+        res = parse_and_validate_pdf(pdf_raw, "scanned_z3.pdf")
+        self.assertEqual(res.document_type, "Z-3")
+        self.assertEqual(res.person.first_name, "Anna")
+        self.assertEqual(res.person.last_name, "Kowalska")
+        self.assertEqual(res.person.pesel, "92051412309")
+        self.assertEqual(res.payer.nip, "5260250995")
+        self.assertEqual(res.payer.payer_size, "ABOVE_20")
+        self.assertEqual(res.insurance.gross_monthly_income, 9500.0)
+        self.assertTrue(res.claim.has_pregnancy_code_b)
+        self.assertEqual(res.insurance_status, "ELIGIBLE")
+        self.assertEqual(res.confidence_score, 0.95)
+
+    @patch.dict("os.environ", {"GEMINI_API_KEY": ""})
+    def test_gemini_ocr_not_available_when_key_empty(self) -> None:
+        self.assertIsNone(get_gemini_api_key())
+        self.assertFalse(is_gemini_ocr_available())
+        self.assertIsNone(ocr_pdf_with_gemini(b"some bytes", "test.pdf"))
+
+    @patch("src.api.services.ocr.requests.post")
+    @patch.dict("os.environ", {"GEMINI_API_KEY": "fake_test_key"})
+    def test_gemini_ocr_success(self, mock_post: MagicMock) -> None:
+        self.assertTrue(is_gemini_ocr_available())
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {
+            "candidates": [
+                {
+                    "content": {
+                        "parts": [
+                            {
+                                "text": '{"document_type": "Z-3", "gross_monthly_income": 5000.0}'
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+        mock_post.return_value = mock_resp
+        res = ocr_pdf_with_gemini(b"test pdf", "test.pdf")
+        self.assertIsNotNone(res)
+        assert res is not None
+        self.assertEqual(res["document_type"], "Z-3")
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ from .routers.admin import AdminRouter
 from .routers.adoption import AdoptionRouter
 from .routers.auth import AuthRouter
 from .routers.calculator import CalculatorRouter
+from .routers.cases import CasesRouter
 from .routers.health import HealthRouter
 from .routers.maternity import MaternityRouter
 from .routers.mock import MockRouter
@@ -143,8 +144,9 @@ class MainAPI(FastAPI):
         self.health_router = HealthRouter()
         self.calculator_router = CalculatorRouter()
         self.pdf_router = PdfRouter()
+        self.cases_router = CasesRouter()
         self.mock_router = MockRouter()
-        self.simulation_router = self.mock_router
+        self.simulation_router = MockRouter(prefix="/simulation")
         self.admin_router = AdminRouter()
         self.pregnancy_router = PregnancyRouter()
         self.maternity_router = MaternityRouter()
@@ -157,7 +159,9 @@ class MainAPI(FastAPI):
         self.include_router(self.health_router)
         self.include_router(self.calculator_router, prefix="/api")
         self.include_router(self.pdf_router, prefix="/api")
+        self.include_router(self.cases_router, prefix="/api")
         self.include_router(self.mock_router, prefix="/api")
+        self.include_router(self.simulation_router, prefix="/api")
         self.include_router(self.admin_router, prefix="/api")
         self.include_router(self.pregnancy_router, prefix="/api")
         self.include_router(self.maternity_router, prefix="/api")
