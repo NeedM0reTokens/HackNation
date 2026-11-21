@@ -37,9 +37,11 @@ WAŻNA ZASADA: NIE wrzucamy przykładowych plików PDF od ZUS do publicznego rep
     Osoba: ___________
 [X] [BE] P1 | Moduł kalkulatora: Podział opieki między oboje rodziców (symulacja równoczesna i naprzemienna + wyliczenie kwot dla obu stron)
     Osoba: ___________
-[ ] [BE] P2 | Moduł kalkulatora: Łączenie urlopu rodzicielskiego z pracą (max 1/2 etatu, proporcjonalne wydłużenie urlopu i przeliczenie zasiłku)
+[X] [BE] P2 | Moduł kalkulatora: Łączenie urlopu rodzicielskiego z pracą (max 1/2 etatu, proporcjonalne wydłużenie urlopu i przeliczenie zasiłku)
     Osoba: ___________
-[ ] [BE] P2 | Moduł kalkulatora: Rodzice adopcyjni i rodzina zastępcza niezawodowa (urlop na warunkach macierzyńskiego, limity wieku 7/10/14 lat)
+[X] [BE] P2 | Moduł kalkulatora: Rodzice adopcyjni i rodzina zastępcza niezawodowa (urlop na warunkach macierzyńskiego, limity wieku 7/10/14 lat)
+    Osoba: ___________
+[X] [BE] P1 | Endpoint POST /api/calculator/parental spinający cały zintegrowany kalkulator + oś czasu (daty) oraz presety pod zakładki (BE-21)
     Osoba: ___________
 [ ] [BE] P1 | Wyliczanie kwot dla indywidualnej podstawy wymiaru zasiłku (uwzględnienie konkretnych spraw testowych od ZUS)
     Osoba: ___________

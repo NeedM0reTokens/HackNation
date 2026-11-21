@@ -1,3 +1,4 @@
+from datetime import date
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
@@ -78,6 +79,17 @@ class CalculatorPreFill(BaseModel):
     children_born_count: int
     sick_leave_duration_days: int = Field(default=0, ge=0)
     payer_size: str
+
+    child_birth_date: str = Field(default_factory=lambda: date.today().isoformat())
+    applied_within_21_days: bool = True
+    chosen_variant: str = "UNIFIED_81_5"
+    special_case_type: str | None = None
+    mother_gross_monthly_income: float = 0.0
+    mother_employment_type: str = "EMPLOYMENT_CONTRACT"
+    is_mother_insured: bool = True
+    father_gross_monthly_income: float = 0.0
+    father_employment_type: str = "EMPLOYMENT_CONTRACT"
+    is_father_insured: bool = True
 
 
 class EligibilityAssessment(BaseModel):
