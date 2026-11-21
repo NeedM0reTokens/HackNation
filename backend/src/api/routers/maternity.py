@@ -1,3 +1,5 @@
+from typing import Any
+
 from fastapi import APIRouter, Security
 
 from ..models.maternity import (
@@ -9,8 +11,8 @@ from ..services.maternity import calculate_maternity_parental_benefit
 
 
 class MaternityRouter(APIRouter):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, prefix="/api/calculators", tags=["Maternity Benefits"], **kwargs)
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, prefix="/calculators", tags=["Maternity Benefits"], **kwargs)
         self.add_api_route(
             "/maternity-parental",
             self.get_maternity_parental_calculation,
@@ -41,7 +43,6 @@ class MaternityRouter(APIRouter):
     def get_maternity_parental_calculation(
         self, payload: MaternityParentalInput
     ) -> MaternityParentalResult:
-        """Oblicza świadczenia macierzyńskie i rodzicielskie z porównaniem wariantów."""
         return calculate_maternity_parental_benefit(payload)
 
 

@@ -19,8 +19,6 @@ from ..services.calculator import (
 
 
 class CalculatorRouter(APIRouter):
-    """Router for common calculator config, presets, and integrated parental timeline (BE-21)."""
-
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(tags=["Kalkulator Zasiłków i Oś Czasu"], **kwargs)
         self._setup_routes()
@@ -111,7 +109,7 @@ class CalculatorRouter(APIRouter):
                 "- **Urlop ojcowski**: 14 dni płatne 100% zintegrowane w harmonogramie.\n"
                 "- **Kalendarzowa oś czasu**: generuje konkretne daty dzienne.\n"
                 "- **Kamienie milowe**: nieprzekraczalne terminy prawne.\n"
-                "- **Miesięczny cashflow**: symulacja wpływów finansowych w podziale na miesiące."
+                "- **Miesięczny cashflow**: symulacja wpływów w podziale na miesiące."
             ),
             response_description=(
                 "Kompletny harmonogram z osią czasu, kamieniami milowymi i kwotami PLN"
@@ -135,16 +133,13 @@ class CalculatorRouter(APIRouter):
         )
 
     def get_allowance_rates_route(self) -> AllowanceRatesResponse:
-        """Pobiera bazowe stawki zasiłków."""
         return get_allowance_rates_service()
 
     def get_all_presets_route(self) -> PresetsListResponse:
-        """Zwraca listę wszystkich 10 presetów dla zakładek."""
         presets = get_presets_service()
         return PresetsListResponse(presets=presets)
 
     def get_preset_by_key_route(self, preset_key: str) -> CalculatorPreset:
-        """Zwraca konkretny preset formularza wg klucza."""
         preset = get_preset_by_key_service(preset_key)
         if not preset:
             raise HTTPException(
@@ -156,7 +151,6 @@ class CalculatorRouter(APIRouter):
     def calculate_integrated_parental_route(
         self, payload: IntegratedCalculatorInput
     ) -> IntegratedCalculatorResult:
-        """Generuje pełny zintegrowany harmonogram rodzicielski z osią czasu."""
         return calculate_integrated_parental_service(payload)
 
 
