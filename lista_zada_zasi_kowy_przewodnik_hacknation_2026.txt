@@ -25,7 +25,7 @@ WAŻNA ZASADA: NIE wrzucamy przykładowych plików PDF od ZUS do publicznego rep
 --------------------------------------------------------------------------------
 2. BACKEND - SILNIK KALKULATORÓW I LOGIKA PRAWNA (Python)
 --------------------------------------------------------------------------------
-[ ] [BE] P1 | Baza konfiguracji parametrów (JSON/SQLite): stopy 100%/70%/81.5%, wymiary tygodni, limity wieku
+[X] [BE] P1 | Baza konfiguracji parametrów (JSON/SQLite): stopy 100%/70%/81.5%, wymiary tygodni, limity wieku
     Osoba: ___________
 [X] [BE] P1 | Endpoint: Zasiłki w ciąży (chorobowy kod B 100%, okres wyczekiwania 30/90 dni, 33/14 dni pracodawca, max 270 dni, świadczenie rehab., zasiłek w wys. macierzyńskiego przy upadłości/bezprawnym zwolnieniu)
     Osoba: ___________
@@ -43,7 +43,7 @@ WAŻNA ZASADA: NIE wrzucamy przykładowych plików PDF od ZUS do publicznego rep
     Osoba: ___________
 [ ] [BE] P1 | Wyliczanie kwot dla indywidualnej podstawy wymiaru zasiłku (uwzględnienie konkretnych spraw testowych od ZUS)
     Osoba: ___________
-[ ] [BE] P2 | Endpointy Panelu Admina (GET/PUT parametry: zmiana stawek procentowych i wymiarów urlopów bez restartu aplikacji)
+[X] [BE] P2 | Endpointy Panelu Admina (GET/PUT parametry: zmiana stawek procentowych i wymiarów urlopów bez restartu aplikacji)
     Osoba: ___________
 
 --------------------------------------------------------------------------------
