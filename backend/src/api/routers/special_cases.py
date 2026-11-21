@@ -2,8 +2,8 @@ from typing import Any
 
 from fastapi import APIRouter
 
-from src.api.models.special_cases import SpecialCasesInput, SpecialCasesResult
-from src.api.services.special_cases import calculate_special_cases
+from ..models.special_cases import SpecialCasesInput, SpecialCasesResult
+from ..services.special_cases import calculate_special_cases
 
 router = APIRouter(prefix="/api/calculators", tags=["Special Cases"])
 
@@ -23,8 +23,6 @@ def get_special_cases_calculation(payload: SpecialCasesInput) -> SpecialCasesRes
 
 
 class SpecialCasesRouter(APIRouter):
-    """Router class for special maternity cases (BE-13, BE-14, BE-15)."""
-
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(prefix="/calculators", tags=["Special Cases"], **kwargs)
         self._setup_routes()

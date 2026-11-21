@@ -1,14 +1,4 @@
-from src.api.models.maternity import (
-    MaternityEmploymentType,
-    PeriodBreakdown,
-)
-from src.api.models.special_cases import (
-    SpecialCasesInput,
-    SpecialCasesResult,
-    SpecialCaseType,
-)
-from src.api.services.maternity import _calculate_net_base, get_maternity_weeks
-from src.constants import (
+from ...constants import (
     DEATH_GRANT_ZUS_PLN,
     FULL_MATERNITY_RATE,
     MANDATORY_MOTHER_MATERNITY_WEEKS,
@@ -31,10 +21,19 @@ from src.constants import (
     TERM_BIRTH_HOSPITALIZATION_MIN_DAYS,
     ZA_ZYCIEM_ONE_TIME_GRANT_PLN,
 )
+from ..models.maternity import (
+    MaternityEmploymentType,
+    PeriodBreakdown,
+)
+from ..models.special_cases import (
+    SpecialCasesInput,
+    SpecialCasesResult,
+    SpecialCaseType,
+)
+from .maternity import _calculate_net_base, get_maternity_weeks
 
 
 def calculate_special_cases(data: SpecialCasesInput) -> SpecialCasesResult:
-    """Calculates entitlements for special cases (BE-13, BE-14, BE-15)."""
     if not data.is_insured_at_birth or data.employment_type == MaternityEmploymentType.NONE:
         return SpecialCasesResult(
             case_type=data.case_type,
@@ -156,7 +155,6 @@ def _calculate_premature_hospitalization(
     weight = data.birth_weight_grams or 3500
     hosp_weeks = data.hospitalization_weeks
 
-    # Group 1: Extreme premature (< 28 weeks or weight <= 1000g) -> up to 15 weeks
     if (
         birth_week <= PREMATURE_EXTREME_WEEK_THRESHOLD
         or weight <= PREMATURE_EXTREME_WEIGHT_GRAMS
@@ -168,14 +166,12 @@ def _calculate_premature_hospitalization(
             f"Urodzenie < {min_w}. tyg. lub waga <= {PREMATURE_EXTREME_WEIGHT_GRAMS}g: "
             f"do {max_w} tyg. uzupełniającego urlopu."
         )
-    # Group 2: Moderate premature (29-36 weeks and weight > 1000g) -> up to 8 weeks
     elif birth_week <= PREMATURE_MODERATE_WEEK_THRESHOLD:
         supplementary_weeks = min(hosp_weeks, PREMATURE_STANDARD_MAX_SUPPLEMENTARY_WEEKS)
         rule_description = (
             f"Urodzenie 28-{PREMATURE_MODERATE_WEEK_THRESHOLD}. tyg.: "
             f"do {PREMATURE_STANDARD_MAX_SUPPLEMENTARY_WEEKS} tyg. uzupełniającego urlopu."
         )
-    # Group 3: Term birth with hospitalization -> up to 8 weeks
     else:
         supplementary_weeks = min(hosp_weeks, PREMATURE_STANDARD_MAX_SUPPLEMENTARY_WEEKS)
         rule_description = (
@@ -296,14 +292,24 @@ def _calculate_stillbirth_or_death(
     else:
         maternity_weeks = STILLBIRTH_MATERNITY_WEEKS
         maternity_days = STILLBIRTH_MATERNITY_DAYS
-        description = (
-            f"Urodzenie martwego dziecka: urlop macierzyński {STILLBIRTH_MATERNITY_WEEKS} tyg."
-        )
+        if data.child_death_after_birth:
+            description = (
+                f"Zgon dziecka po porodzie: przysługuje urlop macierzyński "
+                f"w wymiarze {STILLBIRTH_MATERNITY_WEEKS} tyg. (art. 180(1) § 2 KP)."
+            )
+        else:
+            description = (
+                f"Urodzenie martwego dziecka: urlop macierzyński {STILLBIRTH_MATERNITY_WEEKS} tyg."
+            )
 
     if data.surviving_children_count > 0:
         surviving_maternity_weeks = get_maternity_weeks(data.surviving_children_count)
         maternity_weeks = max(maternity_weeks, surviving_maternity_weeks)
         maternity_days = maternity_weeks * 7
+        description += (
+            f" Ze względu na {data.surviving_children_count} żyjących dzieci wymiar "
+            + f"urlopu macierzyńskiego wynosi {maternity_weeks} tygodni."
+        )
 
     total_amount = round(daily_rate * maternity_days * FULL_MATERNITY_RATE / 100, 2)
 

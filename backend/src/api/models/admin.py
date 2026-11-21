@@ -56,9 +56,9 @@ class PeriodsAndLimits(BaseModel):
 
 
 class AdminConfig(BaseModel):
-    benefit_rates: BenefitRates = Field(default_factory=lambda: BenefitRates())
-    leave_durations: LeaveDurations = Field(default_factory=lambda: LeaveDurations())
-    periods_and_limits: PeriodsAndLimits = Field(default_factory=lambda: PeriodsAndLimits())
+    benefit_rates: BenefitRates = Field(default_factory=BenefitRates)
+    leave_durations: LeaveDurations = Field(default_factory=LeaveDurations)
+    periods_and_limits: PeriodsAndLimits = Field(default_factory=PeriodsAndLimits)
 
 
 class AdminConfigUpdate(BaseModel):

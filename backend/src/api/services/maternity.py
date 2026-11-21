@@ -29,6 +29,8 @@ def _calculate_net_base(gross: float) -> float:
 
 
 def get_maternity_weeks(children_count: int) -> int:
+    if children_count <= 0:
+        return 0
     return MATERNITY_WEEKS_BY_CHILD_COUNT.get(
         children_count,
         MATERNITY_WEEKS_BY_CHILD_COUNT[5],
@@ -36,6 +38,8 @@ def get_maternity_weeks(children_count: int) -> int:
 
 
 def get_parental_weeks(children_count: int, has_za_zyciem: bool) -> int:
+    if children_count <= 0:
+        return 0
     if has_za_zyciem:
         return (
             PARENTAL_WEEKS_ZA_ZYCIEM_SINGLE
@@ -105,6 +109,19 @@ def calculate_maternity_parental_benefit(
         refusal_reasons.append(
             f"Maksymalna pula rodzicielskiego dla jednego rodzica to {shared_pool_limit} tyg. "
             + f"(z puli {parental_total_weeks} tyg., 9 tyg. jest wyłączne dla drugiego rodzica)."
+        )
+
+    if data.father_parental_weeks > shared_pool_limit:
+        refusal_reasons.append(
+            f"Maksymalna pula rodzicielskiego dla ojca to {shared_pool_limit} tyg. "
+            + f"(z puli {parental_total_weeks} tyg., 9 tyg. jest wyłączne dla drugiego rodzica)."
+        )
+
+    if (data.mother_parental_weeks + data.father_parental_weeks) > parental_total_weeks:
+        refusal_reasons.append(
+            "Łączny wymiar urlopu rodzicielskiego obojga rodziców nie może przekraczać "
+            + f"{parental_total_weeks} tygodni (zgłoszono "
+            + f"{data.mother_parental_weeks + data.father_parental_weeks} tyg.)."
         )
 
     if data.parental_leave_parts_count > MAX_PARENTAL_LEAVE_PARTS:

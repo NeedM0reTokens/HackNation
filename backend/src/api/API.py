@@ -15,17 +15,11 @@ from .routers.special_cases import SpecialCasesRouter
 
 
 class MainAPI(FastAPI):
-    """
-    Główna klasa API (dziedzicząca po FastAPI).
-    W niej konfigurowany jest middleware (CORS) oraz podpinane są routery
-    poszczególnych funkcjonalności będące osobnymi klasami dziedziczącymi po APIRouter.
-    """
-
     def __init__(self, **extra):
         super().__init__(
-            title="Zasiłkowy Przewodnik Przyszłego Rodzica API",
+            title="Parent Benefit Guide API",
             version="1.0.0",
-            description="API dla Zasiłkowego Przewodnika Przyszłego Rodzica (HackNation 2026).",
+            description="API for Future Parent Benefit Guide (HackNation 2026).",
             docs_url="/docs",
             redoc_url="/redoc",
             **extra,
@@ -34,7 +28,6 @@ class MainAPI(FastAPI):
         self.register_routers()
 
     def setup_middleware(self):
-        # Konfiguracja CORS - pozwala frontendowi (React / Vite) na swobodną komunikację
         self.add_middleware(
             CORSMiddleware,
             allow_origins=[
@@ -50,7 +43,6 @@ class MainAPI(FastAPI):
         )
 
     def register_routers(self):
-        # Instancje osobnych klas routerów dla poszczególnych funkcjonalności
         self.health_router = HealthRouter()
         self.calculator_router = CalculatorRouter()
         self.pdf_router = PdfRouter()
@@ -63,7 +55,6 @@ class MainAPI(FastAPI):
         self.parental_work_router = ParentalWorkRouter()
         self.adoption_router = AdoptionRouter()
 
-        # Podpinanie routerów do głównej klasy API
         self.include_router(self.health_router)
         self.include_router(self.calculator_router, prefix="/api")
         self.include_router(self.pdf_router, prefix="/api")
@@ -77,7 +68,6 @@ class MainAPI(FastAPI):
         self.include_router(self.adoption_router, prefix="/api")
 
 
-# Instancja głównej klasy API (uruchamiana przez uvicorn src.main:app lub src.api.API:app)
 app = MainAPI()
 
 

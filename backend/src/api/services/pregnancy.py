@@ -149,9 +149,12 @@ def calculate_pregnancy_benefit(data: PregnancyBenefitInput) -> PregnancyBenefit
             employer_days, employer_amount = 0, 0.0
             zus_days = data.sick_leave_duration_days
             zus_amount = round(daily_rate * zus_days * benefit_rate / 100, 2)
-            disbursing_entity = (
-                PayerType.EMPLOYER if data.payer_size == PayerSize.ABOVE_20 else PayerType.ZUS
-            )
+            if data.employment_type == EmploymentType.B2B:
+                disbursing_entity = PayerType.ZUS
+            else:
+                disbursing_entity = (
+                    PayerType.EMPLOYER if data.payer_size == PayerSize.ABOVE_20 else PayerType.ZUS
+                )
 
     total_amount = round(employer_amount + zus_amount, 2)
 
