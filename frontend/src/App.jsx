@@ -5,7 +5,7 @@ function App() {
   const [apiStatus, setApiStatus] = useState('Łączenie z backendem...');
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/health')
+    fetch('http://127.0.0.1:8000/api/health')
       .then((res) => res.json())
       .then((data) => setApiStatus(data.message))
       .catch(() => setApiStatus('Błąd połączenia z backendem!'));
