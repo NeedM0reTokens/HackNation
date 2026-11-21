@@ -1,24 +1,15 @@
-"""Router: zasiłki w ciąży."""
-
 from fastapi import APIRouter
 from src.calculators.pregnancy import (
-    PregnancyInput,
-    PregnancyResult,
-    oblicz_zasilek_ciaza,
+    PregnancyBenefitInput,
+    PregnancyBenefitResult,
+    calculate_pregnancy_benefit,
 )
 
-router = APIRouter(prefix="/api", tags=["Zasiłki w ciąży"])
+router = APIRouter(prefix="/api/calculators", tags=["Pregnancy Benefits"])
 
 
-@router.post(
-    "/zasilki-ciaza",
-    response_model=PregnancyResult,
-    summary="Kalkulator zasiłku chorobowego w ciąży",
-    description=(
-        "Oblicza zasiłek chorobowy w ciąży (kod B, 100% podstawy, max 270 dni). "
-        "Uwzględnia formę zatrudnienia, okres wyczekiwania, podział kosztów "
-        "pracodawca/ZUS, upadłość, świadczenie rehabilitacyjne."
-    ),
-)
-def oblicz_zasilek_w_ciazy(dane: PregnancyInput) -> PregnancyResult:
-    return oblicz_zasilek_ciaza(dane)
+@router.post("/pregnancy", response_model=PregnancyBenefitResult)
+def get_pregnancy_benefit_calculation(
+    payload: PregnancyBenefitInput,
+) -> PregnancyBenefitResult:
+    return calculate_pregnancy_benefit(payload)
