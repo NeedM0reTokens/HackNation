@@ -1,10 +1,10 @@
 from fastapi import APIRouter
 
-from src.api.calculators.pregnancy import (
+from src.api.models.pregnancy import (
     PregnancyBenefitInput,
     PregnancyBenefitResult,
-    calculate_pregnancy_benefit,
 )
+from src.api.services.pregnancy import calculate_pregnancy_benefit
 
 router = APIRouter(prefix="/api/calculators", tags=["Pregnancy Benefits"])
 
