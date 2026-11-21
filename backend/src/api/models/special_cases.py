@@ -32,9 +32,7 @@ class SpecialCasesInput(BaseModel):
         0, ge=0, le=30, description="Total duration of child's hospital stay in full weeks"
     )
 
-    is_stillbirth: bool = Field(
-        False, description="True if child was stillborn (urodzenie martwe)"
-    )
+    is_stillbirth: bool = Field(False, description="True if child was stillborn (urodzenie martwe)")
     child_death_after_birth: bool = Field(
         False, description="True if child died after birth (zgon dziecka po porodzie)"
     )

@@ -94,6 +94,88 @@ class EzlaCitizenResponse(BaseModel):
     )
 
 
+class ContributionDebtItem(BaseModel):
+    """Component of contribution debt (fund, period, principal, interest)."""
+
+    fund_name: str = Field(
+        ...,
+        description="Nazwa funduszu składkowego (np. FUS - Fundusz Ubezpieczeń Społecznych)",
+    )
+    period: str = Field(..., description="Okres rozliczeniowy (YYYY-MM)", examples=["2026-03"])
+    due_amount: float = Field(..., description="Kwota należności głównej w PLN")
+    interest_amount: float = Field(default=0.0, description="Odsetki za zwłokę w PLN")
+    total_item_amount: float = Field(..., description="Łączna kwota do zapłaty w PLN")
+
+
+class ContributionDebtCertificateResponse(BaseModel):
+    """
+    Simulated official ZUS certificate/record of contribution debt status (Art. 2a).
+    Verifies social security contribution arrears as of the date entitlement to benefits arose,
+    which is critical for self-employed individuals (JDG).
+    """
+
+    certificate_id: str = Field(
+        ...,
+        description="Identyfikator zaświadczenia ZUS (np. ZUS/RD-3/2026/05/85040398765)",
+    )
+    certificate_type: str = Field(
+        ...,
+        description="Nazwa dokumentu (Zaświadczenie o niezaleganiu / o stanie zaległości)",
+    )
+    issue_date: str = Field(..., description="Data wystawienia zaświadczenia (YYYY-MM-DD)")
+    entitlement_date: str = Field(
+        ...,
+        description="Dzień powstania prawa do świadczenia (dzień weryfikacji zadłużenia)",
+    )
+    source: str = Field(
+        default="ZUS Centralny Rejestr Płatników Składek (eZUS Mock)",
+        description="Źródło danych",
+    )
+    pesel: str = Field(..., description="Numer PESEL ubezpieczonego")
+    first_name: str = Field(..., description="Imię")
+    last_name: str = Field(..., description="Nazwisko")
+    payer_name: str | None = Field(None, description="Nazwa płatnika składek / nazwa firmy")
+    payer_nip: str | None = Field(None, description="NIP płatnika składek")
+    is_entrepreneur: bool = Field(
+        ...,
+        description="Czy osoba prowadzi pozarolniczą działalność gospodarczą (JDG)",
+    )
+    insurance_title: str | None = Field(None, description="Tytuł ubezpieczenia płatnika")
+    has_overdue_contributions: bool = Field(
+        ...,
+        description="Czy w rejestrze ZUS występuje zadłużenie z tytułu składek",
+    )
+    overdue_amount: float = Field(..., description="Łączna kwota zadłużenia w PLN")
+    statutory_debt_limit: float = Field(
+        48.06,
+        description="Ustawowy próg zadłużenia (1% minimalnego wynagrodzenia w 2026 r. - 48,06 zł)",
+    )
+    overdue_blocks_benefits: bool = Field(
+        ...,
+        description="Czy zadłużenie przekracza 1% minimalnego wynagrodzenia i blokuje zasiłek",
+    )
+    payment_status: str = Field(
+        ...,
+        description="Status rozliczeń: CLEARED, WITHIN_TOLERANCE, DEBT_BLOCKS_BENEFIT",
+    )
+    status_description: str = Field(..., description="Opis stanu rozliczeń płatnika")
+    debt_items: list[ContributionDebtItem] = Field(
+        default_factory=list,
+        description="Wykaz zaległych pozycji składkowych i odsetek",
+    )
+    legal_basis: str = Field(
+        default=(
+            "Art. 2a ustawy z dnia 25 czerwca 1999 r. o świadczeniach pieniężnych z ubezpieczenia "
+            "społecznego w razie choroby i macierzyństwa"
+        ),
+        description="Podstawa prawna weryfikacji zadłużenia",
+    )
+    legal_instruction: str = Field(
+        ...,
+        description="Pouczenie prawne o skutkach zadłużenia i 6-miesięcznym terminie przedawnienia",
+    )
+
+
 class UserProfileResponse(BaseModel):
     """
     Detailed ZUS insurance status simulation response for a citizen (by PESEL).

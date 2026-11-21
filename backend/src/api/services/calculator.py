@@ -459,9 +459,7 @@ def calculate_integrated_parental_service(
             p_days = total_p_weeks * 7
             p_start = current_date
             p_end = p_start + timedelta(days=p_days - 1)
-            p_daily_reduced = round(
-                mother_daily_100 * (parental_rate / 100.0) * (1.0 - wf), 2
-            )
+            p_daily_reduced = round(mother_daily_100 * (parental_rate / 100.0) * (1.0 - wf), 2)
             p_total_benefit = round(p_daily_reduced * p_days, 2)
             monthly_salary = round(data.mother_gross_monthly_income * wf, 2)
             total_salary = round((monthly_salary / 30.0) * p_days, 2)

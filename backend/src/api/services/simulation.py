@@ -9,11 +9,15 @@ from ..data import (
 )
 from ..models.simulation import (
     ActiveEzlaInfo,
+    ContributionDebtCertificateResponse,
+    ContributionDebtItem,
     EzlaCertificateResponse,
     EzlaCitizenResponse,
     MonthlyContribution,
     UserProfileResponse,
 )
+
+MINIMAL_WAGE_DEBT_LIMIT = 48.06
 
 
 def _generate_monthly_contributions(gross_amount: float) -> list[MonthlyContribution]:
@@ -25,7 +29,6 @@ def _generate_monthly_contributions(gross_amount: float) -> list[MonthlyContribu
         return []
 
     contributions: list[MonthlyContribution] = []
-    # Reference year-month for simulation (2025-05 to 2026-04)
     months = [
         "2025-05",
         "2025-06",
@@ -248,4 +251,148 @@ def get_single_ezla_certificate_service(document_id: str) -> EzlaCertificateResp
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail=f"Nie znaleziono zaświadczenia lekarskiego e-ZLA o identyfikatorze {document_id}",
+    )
+
+
+def get_citizen_debt_certificate_service(
+    pesel: str,
+    entitlement_date: str | None = None,
+) -> ContributionDebtCertificateResponse:
+    """
+    Simulates retrieval of contribution debt status and issuance of a ZUS certificate
+    (RD-3) as of the date entitlement to benefits arose (Art. 2a of Sickness Benefits Act).
+    Crucial for self-employed individuals (JDG/B2B) where arrears > 1% minimum wage (48.06 PLN)
+    suspend right to benefits.
+    """
+    clean_pesel = pesel.strip()
+
+    if clean_pesel in PREDEFINED_PROFILES:
+        raw = dict(PREDEFINED_PROFILES[clean_pesel])
+        first_name = str(raw["first_name"])
+        last_name = str(raw["last_name"])
+        payer_name = raw.get("payer_name") or None
+        payer_nip = raw.get("payer_nip") or None
+        insurance_type = str(raw.get("insurance_type", ""))
+        insurance_title = str(raw.get("insurance_title", ""))
+        is_entrepreneur = insurance_type.upper() in {"JDG", "B2B"}
+        has_overdue = bool(raw.get("has_overdue_contributions", False))
+        overdue_amount = float(raw.get("overdue_amount", 0.0))
+
+        if entitlement_date and entitlement_date.strip():
+            effective_entitlement_date = entitlement_date.strip()
+        else:
+            active_ezla_list = raw.get("active_ezla", [])
+            if (
+                active_ezla_list
+                and isinstance(active_ezla_list[0], dict)
+                and active_ezla_list[0].get("start_date")
+            ):
+                effective_entitlement_date = str(active_ezla_list[0]["start_date"])
+            else:
+                effective_entitlement_date = date.today().isoformat()
+    else:
+        _dob, gender = _parse_pesel_details(clean_pesel)
+        first_name = "Katarzyna" if gender == "Kobieta" else "Jan"
+        last_name = "Kowalski"
+        payer_name = "Przykładowy Płatnik Sp. z o.o."
+        payer_nip = "1112223344"
+        insurance_title = "Umowa o pracę (pracownik)"
+        is_entrepreneur = False
+        has_overdue = False
+        overdue_amount = 0.0
+        effective_entitlement_date = (
+            entitlement_date.strip() if entitlement_date else date.today().isoformat()
+        )
+
+    overdue_blocks = overdue_amount > MINIMAL_WAGE_DEBT_LIMIT
+    issue_date = date.today().isoformat()
+    date_path = effective_entitlement_date.replace("-", "/")
+    certificate_id = f"ZUS/RD-3/{date_path}/{clean_pesel}"
+
+    if overdue_amount <= 0.0 or not has_overdue:
+        payment_status = "CLEARED"
+        certificate_type = "ZAŚWIADCZENIE O NIEZALEGANIU W OPŁACANIU SKŁADEK"
+        status_description = (
+            f"Na dzień powstania prawa do świadczenia ({effective_entitlement_date}) płatnik "
+            "nie posiada zaległości z tytułu składek na ubezpieczenia społeczne w rejestrach ZUS. "
+            "Warunek określony w art. 2a ustawy zasiłkowej jest w pełni spełniony."
+        )
+        debt_items: list[ContributionDebtItem] = []
+    elif not overdue_blocks:
+        payment_status = "WITHIN_TOLERANCE"
+        certificate_type = "ZAŚWIADCZENIE O STANIE ZADŁUŻENIA PONIŻEJ PROGU BLOKUJĄCEGO"
+        status_description = (
+            f"Na dzień powstania prawa do świadczenia ({effective_entitlement_date}) "
+            f"stwierdzono zadłużenie w kwocie {overdue_amount:.2f} PLN. Kwota ta nie przekracza "
+            f"progu 1% minimalnego wynagrodzenia ({MINIMAL_WAGE_DEBT_LIMIT:.2f} PLN). "
+            "Zadłużenie nie powoduje zawieszenia wypłaty świadczeń."
+        )
+        debt_items = [
+            ContributionDebtItem(
+                fund_name="Fundusz Ubezpieczeń Społecznych (FUS - składka chorobowa)",
+                period="2026-03",
+                due_amount=overdue_amount,
+                interest_amount=0.0,
+                total_item_amount=overdue_amount,
+            )
+        ]
+    else:
+        payment_status = "DEBT_BLOCKS_BENEFIT"
+        certificate_type = "ZAŚWIADCZENIE O STANIE ZALEGŁOŚCI W OPŁACANIU SKŁADEK"
+        status_description = (
+            f"Na dzień powstania prawa do świadczenia ({effective_entitlement_date}) "
+            f"stwierdzono zadłużenie z tytułu składek w łącznej wysokości {overdue_amount:.2f} "
+            f"PLN, przekraczające próg 1% minimalnego wynagrodzenia "
+            f"({MINIMAL_WAGE_DEBT_LIMIT:.2f} PLN). Na podstawie art. 2a ust. 1 ustawy zasiłkowej "
+            "wypłata świadczeń zostaje wstrzymana do czasu całkowitej spłaty zadłużenia."
+        )
+        principal = round(overdue_amount * 0.914, 2)
+        interest = round(overdue_amount - principal, 2)
+        debt_items = [
+            ContributionDebtItem(
+                fund_name="Fundusz Ubezpieczeń Społecznych (FUS - chorobowe i wypadkowe)",
+                period="2026-03",
+                due_amount=principal,
+                interest_amount=interest,
+                total_item_amount=overdue_amount,
+            )
+        ]
+
+    legal_instruction = (
+        "Zgodnie z art. 2a ust. 1 ustawy z dnia 25 czerwca 1999 r. o świadczeniach pieniężnych "
+        "z ubezpieczenia społecznego w razie choroby i macierzyństwa, świadczenia nie przysługują "
+        "osobom prowadzącym pozarolniczą działalność i osobom z nimi współpracującym, jeżeli w "
+        "dniu powstania prawa do świadczenia występuje zadłużenie z tytułu składek na kwotę "
+        f"przekraczającą 1% minimalnego wynagrodzenia za pracę ({MINIMAL_WAGE_DEBT_LIMIT:.2f} zł), "
+        "do czasu spłaty całości zadłużenia. Zgodnie z art. 2a ust. 2, prawo do świadczenia "
+        "przedawnia się, jeżeli zadłużenie nie zostanie spłacone w ciągu 6 miesięcy od dnia "
+        "powstania prawa do świadczenia. W razie spłaty całości zadłużenia w terminie 6 miesięcy, "
+        "świadczenie przysługuje za cały okres."
+    )
+
+    return ContributionDebtCertificateResponse(
+        certificate_id=certificate_id,
+        certificate_type=certificate_type,
+        issue_date=issue_date,
+        entitlement_date=effective_entitlement_date,
+        source="ZUS Centralny Rejestr Płatników Składek (eZUS Mock)",
+        pesel=clean_pesel,
+        first_name=first_name,
+        last_name=last_name,
+        payer_name=payer_name,
+        payer_nip=payer_nip,
+        is_entrepreneur=is_entrepreneur,
+        insurance_title=insurance_title,
+        has_overdue_contributions=has_overdue,
+        overdue_amount=overdue_amount,
+        statutory_debt_limit=MINIMAL_WAGE_DEBT_LIMIT,
+        overdue_blocks_benefits=overdue_blocks,
+        payment_status=payment_status,
+        status_description=status_description,
+        debt_items=debt_items,
+        legal_basis=(
+            "Art. 2a ustawy z dnia 25 czerwca 1999 r. o świadczeniach pieniężnych z ubezpieczenia "
+            "społecznego w razie choroby i macierzyństwa"
+        ),
+        legal_instruction=legal_instruction,
     )

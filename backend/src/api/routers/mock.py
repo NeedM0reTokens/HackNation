@@ -8,12 +8,14 @@ from ..models.auth import (
     TokenResponse,
 )
 from ..models.simulation import (
+    ContributionDebtCertificateResponse,
     EzlaCertificateResponse,
     EzlaCitizenResponse,
     UserProfileResponse,
 )
 from ..services.mobywatel import MobywatelService, mobywatel_service
 from ..services.simulation import (
+    get_citizen_debt_certificate_service,
     get_citizen_ezla_service,
     get_mock_user_profile_service,
     get_single_ezla_certificate_service,
@@ -42,6 +44,16 @@ EZLA_ENDPOINT_DESCRIPTION = (
     "- **Lekarz i placówka**: lekarz wystawiający, PWZ, specjalizacja, placówka medyczna.\n"
     "- **Prawo do świadczeń**: stawka procentowa (100% / 80%), podmiot wypłacający.\n"
     "- **Status orzeczenia**: aktywne (trwające) lub historyczne (zakończone)."
+)
+
+ZUS_DEBT_ENDPOINT_DESCRIPTION = (
+    "Symuluje pobranie danych o stanie zadłużenia ze składek na ubezpieczenia społeczne "
+    "na dzień powstania prawa do świadczenia (w tym zaświadczenie ZUS RD-3 / ZAS-W):\n\n"
+    "- **Dzień powstania prawa**: data weryfikacji konta płatnika (parametr `entitlement_date`).\n"
+    "- **Podstawa prawna (art. 2a)**: weryfikacja progu 1% minimalnego wynagrodzenia (48,06 zł).\n"
+    "- **Wpływ na przedsiębiorców (JDG)**: wstrzymanie wypłaty świadczeń przy długu >48,06 zł.\n"
+    "- **Termin przedawnienia**: pouczenie o 6-miesięcznym terminie spłaty (art. 2a ust. 2).\n"
+    "- **Zaświadczenie ZUS**: symulowany numer i treść zaświadczenia o niezaleganiu / zaległości."
 )
 
 
@@ -134,6 +146,24 @@ class ZusRouter(APIRouter):
             description="Zwraca szczegółowe dane pojedynczego zaświadczenia e-ZLA po ID dokumentu.",
         )
 
+        self.add_api_route(
+            "/debt/{pesel}",
+            self.get_zus_debt_certificate_route,
+            methods=["GET"],
+            response_model=ContributionDebtCertificateResponse,
+            summary="Zaświadczenie o stanie zadłużenia z tytułu składek ZUS (art. 2a)",
+            description=ZUS_DEBT_ENDPOINT_DESCRIPTION,
+            response_description="Zaświadczenie o stanie zadłużenia składkowego w ZUS",
+            responses={
+                200: {
+                    "description": "Pomyślnie wygenerowano zaświadczenie o stanie zadłużenia z ZUS."
+                },
+                404: {
+                    "description": "Osoba o podanym PESEL nie została znaleziona w rejestrze ZUS."
+                },
+            },
+        )
+
     def get_zus_insurance_data_route(self, pesel: str) -> UserProfileResponse:
         """Returns simulated ZUS insurance data for the given PESEL."""
         return get_mock_user_profile_service(pesel)
@@ -145,6 +175,14 @@ class ZusRouter(APIRouter):
     def get_single_ezla_certificate_route(self, document_id: str) -> EzlaCertificateResponse:
         """Returns details of a single e-ZLA certificate by document ID."""
         return get_single_ezla_certificate_service(document_id)
+
+    def get_zus_debt_certificate_route(
+        self,
+        pesel: str,
+        entitlement_date: str | None = None,
+    ) -> ContributionDebtCertificateResponse:
+        """Returns simulated contribution debt certificate on entitlement date for given PESEL."""
+        return get_citizen_debt_certificate_service(pesel, entitlement_date=entitlement_date)
 
 
 router = MockRouter()

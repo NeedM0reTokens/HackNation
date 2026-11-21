@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from ..api.api import app
 from ..api.services.simulation import (
     _parse_pesel_details,
+    get_citizen_debt_certificate_service,
     get_citizen_ezla_service,
     get_mock_user_profile_service,
     get_single_ezla_certificate_service,
@@ -145,6 +146,69 @@ class TestZusInsuranceSimulation(unittest.TestCase):
         self.assertEqual(data["doctor_name"], "dr n. med. Ewa Wiśniewska")
         self.assertEqual(data["benefit_percentage"], 100.0)
 
+    # --- Testy dla stanu zadłużenia (Art. 2a - ZUS RD-3) ---
+    def test_tomasz_lewandowski_debt_certificate_service(self) -> None:
+        cert = get_citizen_debt_certificate_service("85040398765", entitlement_date="2026-05-01")
+        self.assertEqual(cert.pesel, "85040398765")
+        self.assertEqual(cert.first_name, "Tomasz")
+        self.assertEqual(cert.last_name, "Lewandowski")
+        self.assertTrue(cert.is_entrepreneur)
+        self.assertTrue(cert.has_overdue_contributions)
+        self.assertEqual(cert.overdue_amount, 350.0)
+        self.assertTrue(cert.overdue_blocks_benefits)
+        self.assertEqual(cert.payment_status, "DEBT_BLOCKS_BENEFIT")
+        self.assertEqual(
+            cert.certificate_type, "ZAŚWIADCZENIE O STANIE ZALEGŁOŚCI W OPŁACANIU SKŁADEK"
+        )
+        self.assertEqual(cert.entitlement_date, "2026-05-01")
+        self.assertIn("ZUS/RD-3", cert.certificate_id)
+        self.assertEqual(len(cert.debt_items), 1)
+        self.assertEqual(cert.debt_items[0].total_item_amount, 350.0)
+
+    def test_anna_kowalska_debt_certificate_service(self) -> None:
+        cert = get_citizen_debt_certificate_service("92011501234")
+        self.assertEqual(cert.pesel, "92011501234")
+        self.assertFalse(cert.is_entrepreneur)
+        self.assertFalse(cert.has_overdue_contributions)
+        self.assertEqual(cert.overdue_amount, 0.0)
+        self.assertFalse(cert.overdue_blocks_benefits)
+        self.assertEqual(cert.payment_status, "CLEARED")
+        self.assertEqual(cert.certificate_type, "ZAŚWIADCZENIE O NIEZALEGANIU W OPŁACANIU SKŁADEK")
+        self.assertEqual(len(cert.debt_items), 0)
+
+    def test_api_endpoint_zus_debt_tomasz_lewandowski(self) -> None:
+        res = self.client.get("/api/zus/debt/85040398765?entitlement_date=2026-05-01")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data["pesel"], "85040398765")
+        self.assertEqual(data["entitlement_date"], "2026-05-01")
+        self.assertEqual(data["overdue_amount"], 350.0)
+        self.assertTrue(data["overdue_blocks_benefits"])
+        self.assertEqual(data["payment_status"], "DEBT_BLOCKS_BENEFIT")
+        self.assertTrue(data["is_entrepreneur"])
+        self.assertEqual(len(data["debt_items"]), 1)
+
+    def test_api_endpoint_zus_debt_anna_kowalska(self) -> None:
+        res = self.client.get("/api/zus/debt/92011501234")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data["pesel"], "92011501234")
+        self.assertEqual(data["overdue_amount"], 0.0)
+        self.assertFalse(data["overdue_blocks_benefits"])
+        self.assertEqual(data["payment_status"], "CLEARED")
+        self.assertEqual(
+            data["certificate_type"], "ZAŚWIADCZENIE O NIEZALEGANIU W OPŁACANIU SKŁADEK"
+        )
+
+    def test_api_endpoint_zus_debt_custom_pesel(self) -> None:
+        res = self.client.get("/api/zus/debt/03251212345")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data["pesel"], "03251212345")
+        self.assertEqual(data["payment_status"], "CLEARED")
+        self.assertFalse(data["overdue_blocks_benefits"])
+
+    # --- Testy dla mObywatel ---
     def test_api_endpoint_mock_mobywatel_identities(self) -> None:
         res = self.client.get("/api/mock/mobywatel/identities")
         self.assertEqual(res.status_code, 200)

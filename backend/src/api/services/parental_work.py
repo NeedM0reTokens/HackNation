@@ -27,9 +27,7 @@ def _get_maximum_extension_limit(children_count: int, has_za_zyciem: bool) -> in
             else PARENTAL_WORK_EXT_LIMIT_ZA_ZYCIEM_MULTIPLE
         )
     return (
-        PARENTAL_WORK_EXT_LIMIT_SINGLE
-        if children_count == 1
-        else PARENTAL_WORK_EXT_LIMIT_MULTIPLE
+        PARENTAL_WORK_EXT_LIMIT_SINGLE if children_count == 1 else PARENTAL_WORK_EXT_LIMIT_MULTIPLE
     )
 
 
