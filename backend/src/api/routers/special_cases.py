@@ -1,9 +1,10 @@
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 
-from src.api.models.special_cases import SpecialCasesInput, SpecialCasesResult
-from src.api.services.special_cases import calculate_special_cases
+from ..models.special_cases import SpecialCasesInput, SpecialCasesResult
+from ..security import Permission, authorization_manager
+from ..services.special_cases import calculate_special_cases
 
 router = APIRouter(prefix="/api/calculators", tags=["Special Cases"])
 
@@ -11,6 +12,12 @@ router = APIRouter(prefix="/api/calculators", tags=["Special Cases"])
 @router.post(
     "/special-cases",
     response_model=SpecialCasesResult,
+    dependencies=[
+        Security(
+            authorization_manager.require,
+            scopes=[Permission.calculator_maternity],
+        )
+    ],
     summary="Zunifikowany kalkulator przypadków szczególnych (BE-13, BE-14, BE-15)",
     description=(
         "Kompleksowy moduł obliczający uprawnienia i świadczenia w sytuacjach szczególnych:\n\n"
@@ -43,6 +50,12 @@ class SpecialCasesRouter(APIRouter):
             self.calculate_special_cases_route,
             methods=["POST"],
             response_model=SpecialCasesResult,
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.calculator_maternity],
+                )
+            ],
             summary="Zunifikowany kalkulator przypadków szczególnych (BE-13, BE-14, BE-15)",
             description=(
                 "Oblicza wymiary urlopów i zasiłków dla przypadków szczególnych: "

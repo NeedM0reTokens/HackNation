@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 
 from ..models.paternity import (
     MaternityTransferInput,
@@ -10,6 +10,7 @@ from ..models.paternity import (
     PaternityLeaveInput,
     PaternityLeaveResult,
 )
+from ..security import Permission, authorization_manager
 from ..services.paternity import (
     calculate_maternity_transfer,
     calculate_parental_sharing,
@@ -18,80 +19,88 @@ from ..services.paternity import (
 
 
 class PaternityRouter(APIRouter):
-    """Router for paternity leave, transfer, and parental sharing (BE-16 - BE-18)."""
-
     def __init__(self, **kwargs: Any) -> None:
-        super().__init__(prefix="/calculators", tags=["Paternity & Family Sharing"], **kwargs)
+        super().__init__(
+            prefix="/paternity",
+            tags=["Paternity & Family Sharing"],
+            **kwargs,
+        )
         self._setup_routes()
 
     def _setup_routes(self) -> None:
         self.add_api_route(
-            "/paternity-leave",
+            "/calculate",
             self.calculate_paternity_leave_route,
             methods=["POST"],
             response_model=PaternityLeaveResult,
-            summary="Kalkulator urlopu ojcowskiego (14 dni, 100%) (BE-16)",
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.calculator_maternity],
+                )
+            ],
+            summary="Kalkulator urlopu ojcowskiego (14 dni, 100%, 12/14 m-cy) (BE-16)",
             description=(
-                "Oblicza prawo do urlopu ojcowskiego zgodnie z art. 182(3) Kodeksu Pracy:\n\n"
-                "- **Wymiar**: 14 dni kalendarzowych płatnych 100% podstawy wymiaru.\n"
-                "- **Podział**: możliwość wykorzystania jednorazowo lub w max 2 częściach "
-                "po min. 7 dni.\n"
-                "- **Limit wieku**: do ukończenia przez dziecko 12. miesiąca życia "
-                "(lub do 14 lat i 24 miesięcy od przysposobienia przy adopcji).\n"
-                "- **Niezależność**: przysługuje niezależnie od urlopu macierzyńskiego matki "
-                "(oboje rodzice mogą pobierać zasiłek jednocześnie)."
+                "Oblicza urlop ojcowski przysługujący wyłącznie ojcu (nieprzenoszalny):\n\n"
+                "- Wymiar: 14 dni kalendarzowych płatne 100% podstawy zasiłku.\n"
+                "- Możliwość podziału na max 2 części po min. 7 dni.\n"
+                "- Limit wieku dziecka: do ukończenia 12 miesięcy (lub do 14 lat przy adopcji)."
             ),
-            response_description="Wynik kalkulacji urlopu ojcowskiego z rozbiciem na części",
+            response_description="Szczegółowy wynik kalkulacji urlopu ojcowskiego",
         )
-
         self.add_api_route(
-            "/maternity-transfer",
+            "/transfer-to-father",
             self.calculate_maternity_transfer_route,
             methods=["POST"],
             response_model=MaternityTransferResult,
-            summary="Przejęcie urlopu macierzyńskiego przez ojca (BE-17)",
-            description=(
-                "Weryfikuje przesłanki i wylicza kwotę przejęcia urlopu macierzyńskiego przez ojca "
-                "(art. 180 § 4-17 Kodeksu Pracy):\n\n"
-                "- **Zasada ogólna**: matka musi wykorzystać min. 14 tygodni macierzyńskiego, "
-                "pozostałe tygodnie (np. 6 przy 1 dziecku) przejmuje ubezpieczony ojciec.\n"
-                "- **Sytuacje szczególne (min. 8 tygodni matki)**: hospitalizacja matki, "
-                "orzeczenie o niezdolności do samodzielnej egzystencji, porzucenie dziecka.\n"
-                "- **Sytuacje natychmiastowe (0 tygodni matki)**: zgon matki, podjęcie pracy "
-                "przez nieubezpieczoną matkę.\n"
-                "- **Świadczenie ojca**: wyliczane ZAWSZE z jego własnych zarobków i składek."
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.calculator_maternity],
+                )
+            ],
+            summary=(
+                "Przejęcie urlopu macierzyńskiego przez ojca "
+                "(standard 14 tyg. / sytuacje szczególne) (BE-17)"
             ),
-            response_description="Warunki przejęcia i wyliczenie zasiłku ojca",
+            description=(
+                "Weryfikuje warunki i oblicza wymiar urlopu przekazywanego ojcu:\n\n"
+                "- Standard: matka min. 14 tyg. po porodzie, pozostałe max 6 tyg. dla ojca.\n"
+                "- Sytuacje szczególne (zgon, porzucenie, niezdolność do egzystencji): "
+                "ojciec przejmuje urlop natychmiast lub po 8 tyg. pobytu matki w szpitalu.\n"
+                "- Wymóg ubezpieczenia chorobowego ojca (etat, zlecenie, DG)."
+            ),
+            response_description="Wynik weryfikacji i wymiar urlopu do przejęcia przez ojca",
         )
-
         self.add_api_route(
-            "/parental-sharing",
+            "/family-sharing",
             self.calculate_parental_sharing_route,
             methods=["POST"],
             response_model=ParentalSharingResult,
-            summary="Symulacja podziału opieki między oboje rodziców (BE-18)",
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.calculator_maternity],
+                )
+            ],
+            summary="Symulacja podziału opieki i budżetu domowego rodziców (BE-18)",
             description=(
-                "Symuluje podział tygodni urlopu rodzicielskiego między matkę i ojca "
-                "(art. 182(1a) i 182(1c) Kodeksu Pracy):\n\n"
-                "- **Tryb**: naprzemienny (`SEQUENTIAL`) lub jednoczesny (`SIMULTANEOUS`).\n"
-                "- **Pula 9 tygodni nieprzenoszalnych**: weryfikuje czy każdy rodzic ma "
-                "zagwarantowane swoje 9 tygodni.\n"
-                "- **Kalkulacja budżetu**: wylicza niezależne podstawy i zasiłki dla każdego "
-                "rodzica oraz łączny dochód rodziny w okresie opieki."
+                "Kompleksowa symulacja podziału urlopu rodzicielskiego (41 tygodni):\n\n"
+                "- Gwarantowane 9 tygodni nieprzenoszalne dla każdego z rodziców.\n"
+                "- Maksymalnie 5 części urlopu do ukończenia przez dziecko 6. roku życia.\n"
+                "- Symulacja sumarycznego budżetu domowego w ujęciu wariantowym."
             ),
-            response_description="Szczegółowy podział tygodni i budżetu domowego obojga rodziców",
+            response_description="Szczegółowy plan podziału opieki i bilans finansowy rodziny",
         )
 
-    def calculate_paternity_leave_route(
-        self, payload: PaternityLeaveInput
-    ) -> PaternityLeaveResult:
-        """Oblicza uprawnienia i kwoty urlopu ojcowskiego."""
+    def calculate_paternity_leave_route(self, payload: PaternityLeaveInput) -> PaternityLeaveResult:
+        """Oblicza uprawnienia i wysokość zasiłku z tytułu urlopu ojcowskiego."""
         return calculate_paternity_leave(payload)
 
     def calculate_maternity_transfer_route(
         self, payload: MaternityTransferInput
     ) -> MaternityTransferResult:
-        """Weryfikuje warunki i oblicza kwoty przejęcia urlopu macierzyńskiego przez ojca."""
+        """Weryfikuje prawo ojca do przejęcia części urlopu macierzyńskiego."""
         return calculate_maternity_transfer(payload)
 
     def calculate_parental_sharing_route(
@@ -101,8 +110,5 @@ class PaternityRouter(APIRouter):
         return calculate_parental_sharing(payload)
 
 
-<<<<<<< HEAD
 router = PaternityRouter()
-=======
->>>>>>> c6e189d6c07fea4503a797e5834df1f985859c4a
 PaternityAPI = PaternityRouter

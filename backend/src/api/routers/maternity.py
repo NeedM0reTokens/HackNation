@@ -1,9 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 
 from ..models.maternity import (
     MaternityParentalInput,
     MaternityParentalResult,
 )
+from ..security import Permission, authorization_manager
 from ..services.maternity import calculate_maternity_parental_benefit
 
 
@@ -15,6 +16,12 @@ class MaternityRouter(APIRouter):
             self.get_maternity_parental_calculation,
             methods=["POST"],
             response_model=MaternityParentalResult,
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.calculator_maternity],
+                )
+            ],
             summary="Zintegrowany kalkulator macierzyńskiego i rodzicielskiego (BE-09 - BE-12)",
             description=(
                 "Oblicza wymiary i kwoty urlopów macierzyńskiego i rodzicielskiego:\n\n"

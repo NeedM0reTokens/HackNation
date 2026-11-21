@@ -1,8 +1,9 @@
 from typing import Annotated, Any
 
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, File, Security, UploadFile
 
 from ..models.pdf import PdfParseResponse
+from ..security import Permission, authorization_manager
 from ..services.pdf import parse_pdf_service
 
 router = APIRouter(prefix="/pdf", tags=["PDF Processing & Extraction"])
@@ -11,6 +12,12 @@ router = APIRouter(prefix="/pdf", tags=["PDF Processing & Extraction"])
 @router.post(
     "/parse",
     response_model=PdfParseResponse,
+    dependencies=[
+        Security(
+            authorization_manager.require,
+            scopes=[Permission.pdf_generate],
+        )
+    ],
     summary="Ekstrakcja i walidacja danych z druków ZUS w formacie PDF (BE-22 - BE-25)",
     description=(
         "Przetwarza przesłany plik PDF oficjalnego formularza ZUS "

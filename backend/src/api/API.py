@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .routers.admin import AdminRouter
 from .routers.adoption import AdoptionRouter
+from .routers.auth import AuthRouter
 from .routers.calculator import CalculatorRouter
 from .routers.health import HealthRouter
 from .routers.maternity import MaternityRouter
@@ -14,6 +15,13 @@ from .routers.simulation import SimulationRouter
 from .routers.special_cases import SpecialCasesRouter
 
 OPENAPI_TAGS = [
+    {
+        "name": "Autentykacja mObywatel",
+        "description": (
+            "Moduł uwierzytelniania mObywatel: logowanie profilem obywatela, "
+            "wydawanie tokenów JWT oraz autoryzacja OAuth2 (scopes i RBAC)."
+        ),
+    },
     {
         "name": "Health",
         "description": "Endpointy diagnostyczne weryfikujące dostępność serwera i gotowość API.",
@@ -105,7 +113,7 @@ class MainAPI(FastAPI):
                 "Zawiera silnik kalkulatorów świadczeń rodzicielskich (macierzyński, rodzicielski, "
                 "ojcowski, w ciąży, praca na 1/2 etatu, adopcja, przypadki szczególne), "
                 "generowanie harmonogramu dat dziennych, parser dokumentów PDF ZUS "
-                "oraz moduł symulacji profili mObywatel."
+                "oraz moduł symulacji tożsamości mObywatel."
             ),
             docs_url="/docs",
             redoc_url="/redoc",
@@ -131,6 +139,7 @@ class MainAPI(FastAPI):
         )
 
     def register_routers(self):
+        self.auth_router = AuthRouter()
         self.health_router = HealthRouter()
         self.calculator_router = CalculatorRouter()
         self.pdf_router = PdfRouter()
@@ -143,6 +152,7 @@ class MainAPI(FastAPI):
         self.parental_work_router = ParentalWorkRouter()
         self.adoption_router = AdoptionRouter()
 
+        self.include_router(self.auth_router, prefix="/api")
         self.include_router(self.health_router)
         self.include_router(self.calculator_router, prefix="/api")
         self.include_router(self.pdf_router, prefix="/api")
@@ -157,5 +167,3 @@ class MainAPI(FastAPI):
 
 
 app = MainAPI()
-
-

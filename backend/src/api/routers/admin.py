@@ -1,8 +1,9 @@
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 
 from ..models.admin import AdminConfig, AdminConfigUpdate
+from ..security import Permission, authorization_manager
 from ..services.admin import (
     config_service,
     get_admin_config_service,
@@ -15,6 +16,12 @@ router = APIRouter(prefix="/admin", tags=["Admin Panel"])
 @router.get(
     "/config",
     response_model=AdminConfig,
+    dependencies=[
+        Security(
+            authorization_manager.require,
+            scopes=[Permission.admin_config_read],
+        )
+    ],
     summary="Pobierz aktualne parametry prawne i konfiguracyjne",
     description=(
         "Zwraca zestaw aktualnie obowiązujących wskaźników prawnych ZUS i parametrów makro: "
@@ -24,13 +31,19 @@ router = APIRouter(prefix="/admin", tags=["Admin Panel"])
     response_description="Aktualny obiekt konfiguracji prawnej",
 )
 def get_admin_config() -> AdminConfig:
-    """Zwraca bieżącą konfigurację parametrów prawnych."""
+    """Zwraca bieżącą konfigurację parametrów ustawowych."""
     return get_admin_config_service()
 
 
 @router.put(
     "/config",
     response_model=AdminConfig,
+    dependencies=[
+        Security(
+            authorization_manager.require,
+            scopes=[Permission.admin_config_update],
+        )
+    ],
     summary="Zaktualizuj parametry w locie (bez restartu serwera)",
     description=(
         "Umożliwia administratorowi lub audytorowi dynamiczną aktualizację parametrów "
@@ -60,6 +73,12 @@ class AdminRouter(APIRouter):
             self.get_admin_config,
             methods=["GET"],
             response_model=AdminConfig,
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.admin_config_read],
+                )
+            ],
             summary="Pobierz aktualne parametry prawne i konfiguracyjne",
             description=(
                 "Zwraca zestaw aktualnych wskaźników prawnych ZUS i parametrów makro: "
@@ -73,6 +92,12 @@ class AdminRouter(APIRouter):
             self.update_admin_config,
             methods=["PUT"],
             response_model=AdminConfig,
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.admin_config_update],
+                )
+            ],
             summary="Zaktualizuj parametry w locie (bez restartu serwera)",
             description=(
                 "Umożliwia administratorowi dynamiczną aktualizację parametrów prawnych "

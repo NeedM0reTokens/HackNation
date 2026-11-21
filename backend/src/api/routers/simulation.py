@@ -1,8 +1,9 @@
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 
 from ..models.simulation import UserProfileResponse
+from ..security import Permission, authorization_manager
 from ..services.simulation import get_mock_user_profile_service
 
 router = APIRouter(prefix="/simulation", tags=["Symulacja mObywatel / ZUS"])
@@ -11,6 +12,12 @@ router = APIRouter(prefix="/simulation", tags=["Symulacja mObywatel / ZUS"])
 @router.get(
     "/profile/{user_id}",
     response_model=UserProfileResponse,
+    dependencies=[
+        Security(
+            authorization_manager.require,
+            scopes=[Permission.simulation_run],
+        )
+    ],
     summary="Pobranie profilu ubezpieczonego z symulacji mObywatel / ZUS (BE-26)",
     description=(
         "Zwraca zamockowany profil obywatela z PUE ZUS / mObywatel na potrzeby demonstracji:\n\n"

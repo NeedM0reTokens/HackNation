@@ -1,11 +1,12 @@
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 
 from ..models.parental_work import (
     ParentalWorkInput,
     ParentalWorkResult,
 )
+from ..security import Permission, authorization_manager
 from ..services.parental_work import calculate_parental_work_combination
 
 
@@ -22,6 +23,12 @@ class ParentalWorkRouter(APIRouter):
             self.calculate_parental_work_combination_route,
             methods=["POST"],
             response_model=ParentalWorkResult,
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.calculator_maternity],
+                )
+            ],
             summary="Łączenie urlopu rodzicielskiego z pracą na max 1/2 etatu (BE-19)",
             description=(
                 "Oblicza proporcjonalne wydłużenie urlopu rodzicielskiego i kwoty świadczeń "

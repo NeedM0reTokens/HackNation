@@ -1,4 +1,5 @@
 from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -40,7 +41,7 @@ class PaternityLeaveResult(BaseModel):
     daily_rate: float
     total_benefit_amount: float
     refusal_reasons: list[str] = Field(default_factory=list)
-    parts_breakdown: list[dict] = Field(default_factory=list)
+    parts_breakdown: list[dict[str, Any]] = Field(default_factory=list)
     legal_basis: list[str] = Field(default_factory=list)
     required_documents: list[str] = Field(default_factory=list)
     important_notes: list[str] = Field(default_factory=list)

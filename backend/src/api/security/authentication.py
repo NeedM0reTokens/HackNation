@@ -9,7 +9,7 @@ from .roles import SCOPES, Role, RoleRepository, role_repository
 from .tokens import decode_access_token
 
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/api/auth/mobywatel/login",
+    tokenUrl="/api/auth/login",
     auto_error=False,
     scopes=SCOPES,
 )
