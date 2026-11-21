@@ -144,9 +144,9 @@ button {
 }
 
 .zus-topbar-inner {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  justify-content: space-between;
   gap: 20px;
 }
 
@@ -195,10 +195,21 @@ button {
 
 /* Akcje po prawej stronie */
 .zus-topbar-actions {
-  display: flex;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
   align-items: center;
   gap: 12px;
-  flex-wrap: wrap;
+  white-space: nowrap;
+}
+
+.zus-user-logged-group {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
 }
 
 /* Przyciski dostępności (Navy A+ / Kontrast) */
@@ -1201,14 +1212,15 @@ button {
 /* Ekrany mobilne (< 768px) */
 @media (max-width: 768px) {
   .zus-topbar-inner {
-    flex-direction: column;
-    align-items: flex-start;
+    grid-template-columns: 1fr;
     gap: 14px;
   }
 
   .zus-topbar-actions {
     width: 100%;
-    justify-content: space-between;
+    grid-auto-flow: column;
+    justify-content: flex-start;
+    overflow-x: auto;
   }
 
   .zus-nav-list {
@@ -1282,12 +1294,8 @@ button {
   }
 
   .zus-topbar-actions {
-    flex-direction: column;
+    grid-auto-flow: row;
     align-items: stretch;
-  }
-
-  .zus-a11y-group {
-    justify-content: center;
   }
 
   .zus-btn-outline-pue,
