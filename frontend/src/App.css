@@ -1,0 +1,1583 @@
+/* ==========================================================================
+   ZASIŁKOWY PRZEWODNIK PRZYSZŁEGO RODZICA - DESIGN SYSTEM (ZUS.PL STYLE)
+   Czysty CSS (Pure CSS) bez Tailwind CSS i bibliotek zewnętrznych
+   ========================================================================== */
+
+:root {
+  /* Kolorystyka zgodna z wytycznymi ZUS */
+  --zus-green: #007834;
+  --zus-green-hover: #005c27;
+  --zus-green-dark: #00441c;
+  --zus-green-light: #e6f4ec;
+  --zus-green-border: #99d2af;
+
+  /* Akcenty */
+  --zus-orange: #F3A847;
+  --zus-orange-hover: #e09635;
+  --zus-orange-dark: #b86e0f;
+  --zus-orange-light: #fef5e9;
+
+  /* Granat / Dostępność */
+  --zus-navy: #003B6F;
+  --zus-navy-hover: #00274a;
+  --zus-navy-light: #e6eff7;
+
+  /* Tła i struktura */
+  --zus-bg: #FFFFFF;
+  --zus-quick-bg: #F4F5F7;
+  --zus-card-bg: #FFFFFF;
+  --zus-card-alt: #F8FAFC;
+
+  /* Typografia i barwy tekstu */
+  --zus-text-main: #1A1A1A;
+  --zus-text-secondary: #4A4A4A;
+  --zus-text-muted: #6B7280;
+  --zus-text-inverse: #FFFFFF;
+
+  /* Obramowania */
+  --zus-border: #E2E8F0;
+  --zus-border-light: #F1F5F9;
+  --zus-border-focus: #007834;
+
+  /* Statusy */
+  --zus-success: #007834;
+  --zus-success-bg: #E6F4EC;
+  --zus-info: #003B6F;
+  --zus-info-bg: #E8F1F8;
+  --zus-warning: #B45309;
+  --zus-warning-bg: #FEF3C7;
+
+  /* Cienie i zaokrąglenia */
+  --zus-radius-sm: 3px;
+  --zus-radius-md: 6px;
+  --zus-radius-lg: 10px;
+  --zus-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --zus-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --zus-shadow-md: 0 8px 16px -2px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+  --zus-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Typografia */
+  --font-family: 'Segoe UI', Roboto, 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-size-base: 16px;
+  --line-height-base: 1.5;
+
+  /* Wymiary layoutu */
+  --container-max-width: 1240px;
+}
+
+/* ==========================================================================
+   RESET & BAZOWE STYLE
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--zus-text-main);
+  background-color: var(--zus-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tryb zwiększonego kontrastu (dostępność WCAG) */
+body.a11y-high-contrast {
+  --zus-bg: #000000;
+  --zus-card-bg: #121212;
+  --zus-card-alt: #1E1E1E;
+  --zus-quick-bg: #1A1A1A;
+  --zus-text-main: #FFFF00;
+  --zus-text-secondary: #FFFFFF;
+  --zus-text-muted: #CCCCCC;
+  --zus-border: #FFFF00;
+  --zus-green: #00FF66;
+  --zus-green-hover: #00CC52;
+  --zus-orange: #FFAA00;
+  --zus-navy: #0088FF;
+}
+
+/* Tryb powiększonego tekstu */
+body.a11y-large-font {
+  font-size: 18px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.zus-app-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.zus-container {
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* ==========================================================================
+   1. TOP BAR
+   ========================================================================== */
+.zus-topbar {
+  background-color: #FFFFFF;
+  border-bottom: 1px solid var(--zus-border);
+  padding: 12px 0;
+  position: relative;
+  z-index: 40;
+}
+
+.zus-topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* Logo ZUS */
+.zus-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+}
+
+.zus-logo-svg {
+  height: 38px;
+  width: auto;
+  display: block;
+}
+
+.zus-brand-divider {
+  width: 2px;
+  height: 32px;
+  background-color: var(--zus-green);
+  flex-shrink: 0;
+}
+
+.zus-brand-titles {
+  display: flex;
+  flex-direction: column;
+}
+
+.zus-brand-app-name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--zus-green);
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.zus-brand-institution {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--zus-text-muted);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+/* Akcje po prawej stronie */
+.zus-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Przyciski dostępności (Navy A+ / Kontrast) */
+.zus-a11y-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zus-a11y-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  background-color: var(--zus-navy);
+  color: #FFFFFF;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: var(--zus-radius-sm);
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.zus-a11y-btn:hover {
+  background-color: var(--zus-navy-hover);
+  transform: translateY(-1px);
+}
+
+.zus-a11y-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* Przycisk obramowany PUE */
+.zus-btn-outline-pue {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--zus-green);
+  border: 1.5px solid var(--zus-green);
+  border-radius: var(--zus-radius-sm);
+  background-color: transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.zus-btn-outline-pue:hover {
+  background-color: var(--zus-green-light);
+  border-color: var(--zus-green-hover);
+  color: var(--zus-green-hover);
+}
+
+/* Główny pomarańczowy przycisk CTA mObywatel */
+.zus-btn-cta-mobywatel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 18px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1A1A1A;
+  background-color: var(--zus-orange);
+  border-radius: var(--zus-radius-sm);
+  box-shadow: var(--zus-shadow-sm);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.zus-btn-cta-mobywatel:hover {
+  background-color: var(--zus-orange-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--zus-shadow);
+}
+
+.zus-btn-cta-mobywatel svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Badge zalogowania w topbarze */
+.zus-user-badge-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  background-color: var(--zus-green-light);
+  border: 1px solid var(--zus-green-border);
+  border-radius: var(--zus-radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--zus-green-dark);
+}
+
+.zus-user-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--zus-green);
+  display: inline-block;
+}
+
+/* ==========================================================================
+   2. GŁÓWNA NAWIGACJA (NAVBAR)
+   ========================================================================== */
+.zus-navbar {
+  background-color: #FFFFFF;
+  border-bottom: 1px solid var(--zus-border);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.zus-navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.zus-nav-list {
+  display: flex;
+  align-items: stretch;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.zus-nav-list::-webkit-scrollbar {
+  display: none;
+}
+
+.zus-nav-item {
+  flex-shrink: 0;
+}
+
+.zus-nav-link {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 16px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--zus-text-main);
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.zus-nav-link:hover {
+  color: var(--zus-green);
+  background-color: #FAFAFA;
+}
+
+.zus-nav-link.active {
+  color: var(--zus-green);
+  border-bottom-color: var(--zus-green);
+  background-color: var(--zus-green-light);
+}
+
+/* Przycisk hamburger na mobile */
+.zus-hamburger-btn {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--zus-green);
+}
+
+.zus-hamburger-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* Menu mobilne rozwijane */
+.zus-mobile-menu {
+  display: none;
+  background-color: #FFFFFF;
+  border-bottom: 2px solid var(--zus-green);
+  padding: 12px 0;
+}
+
+.zus-mobile-menu.open {
+  display: block;
+}
+
+.zus-mobile-nav-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.zus-mobile-nav-link {
+  display: block;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--zus-text-main);
+  border-left: 4px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.zus-mobile-nav-link:hover,
+.zus-mobile-nav-link.active {
+  color: var(--zus-green);
+  background-color: var(--zus-green-light);
+  border-left-color: var(--zus-green);
+}
+
+/* ==========================================================================
+   3. SEKCJA HERO (UKŁAD 2-KOLUMNOWY)
+   ========================================================================== */
+.zus-hero-section {
+  padding: 40px 0 50px 0;
+  background-color: var(--zus-bg);
+}
+
+.zus-hero-grid {
+  display: grid;
+  grid-template-columns: 68% 32%;
+  gap: 36px;
+  align-items: start;
+}
+
+/* Lewa kolumna hero (68%) */
+.zus-hero-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.zus-official-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background-color: var(--zus-green-light);
+  color: var(--zus-green-dark);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  border: 1px solid var(--zus-green-border);
+}
+
+.zus-hero-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--zus-text-main);
+  margin-bottom: 18px;
+  letter-spacing: -0.5px;
+}
+
+.zus-hero-desc {
+  font-size: 1.1rem;
+  line-height: 1.65;
+  color: var(--zus-text-secondary);
+  margin-bottom: 32px;
+}
+
+/* POZIOMY PASEK ZAKŁADEK (CHARAKTERYSTYCZNY STYL ZUS ZE ZDJĘCIA) */
+.zus-role-tabs-container {
+  border-top: 4px solid var(--zus-green);
+  background-color: #FFFFFF;
+  box-shadow: var(--zus-shadow-sm);
+  border-left: 1px solid var(--zus-border);
+  border-right: 1px solid var(--zus-border);
+  border-bottom: 1px solid var(--zus-border);
+  border-radius: 0 0 var(--zus-radius-md) var(--zus-radius-md);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.zus-role-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--zus-border);
+  background-color: #F8FAFC;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.zus-role-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.zus-role-tab {
+  flex: 1;
+  min-width: 140px;
+  padding: 16px 14px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  background-color: #FFFFFF;
+  color: var(--zus-green);
+  border: none;
+  border-right: 1px solid var(--zus-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.zus-role-tab:last-child {
+  border-right: none;
+}
+
+.zus-role-tab:hover:not(.active) {
+  background-color: var(--zus-green-light);
+  color: var(--zus-green-hover);
+}
+
+.zus-role-tab.active {
+  background-color: var(--zus-green);
+  color: #FFFFFF;
+}
+
+.zus-role-tab-icon {
+  font-size: 1.1rem;
+}
+
+/* KARTA PODSUMOWANIA DLA WYBRANEJ ROLI */
+.zus-role-summary-card {
+  padding: 28px;
+  background-color: #FFFFFF;
+}
+
+.zus-role-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  border-bottom: 1px dashed var(--zus-border);
+  padding-bottom: 12px;
+}
+
+.zus-role-summary-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--zus-text-main);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.zus-role-summary-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--zus-radius-sm);
+  background-color: var(--zus-green-light);
+  color: var(--zus-green);
+}
+
+.zus-benefits-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.zus-benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: var(--zus-text-main);
+}
+
+.zus-benefit-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--zus-green);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.zus-benefit-item strong {
+  color: var(--zus-green-dark);
+}
+
+.zus-role-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--zus-border);
+  flex-wrap: wrap;
+}
+
+.zus-btn-role-calculator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background-color: var(--zus-green);
+  color: #FFFFFF;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: var(--zus-radius-sm);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.zus-btn-role-calculator:hover {
+  background-color: var(--zus-green-hover);
+  transform: translateY(-1px);
+}
+
+.zus-role-note {
+  font-size: 0.85rem;
+  color: var(--zus-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* PRAWA KOLUMNA (32%) - KARTA BOCZNA "TWÓJ STATUS W ZUS" */
+.zus-hero-sidebar {
+  background-color: #FFFFFF;
+  border: 1px solid var(--zus-border);
+  border-top: 4px solid var(--zus-green);
+  border-radius: var(--zus-radius-md);
+  box-shadow: var(--zus-shadow);
+  overflow: hidden;
+}
+
+.zus-sidebar-header {
+  padding: 18px 20px;
+  background-color: #F8FAFC;
+  border-bottom: 1px solid var(--zus-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.zus-sidebar-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--zus-text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zus-sidebar-title svg {
+  width: 20px;
+  height: 20px;
+  color: var(--zus-green);
+}
+
+.zus-status-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.zus-status-pill.offline {
+  background-color: #F1F5F9;
+  color: #64748B;
+  border: 1px solid #CBD5E1;
+}
+
+.zus-status-pill.online {
+  background-color: var(--zus-green-light);
+  color: var(--zus-green-dark);
+  border: 1px solid var(--zus-green-border);
+}
+
+.zus-sidebar-body {
+  padding: 22px 20px;
+}
+
+/* Stan niezalogowany */
+.zus-not-logged-box {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.zus-not-logged-text {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--zus-text-secondary);
+}
+
+.zus-sidebar-action-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.zus-btn-sidebar-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background-color: var(--zus-orange);
+  color: #1A1A1A;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: var(--zus-radius-sm);
+  transition: all 0.2s ease;
+}
+
+.zus-btn-sidebar-login:hover {
+  background-color: var(--zus-orange-hover);
+  box-shadow: var(--zus-shadow-sm);
+}
+
+.zus-btn-sidebar-pdf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  background-color: #FFFFFF;
+  color: var(--zus-navy);
+  border: 1.5px solid var(--zus-navy);
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: var(--zus-radius-sm);
+  transition: all 0.2s ease;
+}
+
+.zus-btn-sidebar-pdf:hover {
+  background-color: var(--zus-navy-light);
+}
+
+.zus-btn-sidebar-manual {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--zus-green);
+  text-align: center;
+  padding: 6px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.zus-btn-sidebar-manual:hover {
+  color: var(--zus-green-hover);
+}
+
+/* Stan ZALOGOWANY (dane z mObywatel/ZUS) */
+.zus-logged-box {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.zus-user-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--zus-border);
+}
+
+.zus-user-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--zus-green);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.zus-user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.zus-user-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--zus-text-main);
+}
+
+.zus-user-pesel {
+  font-size: 0.8rem;
+  color: var(--zus-text-muted);
+}
+
+/* Sekcje danych z ZUS */
+.zus-data-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background-color: var(--zus-card-alt);
+  border-radius: var(--zus-radius-sm);
+  border-left: 3px solid var(--zus-green);
+}
+
+.zus-data-label {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--zus-text-muted);
+  letter-spacing: 0.3px;
+}
+
+.zus-data-val-primary {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--zus-text-main);
+}
+
+.zus-data-val-sub {
+  font-size: 0.8rem;
+  color: var(--zus-text-secondary);
+}
+
+.zus-ezla-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #065F46;
+  background-color: #D1FAE5;
+  padding: 2px 8px;
+  border-radius: 4px;
+  width: fit-content;
+  margin-top: 4px;
+}
+
+.zus-btn-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 9px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #DC2626;
+  border: 1px solid #FCA5A5;
+  border-radius: var(--zus-radius-sm);
+  background-color: #FEF2F2;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.zus-btn-logout:hover {
+  background-color: #FEE2E2;
+  border-color: #EF4444;
+}
+
+/* ==========================================================================
+   4. DOLNY PASEK SZYBKICH AKCJI (QUICK ACTIONS BAR)
+   ========================================================================== */
+.zus-quick-actions-bar {
+  background-color: var(--zus-quick-bg);
+  border-top: 1px solid var(--zus-border);
+  border-bottom: 1px solid var(--zus-border);
+  padding: 36px 0;
+}
+
+.zus-quick-actions-header {
+  margin-bottom: 24px;
+}
+
+.zus-quick-actions-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--zus-text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.zus-quick-actions-title-bar {
+  width: 4px;
+  height: 20px;
+  background-color: var(--zus-green);
+  border-radius: 2px;
+}
+
+.zus-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.zus-quick-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 16px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--zus-border);
+  border-radius: var(--zus-radius-md);
+  box-shadow: var(--zus-shadow-sm);
+  transition: all 0.25s ease;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.zus-quick-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.zus-quick-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--zus-shadow-md);
+  border-color: var(--zus-green-border);
+}
+
+.zus-quick-card:hover::after {
+  background-color: var(--zus-green);
+}
+
+.zus-quick-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background-color: var(--zus-green-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: var(--zus-green);
+  transition: all 0.25s ease;
+}
+
+.zus-quick-card:hover .zus-quick-icon-wrapper {
+  background-color: var(--zus-green);
+  color: #FFFFFF;
+}
+
+.zus-quick-icon-wrapper svg {
+  width: 26px;
+  height: 26px;
+}
+
+.zus-quick-card-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--zus-text-main);
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.zus-quick-card-desc {
+  font-size: 0.82rem;
+  color: var(--zus-text-muted);
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   FOOTER (OFICJALNY STOPKA ZUS)
+   ========================================================================== */
+.zus-footer {
+  background-color: #FFFFFF;
+  border-top: 1px solid var(--zus-border);
+  padding: 32px 0 24px 0;
+  margin-top: auto;
+}
+
+.zus-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.zus-footer-text {
+  font-size: 0.85rem;
+  color: var(--zus-text-muted);
+}
+
+.zus-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  list-style: none;
+}
+
+.zus-footer-link {
+  font-size: 0.85rem;
+  color: var(--zus-text-secondary);
+  font-weight: 600;
+}
+
+.zus-footer-link:hover {
+  color: var(--zus-green);
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   MODALE (POPUP SYMULACJI PUE / PDF)
+   ========================================================================== */
+.zus-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+  backdrop-filter: blur(2px);
+}
+
+.zus-modal {
+  background-color: #FFFFFF;
+  width: 100%;
+  max-width: 580px;
+  border-radius: var(--zus-radius-md);
+  border-top: 5px solid var(--zus-green);
+  box-shadow: var(--zus-shadow-lg);
+  overflow: hidden;
+  animation: zusFadeIn 0.2s ease-out;
+}
+
+@keyframes zusFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.zus-modal-header {
+  padding: 18px 24px;
+  background-color: #F8FAFC;
+  border-bottom: 1px solid var(--zus-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.zus-modal-title {
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: var(--zus-text-main);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.zus-modal-close-btn {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--zus-text-muted);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.zus-modal-close-btn:hover {
+  color: var(--zus-text-main);
+}
+
+.zus-modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.zus-modal-desc {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--zus-text-secondary);
+}
+
+.zus-modal-case-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--zus-border);
+  border-radius: var(--zus-radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background-color: #FFFFFF;
+}
+
+.zus-modal-case-item:hover,
+.zus-modal-case-item.selected {
+  border-color: var(--zus-green);
+  background-color: var(--zus-green-light);
+}
+
+.zus-modal-case-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--zus-text-main);
+}
+
+.zus-modal-case-desc {
+  font-size: 0.82rem;
+  color: var(--zus-text-secondary);
+}
+
+.zus-modal-footer {
+  padding: 16px 24px;
+  background-color: #F8FAFC;
+  border-top: 1px solid var(--zus-border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.zus-btn-secondary {
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--zus-text-secondary);
+  background-color: #E2E8F0;
+  border-radius: var(--zus-radius-sm);
+  transition: all 0.15s ease;
+}
+
+.zus-btn-secondary:hover {
+  background-color: #CBD5E1;
+}
+
+.zus-btn-primary {
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  background-color: var(--zus-green);
+  border-radius: var(--zus-radius-sm);
+  transition: all 0.15s ease;
+}
+
+.zus-btn-primary:hover {
+  background-color: var(--zus-green-hover);
+}
+
+/* ==========================================================================
+   RESPONSYWNOŚĆ (MEDIA QUERIES)
+   ========================================================================== */
+
+/* Tablety i średnie ekrany (< 1024px) */
+@media (max-width: 1024px) {
+  .zus-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .zus-hero-sidebar {
+    max-width: 600px;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .zus-quick-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Ekrany mobilne (< 768px) */
+@media (max-width: 768px) {
+  .zus-topbar-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .zus-topbar-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .zus-nav-list {
+    display: none;
+  }
+
+  .zus-hamburger-btn {
+    display: flex;
+  }
+
+  .zus-hero-section {
+    padding: 24px 0 36px 0;
+  }
+
+  .zus-hero-title {
+    font-size: 1.7rem;
+  }
+
+  .zus-hero-desc {
+    font-size: 0.98rem;
+  }
+
+  .zus-role-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .zus-role-tab {
+    min-width: 130px;
+    padding: 12px 10px;
+    font-size: 0.88rem;
+  }
+
+  .zus-role-summary-card {
+    padding: 20px 16px;
+  }
+
+  .zus-role-card-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .zus-btn-role-calculator {
+    justify-content: center;
+  }
+
+  .zus-quick-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .zus-quick-card {
+    padding: 18px 12px;
+  }
+
+  .zus-footer-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 14px;
+  }
+}
+
+/* Małe ekrany mobilne (< 480px) */
+@media (max-width: 480px) {
+  .zus-quick-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .zus-brand-app-name {
+    font-size: 0.85rem;
+  }
+
+  .zus-topbar-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .zus-a11y-group {
+    justify-content: center;
+  }
+
+  .zus-btn-outline-pue,
+  .zus-btn-cta-mobywatel {
+    justify-content: center;
+  }
+}
+
+
+/* ==========================================================================
+   WIDOKI MODUŁOWE (WIDOKI PODSTRON KALKULATORÓW I ZAKŁADEK)
+   ========================================================================== */
+
+.zus-view-container {
+  padding: 36px 0 60px 0;
+  max-width: var(--container-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.zus-view-header {
+  margin-bottom: 28px;
+  max-width: 860px;
+}
+
+.zus-view-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--zus-text-main);
+  line-height: 1.25;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+
+.zus-view-desc {
+  font-size: 1.05rem;
+  color: var(--zus-text-secondary);
+  line-height: 1.6;
+}
+
+.zus-view-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 28px;
+  align-items: start;
+}
+
+.zus-card {
+  background-color: var(--zus-card-bg);
+  border: 1px solid var(--zus-border);
+  border-top: 4px solid var(--zus-green);
+  border-radius: var(--zus-radius-md);
+  padding: 24px;
+  box-shadow: var(--zus-shadow-sm);
+}
+
+.zus-card-header-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--zus-text-main);
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--zus-border);
+  padding-bottom: 10px;
+}
+
+/* Formularze ZUS */
+.zus-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.zus-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zus-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.zus-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--zus-text-main);
+}
+
+.zus-input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  border: 1.5px solid var(--zus-border);
+  border-radius: var(--zus-radius-sm);
+  background-color: #FFFFFF;
+  color: var(--zus-text-main);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.zus-input:focus {
+  outline: none;
+  border-color: var(--zus-green);
+  box-shadow: 0 0 0 3px rgba(0, 120, 52, 0.15);
+}
+
+/* Przyciski zakładek */
+.zus-tab-btn {
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--zus-text-secondary);
+  border-bottom: 3px solid transparent;
+  background: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.zus-tab-btn:hover {
+  color: var(--zus-green);
+}
+
+.zus-tab-btn.active {
+  color: var(--zus-green);
+  border-bottom-color: var(--zus-green);
+  font-weight: 700;
+}
+
+/* Statystyki i kwoty */
+.zus-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.zus-stat-item {
+  padding: 14px;
+  background-color: var(--zus-card-alt);
+  border: 1px solid var(--zus-border);
+  border-radius: var(--zus-radius-sm);
+}
+
+.zus-stat-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--zus-text-muted);
+  margin-bottom: 4px;
+}
+
+.zus-stat-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--zus-text-main);
+}
+
+/* Badże */
+.zus-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: var(--zus-radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.zus-badge.success {
+  background-color: var(--zus-green-light);
+  color: var(--zus-green-dark);
+  border: 1px solid var(--zus-green-border);
+}
+
+.zus-badge.info {
+  background-color: var(--zus-navy-light);
+  color: var(--zus-navy);
+  border: 1px solid #BEE3F8;
+}
+
+.zus-badge.danger {
+  background-color: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FCA5A5;
+}
+
+/* Alerty i powiadomienia */
+.zus-notice-box {
+  padding: 14px 16px;
+  background-color: var(--zus-green-light);
+  border-left: 4px solid var(--zus-green);
+  border-radius: var(--zus-radius-sm);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--zus-text-main);
+}
+
+/* Listy */
+.zus-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.zus-list li {
+  position: relative;
+  padding-left: 20px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--zus-text-main);
+}
+
+.zus-list li::before {
+  content: '■';
+  position: absolute;
+  left: 0;
+  color: var(--zus-green);
+  font-size: 0.7rem;
+  top: 2px;
+}
+
+/* Timeline */
+.zus-timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.zus-timeline-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed var(--zus-border);
+}
+
+.zus-timeline-item:last-child {
+  border-bottom: none;
+}
+
+.zus-timeline-badge {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  background-color: var(--zus-green);
+  color: #FFFFFF;
+  font-size: 0.82rem;
+  font-weight: 800;
+  border-radius: var(--zus-radius-sm);
+  letter-spacing: 0.5px;
+}
+
+.zus-timeline-item strong {
+  display: block;
+  font-size: 1rem;
+  color: var(--zus-text-main);
+  margin-bottom: 4px;
+}
+
+.zus-timeline-item p {
+  font-size: 0.9rem;
+  color: var(--zus-text-secondary);
+  line-height: 1.5;
+}
+
+/* Placeholder pustego stanu */
+.zus-empty-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--zus-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .zus-view-grid {
+    grid-template-columns: 1fr;
+  }
+  .zus-form-row {
+    grid-template-columns: 1fr;
+  }
+  .zus-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}

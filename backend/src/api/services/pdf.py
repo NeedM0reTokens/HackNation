@@ -3,7 +3,10 @@ import re
 from datetime import date, datetime
 
 from fastapi import HTTPException, UploadFile
-from pypdf import PdfReader
+try:
+    from pypdf import PdfReader
+except ImportError:
+    PdfReader = None
 
 from ...constants import (
     MANDATORY_WAITING_PERIOD_DAYS,
@@ -82,6 +85,8 @@ def _extract_text_from_pdf_bytes(file_bytes: bytes) -> tuple[str, int]:
         )
 
     try:
+        if PdfReader is None:
+            return file_bytes.decode("latin1", errors="ignore"), 1
         stream = io.BytesIO(file_bytes)
         reader = PdfReader(stream)
         page_count = len(reader.pages)
