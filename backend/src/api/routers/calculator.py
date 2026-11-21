@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Security
+from fastapi import APIRouter, HTTPException
 
 from ..models.calculator import (
     AllowanceRatesResponse,
@@ -9,7 +9,6 @@ from ..models.calculator import (
     IntegratedCalculatorResult,
     PresetsListResponse,
 )
-from ..security import Permission, authorization_manager
 from ..services.calculator import (
     calculate_integrated_parental_service,
     get_allowance_rates_service,
@@ -31,12 +30,6 @@ class CalculatorRouter(APIRouter):
             self.get_allowance_rates_route,
             methods=["GET"],
             response_model=AllowanceRatesResponse,
-            dependencies=[
-                Security(
-                    authorization_manager.require,
-                    scopes=[Permission.calculator_maternity],
-                )
-            ],
             summary="Pobierz bazowe stawki zasiłków i wymiary urlopów",
             description=(
                 "Zwraca zestaw podstawowych wskaźników prawnych: ujednoliconą stawkę 81,5%, "
@@ -51,12 +44,6 @@ class CalculatorRouter(APIRouter):
             self.get_all_presets_route,
             methods=["GET"],
             response_model=PresetsListResponse,
-            dependencies=[
-                Security(
-                    authorization_manager.require,
-                    scopes=[Permission.calculator_maternity],
-                )
-            ],
             summary="Pobierz listę gotowych presetów pod zakładki frontendowe",
             description=(
                 "Zwraca zestaw 10 gotowych, predefiniowanych konfiguracji kalkulatorów "
@@ -72,12 +59,6 @@ class CalculatorRouter(APIRouter):
             self.get_preset_by_key_route,
             methods=["GET"],
             response_model=CalculatorPreset,
-            dependencies=[
-                Security(
-                    authorization_manager.require,
-                    scopes=[Permission.calculator_maternity],
-                )
-            ],
             summary="Pobierz pojedynczy preset konfiguracji dla wybranej zakładki",
             description=(
                 "Zwraca szczegółowy obiekt presetu dla wskazanego klucza `preset_key` "
@@ -94,12 +75,6 @@ class CalculatorRouter(APIRouter):
             self.calculate_integrated_parental_route,
             methods=["POST"],
             response_model=IntegratedCalculatorResult,
-            dependencies=[
-                Security(
-                    authorization_manager.require,
-                    scopes=[Permission.calculator_maternity],
-                )
-            ],
             summary="Zintegrowany kalkulator rodzicielski z osią czasu (BE-21)",
             description=(
                 "Główny silnik integrujący wszystkie etapy rodzicielstwa:\n\n"
@@ -123,12 +98,6 @@ class CalculatorRouter(APIRouter):
             self.calculate_integrated_parental_route,
             methods=["POST"],
             response_model=IntegratedCalculatorResult,
-            dependencies=[
-                Security(
-                    authorization_manager.require,
-                    scopes=[Permission.calculator_maternity],
-                )
-            ],
             summary="Zintegrowany kalkulator rodzicielski z osią czasu (alias BE-21)",
             description="Wygodny alias dla endpointu POST /api/calculator/parental.",
             response_description="Kompletny harmonogram z osią czasu i kwotami PLN",

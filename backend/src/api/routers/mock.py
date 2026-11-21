@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter, Security
+from fastapi import APIRouter
 
 from ..models.auth import (
     CitizenIdentity,
@@ -8,7 +8,6 @@ from ..models.auth import (
     TokenResponse,
 )
 from ..models.simulation import UserProfileResponse
-from ..security import Permission, authorization_manager
 from ..services.mobywatel import MobywatelService, mobywatel_service
 from ..services.simulation import get_mock_user_profile_service
 
@@ -32,12 +31,6 @@ class MockRouter(APIRouter):
             self.get_mock_user_profile_route,
             methods=["GET"],
             response_model=UserProfileResponse,
-            dependencies=[
-                Security(
-                    authorization_manager.require,
-                    scopes=[Permission.simulation_run],
-                )
-            ],
             summary="Pobranie profilu ubezpieczonego z symulacji PUE ZUS / mObywatel (BE-26)",
             description=(
                 "Zwraca zamockowany profil obywatela z PUE ZUS / mObywatel na potrzeby "

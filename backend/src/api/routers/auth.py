@@ -1,6 +1,6 @@
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Security
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
 from ..models.auth import (
@@ -11,9 +11,7 @@ from ..models.auth import (
 )
 from ..security import (
     AuthContext,
-    Permission,
     authentication_manager,
-    authorization_manager,
 )
 from ..services.mobywatel import MobywatelService, mobywatel_service
 
@@ -72,12 +70,6 @@ class AuthRouter(APIRouter):
             self.get_current_user_profile_route,
             methods=["GET"],
             response_model=UserProfileResponse,
-            dependencies=[
-                Security(
-                    authorization_manager.require,
-                    scopes=[Permission.profile_read],
-                )
-            ],
             summary="Pobierz profil aktualnie zalogowanego użytkownika",
             description="Zwraca dane tożsamości i uprawnienia zdekodowane z tokena Bearer JWT.",
         )

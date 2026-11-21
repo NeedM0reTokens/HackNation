@@ -1,11 +1,10 @@
-from fastapi import APIRouter, Security
+from fastapi import APIRouter
 
 from ..models.pregnancy import (
     EmploymentType,
     PregnancyBenefitInput,
     PregnancyBenefitResult,
 )
-from ..security import Permission, authorization_manager
 from ..services.pregnancy import calculate_pregnancy_benefit
 
 
@@ -17,12 +16,6 @@ class PregnancyRouter(APIRouter):
             self.get_pregnancy_benefit_calculation,
             methods=["POST"],
             response_model=PregnancyBenefitResult,
-            dependencies=[
-                Security(
-                    authorization_manager.require,
-                    scopes=[Permission.calculator_pregnancy],
-                )
-            ],
             summary="Kalkulator zasiłków w ciąży (kod B, rehabilitacja, upadłość) (BE-04 - BE-08)",
             description=(
                 "Kompleksowy kalkulator świadczeń chorobowych w ciąży:\n\n"
@@ -44,12 +37,6 @@ class PregnancyRouter(APIRouter):
             self.get_pregnancy_benefit_example,
             methods=["GET"],
             response_model=PregnancyBenefitResult,
-            dependencies=[
-                Security(
-                    authorization_manager.require,
-                    scopes=[Permission.calculator_pregnancy],
-                )
-            ],
             summary="Przykładowe wyliczenie zasiłku w ciąży bez danych wejściowych",
             description="Zwraca wzorcowy wynik dla pracownicy na etacie (8000 zł brutto).",
             response_description="Wzorcowy wynik kalkulacji",
