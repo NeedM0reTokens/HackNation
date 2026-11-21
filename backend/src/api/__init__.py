@@ -1,4 +1,4 @@
-from .API import MainAPI, app
+from .api import MainAPI, app
 from .routers.admin import AdminAPI, AdminRouter
 from .routers.adoption import AdoptionAPI, AdoptionRouter
 from .routers.calculator import CalculatorAPI, CalculatorRouter
