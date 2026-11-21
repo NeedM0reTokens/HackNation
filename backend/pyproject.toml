@@ -1,0 +1,46 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "Backend API"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "python-multipart>=0.0.9",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8.0",
+    "basedpyright>=1.20.0",
+]
+
+# --- Konfiguracja RUFF ---
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "app"]
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort (organizacja importów)
+    "UP",    # pyupgrade
+    "B",     # flake8-bugbear
+    "RUF",   # ruff-specific rules
+]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# --- Konfiguracja BASEDPYRIGHT ---
+[tool.basedpyright]
+include = ["src", "app"]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+reportMissingTypeStubs = false

@@ -13,12 +13,9 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_origins=["*"],
 )
+
 
 @app.get("/api/health")
 def health_check():
-    return {
-        "status": "ok",
-        "message": "Backend ZUS Przewodnika działa poprawnie!"
-    }
+    return {"status": "ok", "message": "Backend ZUS Przewodnika działa poprawnie!"}
