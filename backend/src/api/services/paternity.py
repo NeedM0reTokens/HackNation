@@ -1,25 +1,4 @@
-from src.api.models.maternity import (
-    BenefitPaymentVariant,
-    MaternityEmploymentType,
-    PeriodBreakdown,
-)
-from src.api.models.paternity import (
-    MaternityTransferInput,
-    MaternityTransferReason,
-    MaternityTransferResult,
-    ParentalSharingInput,
-    ParentalSharingResult,
-    ParentBenefitBreakdown,
-    PaternityLeaveInput,
-    PaternityLeaveResult,
-    SharingMode,
-)
-from src.api.services.maternity import (
-    _calculate_net_base,
-    get_maternity_weeks,
-    get_parental_weeks,
-)
-from src.constants import (
+from ...constants import (
     FULL_MATERNITY_RATE,
     MANDATORY_MOTHER_MATERNITY_WEEKS,
     MAX_CHILD_AGE_PATERNITY_ADOPTION_YEARS,
@@ -34,16 +13,35 @@ from src.constants import (
     STANDARD_PARENTAL_RATE,
     UNIFIED_BENEFIT_RATE,
 )
+from ..models.maternity import (
+    BenefitPaymentVariant,
+    MaternityEmploymentType,
+    PeriodBreakdown,
+)
+from ..models.paternity import (
+    MaternityTransferInput,
+    MaternityTransferReason,
+    MaternityTransferResult,
+    ParentalSharingInput,
+    ParentalSharingResult,
+    ParentBenefitBreakdown,
+    PaternityLeaveInput,
+    PaternityLeaveResult,
+    SharingMode,
+)
+from .maternity import (
+    _calculate_net_base,
+    get_maternity_weeks,
+    get_parental_weeks,
+)
 
 
 def calculate_paternity_leave(data: PaternityLeaveInput) -> PaternityLeaveResult:
-    """Calculates paternity leave (14 days, max 2 parts, age limits - BE-16)."""
     refusal_reasons: list[str] = []
 
     if not data.is_insured or data.employment_type == MaternityEmploymentType.NONE:
         refusal_reasons.append("Brak ubezpieczenia chorobowego ojca uniemożliwia pobranie zasiłku.")
 
-    # Age check
     if data.is_adopted:
         if (
             data.adopted_child_age_years is not None
@@ -62,7 +60,6 @@ def calculate_paternity_leave(data: PaternityLeaveInput) -> PaternityLeaveResult
                 f"Urlop przysługuje do ukończenia {MAX_CHILD_AGE_PATERNITY_MONTHS} m-cy życia."
             )
 
-    # Parts check
     if len(data.parts) > MAX_PATERNITY_PARTS:
         refusal_reasons.append(
             f"Urlop ojcowski można podzielić na maksymalnie {MAX_PATERNITY_PARTS} części."
@@ -129,7 +126,6 @@ def calculate_paternity_leave(data: PaternityLeaveInput) -> PaternityLeaveResult
 
 
 def calculate_maternity_transfer(data: MaternityTransferInput) -> MaternityTransferResult:
-    """Calculates father taking over maternity leave (BE-17)."""
     refusal_reasons: list[str] = []
     total_maternity_weeks = get_maternity_weeks(data.children_born_count)
 
@@ -216,14 +212,12 @@ def calculate_maternity_transfer(data: MaternityTransferInput) -> MaternityTrans
 
 
 def calculate_parental_sharing(data: ParentalSharingInput) -> ParentalSharingResult:
-    """Simulates parental care sharing between both parents (BE-18)."""
     maternity_pool = get_maternity_weeks(data.children_born_count)
     parental_pool = get_parental_weeks(data.children_born_count, data.has_za_zyciem_certificate)
     combined_total = maternity_pool + parental_pool
 
     val_messages: list[str] = []
 
-    # Check non-transferable guarantee
     non_transferable_ok = True
     shared_pool = parental_pool - NON_TRANSFERABLE_PARENTAL_WEEKS
 
@@ -240,7 +234,6 @@ def calculate_parental_sharing(data: ParentalSharingInput) -> ParentalSharingRes
             f"Suma rodzicielskiego ({total_parental_taken} tyg.) przekracza {parental_pool} tyg."
         )
 
-    # Base net and daily rates
     m_base = _calculate_net_base(data.mother_gross_income)
     if data.mother_employment_type == MaternityEmploymentType.EMPLOYMENT_CONTRACT:
         m_base = max(m_base, _calculate_net_base(MIN_WAGE_2026))
@@ -251,7 +244,6 @@ def calculate_parental_sharing(data: ParentalSharingInput) -> ParentalSharingRes
         f_base = max(f_base, _calculate_net_base(MIN_WAGE_2026))
     f_daily = round(f_base / 30, 2)
 
-    # Rates
     m_mat_rate = (
         UNIFIED_BENEFIT_RATE
         if data.chosen_variant == BenefitPaymentVariant.UNIFIED_81_5
@@ -264,7 +256,6 @@ def calculate_parental_sharing(data: ParentalSharingInput) -> ParentalSharingRes
     )
     f_rate = STANDARD_PARENTAL_RATE
 
-    # Mother calculations
     m_mat_amount = round(m_daily * data.mother_maternity_weeks * 7 * m_mat_rate / 100, 2)
     m_par_amount = round(m_daily * data.mother_parental_weeks * 7 * m_par_rate / 100, 2)
     m_total = round(m_mat_amount + m_par_amount, 2)
@@ -290,7 +281,6 @@ def calculate_parental_sharing(data: ParentalSharingInput) -> ParentalSharingRes
         ),
     ]
 
-    # Father calculations
     f_mat_amount = round(f_daily * data.father_maternity_weeks * 7 * m_mat_rate / 100, 2)
     f_par_amount = round(f_daily * data.father_parental_weeks * 7 * f_rate / 100, 2)
     f_total = round(f_mat_amount + f_par_amount, 2)
