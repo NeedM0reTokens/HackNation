@@ -4,7 +4,7 @@ from .auth import AuthRouter
 from .calculator import CalculatorRouter
 from .health import HealthRouter
 from .maternity import MaternityRouter
-from .mock import MockRouter, SimulationRouter
+from .mock import MockRouter, ZusRouter
 from .parental_work import ParentalWorkRouter
 from .paternity import PaternityRouter
 from .pdf import PdfRouter
@@ -23,6 +23,6 @@ __all__ = [
     "PaternityRouter",
     "PdfRouter",
     "PregnancyRouter",
-    "SimulationRouter",
     "SpecialCasesRouter",
+    "ZusRouter",
 ]

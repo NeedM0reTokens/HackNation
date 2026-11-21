@@ -3,6 +3,7 @@ import re
 from datetime import date, datetime
 
 from fastapi import HTTPException, UploadFile
+
 try:
     from pypdf import PdfReader
 except ImportError:

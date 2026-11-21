@@ -1,7 +1,19 @@
 from datetime import date
 
-from ..data import NAME_TO_PESEL, PREDEFINED_PROFILES
-from ..models.simulation import ActiveEzlaInfo, MonthlyContribution, UserProfileResponse
+from fastapi import HTTPException, status
+
+from ..data import (
+    PREDEFINED_EZLA,
+    PREDEFINED_EZLA_BY_DOC,
+    PREDEFINED_PROFILES,
+)
+from ..models.simulation import (
+    ActiveEzlaInfo,
+    EzlaCertificateResponse,
+    EzlaCitizenResponse,
+    MonthlyContribution,
+    UserProfileResponse,
+)
 
 
 def _generate_monthly_contributions(gross_amount: float) -> list[MonthlyContribution]:
@@ -80,17 +92,16 @@ def _parse_pesel_details(pesel: str) -> tuple[str, str]:
     return "1992-01-01", "Kobieta"
 
 
-def get_mock_user_profile_service(user_id_or_pesel: str) -> UserProfileResponse:
+def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
     """
-    Returns simulated ZUS insurance profile for a person by their PESEL or alias.
+    Returns simulated ZUS insurance profile for a person by their PESEL.
     If the PESEL is recognized in the predefined scenarios, returns specific data.
     If an unknown PESEL is given, generates a realistic, legally compliant default profile.
     """
-    normalized_id = user_id_or_pesel.strip().lower()
-    pesel = NAME_TO_PESEL.get(normalized_id, normalized_id)
+    clean_pesel = pesel.strip()
 
-    if pesel in PREDEFINED_PROFILES:
-        raw = dict(PREDEFINED_PROFILES[pesel])
+    if clean_pesel in PREDEFINED_PROFILES:
+        raw = dict(PREDEFINED_PROFILES[clean_pesel])
         gross = float(raw["average_monthly_gross"])
         contributions = _generate_monthly_contributions(gross)
 
@@ -101,14 +112,12 @@ def get_mock_user_profile_service(user_id_or_pesel: str) -> UserProfileResponse:
 
         return UserProfileResponse(
             pesel=str(raw["pesel"]),
-            user_id=str(raw["pesel"]),
             first_name=str(raw["first_name"]),
             last_name=str(raw["last_name"]),
             date_of_birth=str(raw["date_of_birth"]),
             gender=str(raw["gender"]),
             source="ZUS Centralny Rejestr Ubezpieczonych (eZUS Mock)",
             has_insurance=bool(raw["has_insurance"]),
-            has_active_insurance=bool(raw["has_insurance"]),
             insurance_status=str(raw["insurance_status"]),
             insurance_title=str(raw["insurance_title"]),
             insurance_type=str(raw["insurance_type"]),
@@ -125,7 +134,6 @@ def get_mock_user_profile_service(user_id_or_pesel: str) -> UserProfileResponse:
             payer_name=raw.get("payer_name") or None,
             payer_nip=raw.get("payer_nip") or None,
             is_large_payer=bool(raw["is_large_payer"]),
-            overdue_contributions=bool(raw["overdue_contributions"]),
             has_overdue_contributions=bool(raw["has_overdue_contributions"]),
             overdue_amount=float(raw["overdue_amount"]),
             overdue_blocks_benefits=bool(raw["overdue_blocks_benefits"]),
@@ -136,7 +144,7 @@ def get_mock_user_profile_service(user_id_or_pesel: str) -> UserProfileResponse:
         )
 
     # Dynamic generation for any other custom PESEL
-    dob, gender = _parse_pesel_details(pesel)
+    dob, gender = _parse_pesel_details(clean_pesel)
     first_name = "Katarzyna" if gender == "Kobieta" else "Jan"
     last_name = "Kowalski"
 
@@ -147,15 +155,13 @@ def get_mock_user_profile_service(user_id_or_pesel: str) -> UserProfileResponse:
     contributions = _generate_monthly_contributions(gross)
 
     return UserProfileResponse(
-        pesel=pesel,
-        user_id=pesel,
+        pesel=clean_pesel,
         first_name=first_name,
         last_name=last_name,
         date_of_birth=dob,
         gender=gender,
         source="ZUS Centralny Rejestr Ubezpieczonych (eZUS Mock)",
         has_insurance=True,
-        has_active_insurance=True,
         insurance_status="ACTIVE",
         insurance_title="Umowa o pracę (pracownik)",
         insurance_type="UoP",
@@ -172,7 +178,6 @@ def get_mock_user_profile_service(user_id_or_pesel: str) -> UserProfileResponse:
         payer_name="Przykładowy Płatnik Sp. z o.o.",
         payer_nip="1112223344",
         is_large_payer=True,
-        overdue_contributions=False,
         has_overdue_contributions=False,
         overdue_amount=0.0,
         overdue_blocks_benefits=False,
@@ -180,4 +185,67 @@ def get_mock_user_profile_service(user_id_or_pesel: str) -> UserProfileResponse:
         active_ezla=[],
         sickness_days_used_in_year=0,
         max_sickness_days=182,
+    )
+
+
+def get_citizen_ezla_service(pesel: str) -> EzlaCitizenResponse:
+    """
+    Returns electronic sick leave certificates (e-ZLA) for a citizen by PESEL.
+    Simulates retrieval of e-ZLA incapacity certificates from the ZUS medical registry.
+    """
+    clean_pesel = pesel.strip()
+
+    if clean_pesel in PREDEFINED_PROFILES:
+        raw_profile = dict(PREDEFINED_PROFILES[clean_pesel])
+        raw_certs = PREDEFINED_EZLA.get(clean_pesel, [])
+        certificates = [EzlaCertificateResponse.model_validate(c) for c in raw_certs]
+
+        active_count = sum(1 for c in certificates if c.status == "ACTIVE")
+        has_active = active_count > 0
+
+        return EzlaCitizenResponse(
+            pesel=str(raw_profile["pesel"]),
+            first_name=str(raw_profile["first_name"]),
+            last_name=str(raw_profile["last_name"]),
+            date_of_birth=str(raw_profile["date_of_birth"]),
+            gender=str(raw_profile["gender"]),
+            source="ZUS Rejestr Zaświadczeń Lekarskich (e-ZLA Mock)",
+            has_active_ezla=has_active,
+            total_certificates_count=len(certificates),
+            active_certificates_count=active_count,
+            sickness_days_used_in_year=int(raw_profile.get("sickness_days_used_in_year", 0)),
+            max_sickness_days=int(raw_profile.get("max_sickness_days", 182)),
+            certificates=certificates,
+        )
+
+    # Dynamic fallback for arbitrary unknown PESEL
+    dob, gender = _parse_pesel_details(clean_pesel)
+    first_name = "Katarzyna" if gender == "Kobieta" else "Jan"
+    last_name = "Kowalski"
+
+    return EzlaCitizenResponse(
+        pesel=clean_pesel,
+        first_name=first_name,
+        last_name=last_name,
+        date_of_birth=dob,
+        gender=gender,
+        source="ZUS Rejestr Zaświadczeń Lekarskich (e-ZLA Mock)",
+        has_active_ezla=False,
+        total_certificates_count=0,
+        active_certificates_count=0,
+        sickness_days_used_in_year=0,
+        max_sickness_days=182,
+        certificates=[],
+    )
+
+
+def get_single_ezla_certificate_service(document_id: str) -> EzlaCertificateResponse:
+    """Returns a specific e-ZLA certificate by its unique document ID."""
+    normalized_doc = document_id.strip()
+    if normalized_doc in PREDEFINED_EZLA_BY_DOC:
+        return EzlaCertificateResponse.model_validate(PREDEFINED_EZLA_BY_DOC[normalized_doc])
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Nie znaleziono zaświadczenia lekarskiego e-ZLA o identyfikatorze {document_id}",
     )

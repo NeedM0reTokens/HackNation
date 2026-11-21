@@ -52,7 +52,7 @@ export async function getAllowanceRates() {
 // 3. Logowanie przez mObywatel
 export async function loginWithMObywatel(): Promise<{ user: InsuredUser; simulation?: any }> {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/simulation/profile/anna-kowalska`, { method: 'GET' })
+    const res = await fetch(`${API_BASE_URL}/api/zus/insurance/92011501234`, { method: 'GET' })
     if (res.ok) {
       const simData = await res.json()
       return {

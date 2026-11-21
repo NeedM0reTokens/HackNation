@@ -15,16 +15,83 @@ class MonthlyContribution(BaseModel):
 
 
 class ActiveEzlaInfo(BaseModel):
-    """Electronic sick leave (e-ZLA) certificate registered in ZUS."""
+    """Electronic sick leave (e-ZLA) certificate summary registered in ZUS."""
 
     document_id: str = Field(..., description="Identyfikator zaświadczenia e-ZLA")
-    medical_code: str = Field(
-        ..., description="Kod literowy ZUS (np. 'B' - ciąża, 'A' - po przerwie <60 dni)"
+    medical_code: str | None = Field(
+        None, description="Kod literowy ZUS (np. 'B' - ciąża, 'A' - po przerwie <60 dni)"
     )
     start_date: str = Field(..., description="Początek okresu zwolnienia lekarskiego")
     end_date: str = Field(..., description="Koniec okresu zwolnienia lekarskiego")
     days_count: int = Field(..., description="Liczba dni kalendarzowych zwolnienia")
     doctor_name: str = Field(..., description="Lekarz wystawiający zaświadczenie")
+
+
+class EzlaCertificateResponse(BaseModel):
+    """Detailed electronic medical certificate (e-ZLA) for incapacity to work."""
+
+    document_id: str = Field(..., description="Unikalny identyfikator dokumentu e-ZLA")
+    series_number: str = Field(..., description="Seria i numer zaświadczenia lekarskiego")
+    medical_code: str | None = Field(
+        None, description="Kod literowy ZUS (np. 'B' - ciąża, 'A' - ponowna choroba <60 dni)"
+    )
+    code_description: str | None = Field(None, description="Prawne znaczenie kodu literowego ZUS")
+    start_date: str = Field(..., description="Początek okresu orzeczonej niezdolności do pracy")
+    end_date: str = Field(..., description="Koniec okresu orzeczonej niezdolności do pracy")
+    days_count: int = Field(..., description="Liczba dni kalendarzowych zwolnienia")
+    recommendation_code: str = Field(
+        ..., description="Zalecenie: '1' - chory powinien leżeć, '2' - chory może chodzić"
+    )
+    recommendation_description: str = Field(..., description="Opis zalecenia lekarskiego")
+    doctor_name: str = Field(..., description="Imię i nazwisko lekarza orzecznika")
+    doctor_pwz: str = Field(..., description="Numer Prawa Wykonywania Zawodu (PWZ) lekarza")
+    doctor_specialization: str | None = Field(None, description="Specjalizacja lekarza")
+    medical_facility: str = Field(
+        ..., description="Nazwa podmiotu leczniczego wystawiającego e-ZLA"
+    )
+    is_pregnancy: bool = Field(False, description="Czy zwolnienie jest z tytułu ciąży (kod B)")
+    benefit_percentage: float = Field(
+        80.0, description="Wysokość stawki zasiłku (100% dla kodu B, 80% standard, 70% szpital)"
+    )
+    disbursing_entity: str = Field(
+        "EMPLOYER",
+        description="Podmiot wypłacający: EMPLOYER (wynagrodzenie chorobowe do 33/14 dni) lub ZUS",
+    )
+    status: str = Field("ACTIVE", description="Status zaświadczenia: ACTIVE, HISTORICAL, CANCELLED")
+    payer_name: str | None = Field(None, description="Nazwa płatnika składek")
+    payer_nip: str | None = Field(None, description="NIP płatnika składek")
+
+
+class EzlaCitizenResponse(BaseModel):
+    """Citizen's electronic sick leave certificates preview from ZUS."""
+
+    pesel: str = Field(..., description="Numer PESEL ubezpieczonego")
+    first_name: str = Field(..., description="Imię")
+    last_name: str = Field(..., description="Nazwisko")
+    date_of_birth: str = Field(..., description="Data urodzenia (YYYY-MM-DD)")
+    gender: str = Field(..., description="Płeć")
+    source: str = Field(
+        default="ZUS Rejestr Zaświadczeń Lekarskich (e-ZLA Mock)",
+        description="Źródło danych",
+    )
+    has_active_ezla: bool = Field(
+        False, description="Czy ubezpieczony posiada obecnie aktywne zaświadczenie e-ZLA"
+    )
+    total_certificates_count: int = Field(
+        0, description="Łączna liczba zarejestrowanych zaświadczeń e-ZLA"
+    )
+    active_certificates_count: int = Field(
+        0, description="Liczba aktualnie trwających zwolnień lekarskich"
+    )
+    sickness_days_used_in_year: int = Field(
+        0, description="Liczba dni zasiłkowych wykorzystanych w bieżącym roku kalendarzowym"
+    )
+    max_sickness_days: int = Field(
+        182, description="Maksymalny limit okresu zasiłkowego (270 dni w ciąży, 182 standard)"
+    )
+    certificates: list[EzlaCertificateResponse] = Field(
+        default_factory=list, description="Lista zaświadczeń lekarskich e-ZLA"
+    )
 
 
 class UserProfileResponse(BaseModel):
@@ -35,7 +102,6 @@ class UserProfileResponse(BaseModel):
 
     # Identifiers
     pesel: str = Field(..., description="Numer PESEL ubezpieczonego")
-    user_id: str = Field(..., description="Identyfikator profilu (dla wstecznej kompatybilności)")
     first_name: str = Field(..., description="Imię")
     last_name: str = Field(..., description="Nazwisko")
     date_of_birth: str = Field(..., description="Data urodzenia (YYYY-MM-DD)")
@@ -48,9 +114,6 @@ class UserProfileResponse(BaseModel):
     # Insurance Status
     has_insurance: bool = Field(
         ..., description="Czy osoba podlega aktualnie ubezpieczeniom społecznym"
-    )
-    has_active_insurance: bool = Field(
-        ..., description="Alias dla wstecznej kompatybilności has_insurance"
     )
     insurance_status: str = Field(
         ..., description="Status ubezpieczenia: ACTIVE, NOT_INSURED, SUSPENDED"
@@ -111,9 +174,6 @@ class UserProfileResponse(BaseModel):
     )
 
     # Contribution Debt Verification (Art. 2a Ustawy zasiłkowej)
-    overdue_contributions: bool = Field(
-        ..., description="Czy na koncie występują zaległości składkowe (alias dla kompatybilności)"
-    )
     has_overdue_contributions: bool = Field(..., description="Czy występuje zadłużenie składkowe")
     overdue_amount: float = Field(0.0, description="Kwota zadłużenia składkowego w PLN")
     overdue_blocks_benefits: bool = Field(
