@@ -90,8 +90,11 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   )
 
   const sendMessage = useCallback(
-    (text: string) => runAssistant(text, () => askAssistantApi(text)),
-    [runAssistant],
+    (text: string) => {
+      const history = messages.slice(-6).map((m) => ({ role: m.role, content: m.content }))
+      return runAssistant(text, () => askAssistantApi(text, history))
+    },
+    [runAssistant, messages],
   )
 
   const value = useMemo<AppState>(

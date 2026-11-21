@@ -6,7 +6,14 @@ import { Textarea } from '@/components/ui/textarea'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useAppState } from '@/components/app-state'
 
-const suggestions = ['Czym jest podstawa wymiaru?', 'Wariant 81,5% czy 100% + 70%?', 'Ile tygodni przysługuje tacie?']
+const suggestions = [
+  'Czym jest podstawa wymiaru?',
+  'Wariant 81,5% czy 100% + 70%?',
+  'Ile tygodni przysługuje tacie?',
+  'Zaświadczenie Za życiem',
+  'Urlop na wcześniaka',
+  'Praca na pół etatu na rodzicielskim',
+]
 
 export function AssistantPanel() {
   const { assistantOpen, setAssistantOpen, messages, assistantPending, sendMessage } = useAppState()
@@ -25,11 +32,16 @@ export function AssistantPanel() {
     <Sheet open={assistantOpen} onOpenChange={setAssistantOpen}>
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
         <SheetHeader className="border-b p-4">
-          <SheetTitle className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-              <Sparkles className="size-4" aria-hidden="true" />
+          <SheetTitle className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                <Sparkles className="size-4" aria-hidden="true" />
+              </span>
+              Asystent AI ZUS
+            </div>
+            <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
+              Gemini 2.0 AI
             </span>
-            Asystent AI ZUS
           </SheetTitle>
           <SheetDescription>
             Odpowiedzi mają charakter informacyjny i nie są decyzją ZUS.
@@ -51,9 +63,18 @@ export function AssistantPanel() {
                   <p>{message.content}</p>
                   {message.details && message.details.length > 0 && (
                     <ul className="mt-2 flex list-disc flex-col gap-1 pl-4 text-muted-foreground">
-                      {message.details.map((detail) => (
-                        <li key={detail}>{detail}</li>
-                      ))}
+                      {message.details.map((detail) => {
+                        if (detail.startsWith('Podstawa prawna:')) {
+                          return (
+                            <li key={detail} className="list-none -ml-4 mt-1.5">
+                              <span className="inline-block rounded border border-primary/20 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                                ⚖️ {detail}
+                              </span>
+                            </li>
+                          )
+                        }
+                        return <li key={detail}>{detail}</li>
+                      })}
                     </ul>
                   )}
                 </div>

@@ -406,16 +406,77 @@ export async function updateAdminConfig(payload: any) {
   }
 }
 
-// 11. Asystent i wyjaśnienia AI
-export async function askAssistantApi(message: string): Promise<Explanation> {
+// 11. Asystent i wyjaśnienia AI (Google Gemini API)
+export interface AssistantStatus {
+  is_configured: boolean
+  model: string
+  provider: string
+}
+
+export async function getAssistantStatus(): Promise<AssistantStatus> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/assistant/status`, { method: 'GET' })
+    if (res.ok) {
+      return await res.json()
+    }
+  } catch (err) {
+    console.warn('Could not reach /api/assistant/status', err)
+  }
+  return {
+    is_configured: false,
+    model: 'gemini-2.0-flash',
+    provider: 'Google Gemini AI',
+  }
+}
+
+export async function askAssistantApi(
+  message: string,
+  history?: { role: string; content: string }[],
+): Promise<Explanation> {
   if (!message.trim()) {
     throw new Error('Brak treści pytania')
   }
-  await delay(500)
-  return findExplanationForQuestion(message)
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/assistant/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message,
+        history: history?.map((h) => ({ role: h.role, content: h.content })),
+      }),
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const data = await res.json()
+    return {
+      id: data.id || `ai-${Date.now()}`,
+      title: data.title || 'Odpowiedź Asystenta AI ZUS',
+      summary: data.summary,
+      details: data.details || [],
+      legalBasis: data.legal_basis || undefined,
+    }
+  } catch (err) {
+    console.warn('Backend Assistant API offline, using local statutory glossary fallback', err)
+    return findExplanationForQuestion(message)
+  }
 }
 
 export async function getExplanation(topicId: string): Promise<Explanation> {
-  await delay(400)
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/assistant/explain/${encodeURIComponent(topicId)}`, {
+      method: 'GET',
+    })
+    if (res.ok) {
+      const data = await res.json()
+      return {
+        id: data.id,
+        title: data.title,
+        summary: data.summary,
+        details: data.details || [],
+        legalBasis: data.legal_basis || undefined,
+      }
+    }
+  } catch (err) {
+    console.warn('Backend explain endpoint offline, using local glossary', err)
+  }
   return glossary[topicId] ?? fallbackExplanation
 }
