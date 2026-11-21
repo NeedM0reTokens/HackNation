@@ -1,6 +1,7 @@
 from .api import MainAPI, app
 from .routers.admin import AdminAPI, AdminRouter
 from .routers.adoption import AdoptionAPI, AdoptionRouter
+from .routers.assistant import AssistantAPI, AssistantRouter
 from .routers.auth import AuthAPI, AuthRouter
 from .routers.calculator import CalculatorAPI, CalculatorRouter
 from .routers.health import HealthAPI, HealthRouter
@@ -17,6 +18,8 @@ __all__ = [
     "AdminRouter",
     "AdoptionAPI",
     "AdoptionRouter",
+    "AssistantAPI",
+    "AssistantRouter",
     "AuthAPI",
     "AuthRouter",
     "CalculatorAPI",

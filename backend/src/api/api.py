@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .routers.admin import AdminRouter
 from .routers.adoption import AdoptionRouter
+from .routers.assistant import AssistantRouter
 from .routers.auth import AuthRouter
 from .routers.calculator import CalculatorRouter
 from .routers.health import HealthRouter
@@ -100,6 +101,15 @@ OPENAPI_TAGS = [
             "i usługami rządowymi (mObywatel, PUE ZUS / eZUS) na potrzeby demonstracji i testów."
         ),
     },
+    {
+        "name": "Asystent AI ZUS (Gemini)",
+        "description": (
+            "Inteligentny doradca i asystent obywatela oparty na modelu Google Gemini. "
+            "Wyjaśnia przepisy prawa rodzicielskiego i zasiłkowego prostym, empatycznym "
+            "językiem (Plain Polish) ze wskazaniem konkretnych artykułów Kodeksu pracy "
+            "oraz ustawy zasiłkowej."
+        ),
+    },
 ]
 
 
@@ -153,6 +163,7 @@ class MainAPI(FastAPI):
         self.paternity_router = PaternityRouter()
         self.parental_work_router = ParentalWorkRouter()
         self.adoption_router = AdoptionRouter()
+        self.assistant_router = AssistantRouter()
 
         self.include_router(self.auth_router, prefix="/api")
         self.include_router(self.health_router)
@@ -168,6 +179,7 @@ class MainAPI(FastAPI):
         self.include_router(self.paternity_router, prefix="/api")
         self.include_router(self.parental_work_router, prefix="/api")
         self.include_router(self.adoption_router, prefix="/api")
+        self.include_router(self.assistant_router, prefix="/api")
 
 
 app = MainAPI()

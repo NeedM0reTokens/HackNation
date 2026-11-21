@@ -1,5 +1,6 @@
 from .admin import AdminRouter
 from .adoption import AdoptionRouter
+from .assistant import AssistantRouter
 from .auth import AuthRouter
 from .calculator import CalculatorRouter
 from .health import HealthRouter
@@ -14,6 +15,7 @@ from .special_cases import SpecialCasesRouter
 __all__ = [
     "AdminRouter",
     "AdoptionRouter",
+    "AssistantRouter",
     "AuthRouter",
     "CalculatorRouter",
     "HealthRouter",
