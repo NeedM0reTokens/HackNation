@@ -23,3 +23,7 @@ frontend/dist/
 # Local envs
 .env
 .env.local
+
+# IDE
+.vscode/
+.idea/
