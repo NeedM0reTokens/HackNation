@@ -16,9 +16,10 @@ export const SpecialCasesView: React.FC = () => {
       const res = await calculateSpecialCases({
         case_type: caseType,
         gross_monthly_income: income,
-        child_birth_week: birthWeek,
-        birth_weight_grams: weight,
+        child_birth_week: caseType === 'PREMATURE_HOSPITALIZATION' ? birthWeek : undefined,
+        birth_weight_grams: caseType === 'PREMATURE_HOSPITALIZATION' ? weight : undefined,
         has_za_zyciem_certificate: caseType === 'ZA_ZYCIEM',
+        is_stillbirth: caseType === 'STILLBIRTH_OR_DEATH',
       });
       setResult(res);
     } finally {

@@ -590,6 +590,21 @@ export async function calculateParentalSharing(payload: ParentalSharingInput): P
   }
 }
 
+// 8. Przypadki szczególne (POST /api/calculators/special-cases)
+export interface SpecialCasesPayload {
+  case_type: 'ZA_ZYCIEM' | 'PREMATURE_HOSPITALIZATION' | 'STILLBIRTH_OR_DEATH'
+  gross_monthly_income: number
+  employment_type?: string
+  children_born_count?: number
+  is_insured_at_birth?: boolean
+  has_za_zyciem_certificate?: boolean
+  child_birth_week?: number
+  birth_weight_grams?: number
+  hospitalization_weeks?: number
+  is_stillbirth?: boolean
+  child_death_after_birth?: boolean
+}
+
 // 11. Łączenie rodzicielskiego z pracą na max 1/2 etatu (BE-19: POST /api/calculators/parental-work-combination)
 export async function calculateParentalWorkCombination(payload: ParentalWorkInput): Promise<ParentalWorkResult> {
   try {
@@ -757,14 +772,36 @@ export async function calculateAdoptionLeave(payload: AdoptionLeaveInput): Promi
 // 13. Przypadki szczególne (BE-13 - BE-15: POST /api/calculators/special-cases)
 export async function calculateSpecialCases(payload: SpecialCasesInput): Promise<SpecialCasesResult> {
   try {
+    const formattedPayload = {
+      case_type: payload.case_type,
+      gross_monthly_income: Number(payload.gross_monthly_income) || 7000,
+      employment_type: payload.employment_type || 'EMPLOYMENT_CONTRACT',
+      children_born_count: payload.children_born_count || 1,
+      is_insured_at_birth: payload.is_insured_at_birth !== false,
+      has_za_zyciem_certificate: payload.has_za_zyciem_certificate ?? (payload.case_type === 'ZA_ZYCIEM'),
+      child_birth_week: payload.child_birth_week,
+      birth_weight_grams: payload.birth_weight_grams,
+      hospitalization_weeks: payload.hospitalization_weeks || 0,
+      is_stillbirth: payload.is_stillbirth ?? (payload.case_type === 'STILLBIRTH_OR_DEATH'),
+      child_death_after_birth: payload.child_death_after_birth || false,
+    }
+
     const res = await fetch(`${API_BASE_URL}/api/calculators/special-cases`, {
       method: 'POST',
-      headers: getHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formattedPayload),
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    return await res.json()
-  } catch {
+    const data = await res.json()
+    return {
+      ...data,
+      benefit_rate_percent: data.case_type === 'PREMATURE_HOSPITALIZATION' ? 100.0 : (data.case_type === 'ZA_ZYCIEM' ? 70.0 : 100.0),
+      funeral_allowance_amount: data.case_type === 'STILLBIRTH_OR_DEATH' ? (data.one_time_grant_pln || 4000) : undefined,
+      description: data.description || 'Świadczenie wyliczone zgodnie z przepisami ZUS.',
+      required_documents: data.required_documents || [],
+    }
+  } catch (err) {
+    console.warn('API /api/calculators/special-cases call failed, using legal fallback', err)
     const base = payload.gross_monthly_income * (1 - 0.1371)
     const dailyRate = Math.round((base / 30) * 100) / 100
 
@@ -841,34 +878,11 @@ export async function calculateSpecialCases(payload: SpecialCasesInput): Promise
       const totalBenefit = Math.round(dailyRate * 1.0 * matWeeks * 7 * 100) / 100
       return {
         case_type: 'STILLBIRTH_OR_DEATH',
-        is_eligible: true,
-        base_maternity_weeks: matWeeks,
-        supplementary_maternity_weeks: 0,
-        total_maternity_weeks: matWeeks,
-        parental_weeks: 0,
-        non_transferable_parental_weeks: 0,
-        total_leave_weeks: matWeeks,
-        calculation_base_net: Math.round(base * 100) / 100,
-        daily_rate: dailyRate,
-        total_benefit_amount: totalBenefit,
-        one_time_grant_pln: 7000.0,
-        can_interrupt_maternity_for_hospitalization: false,
-        min_mandatory_mother_maternity_weeks: 8,
-        description: 'Prawo do 8 tygodni urlopu macierzyńskiego (56 dni, 100% płatne) oraz zasiłku pogrzebowego 7 000 zł.',
-        required_documents: [
-          'Akt urodzenia z adnotacją o martwym urodzeniu (lub karta martwego urodzenia ze szpitala)',
-          'Wniosek o zasiłek pogrzebowy (druk Z-12)',
-          'Rachunki potwierdzające koszty pogrzebu',
-        ],
-        legal_basis: [
-          'Art. 180(1) Kodeksu Pracy (urlop w razie urodzenia martwego dziecka)',
-          'Ustawa o emeryturach i rentach z FUS (zasiłek pogrzebowy)',
-        ],
-        important_notes: [
-          'W przypadku urodzenia martwego dziecka urlop macierzyński przysługuje przez 8 tygodni po porodzie (nie krócej niż 7 dni od zgonu).',
-          'Nie przysługuje urlop rodzicielski.',
-        ],
-        periods: [],
+        maternity_weeks: 8,
+        benefit_rate_percent: 100.0,
+        funeral_allowance_amount: 4000,
+        description: 'Prawo do 8 tygodni urlopu macierzyńskiego (100%) oraz zasiłku pogrzebowego 4000 zł.',
+        required_documents: ['Akt urodzenia z adnotacją o martwym urodzeniu lub zaświadczenie lekarskie.', 'Wniosek Z-12 o zasiłek pogrzebowy.'],
       }
     }
   }

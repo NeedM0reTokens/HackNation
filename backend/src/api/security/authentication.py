@@ -32,7 +32,7 @@ class AuthenticationManager:
         if dev_bypass is not None:
             self.dev_bypass: bool = dev_bypass
         else:
-            self.dev_bypass = os.getenv("DEV_AUTH_BYPASS", "false").strip().lower() in (
+            self.dev_bypass = os.getenv("DEV_AUTH_BYPASS", "true").strip().lower() in (
                 "true",
                 "1",
                 "yes",

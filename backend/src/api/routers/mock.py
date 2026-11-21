@@ -196,7 +196,6 @@ class SimulationRouter(APIRouter):
     def get_simulation_profile_route(self, user_id: str) -> UserProfileResponse:
         return get_mock_user_profile_service(user_id)
 
-
 router = MockRouter()
 MockAPI = MockRouter
 SimulationAPI = SimulationRouter
