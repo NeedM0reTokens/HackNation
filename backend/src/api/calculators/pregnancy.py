@@ -2,7 +2,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
-from app.constants import (
+from src.constants import (
     EMPLOYER_SICK_DAYS_SENIOR,
     EMPLOYER_SICK_DAYS_STANDARD,
     MANDATORY_WAITING_PERIOD_DAYS,

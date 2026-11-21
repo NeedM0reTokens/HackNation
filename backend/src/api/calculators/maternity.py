@@ -2,7 +2,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
-from app.constants import (
+from src.constants import (
     FULL_MATERNITY_RATE,
     LONG_APPLICATION_DEADLINE_DAYS,
     MANDATORY_MOTHER_MATERNITY_WEEKS,

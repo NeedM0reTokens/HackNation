@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AdminConfigSchema",
+  "description": "JSON Schema dla konfiguracji parametrów Zasiłkowego Przewodnika Przyszłego Rodzica (BE-03 / SETUP-06)",
+  "type": "object",
+  "required": ["stopy_procentowe", "wymiary_urlopow", "okresy_i_limity"],
+  "properties": {
+    "stopy_procentowe": {
+      "type": "object",
+      "properties": {
+        "stopa_chorobowy_kod_b": { "type": "number", "minimum": 0, "maximum": 100 },
+        "stopa_chorobowy_standard": { "type": "number", "minimum": 0, "maximum": 100 },
+        "stopa_macierzynski_jednolity": { "type": "number", "minimum": 0, "maximum": 100 },
+        "stopa_macierzynski_standard": { "type": "number", "minimum": 0, "maximum": 100 },
+        "stopa_rodzicielski_standard": { "type": "number", "minimum": 0, "maximum": 100 },
+        "stopa_ojcowski": { "type": "number", "minimum": 0, "maximum": 100 },
+        "stopa_swiadczenie_rehab_1_3": { "type": "number", "minimum": 0, "maximum": 100 },
+        "stopa_swiadczenie_rehab_pozostale": { "type": "number", "minimum": 0, "maximum": 100 },
+        "stopa_swiadczenie_rehab_ciaza": { "type": "number", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "wymiary_urlopow": {
+      "type": "object",
+      "properties": {
+        "urlop_macierzynski_1_dziecko_tygodnie": { "type": "integer", "minimum": 1 },
+        "urlop_macierzynski_2_dzieci_tygodnie": { "type": "integer", "minimum": 1 },
+        "urlop_macierzynski_3_dzieci_tygodnie": { "type": "integer", "minimum": 1 },
+        "urlop_macierzynski_4_dzieci_tygodnie": { "type": "integer", "minimum": 1 },
+        "urlop_macierzynski_5_plus_tygodnie": { "type": "integer", "minimum": 1 },
+        "urlop_macierzynski_obligatoryjny_matki_tygodnie": { "type": "integer", "minimum": 1 },
+        "urlop_rodzicielski_1_dziecko_tygodnie": { "type": "integer", "minimum": 1 },
+        "urlop_rodzicielski_wieloraczki_tygodnie": { "type": "integer", "minimum": 1 },
+        "urlop_rodzicielski_nieprzenoszalny_tygodnie": { "type": "integer", "minimum": 0 },
+        "urlop_ojcowski_dni": { "type": "integer", "minimum": 1 },
+        "max_czesci_urlopu_rodzicielskiego": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "okresy_i_limity": {
+      "type": "object",
+      "properties": {
+        "okres_wyczekiwania_uop_dni": { "type": "integer", "minimum": 0 },
+        "okres_wyczekiwania_dobrowolne_dni": { "type": "integer", "minimum": 0 },
+        "dni_chorobowe_pracodawca_standard": { "type": "integer", "minimum": 0 },
+        "dni_chorobowe_pracodawca_50plus": { "type": "integer", "minimum": 0 },
+        "wiek_prog_pracodawca": { "type": "integer", "minimum": 0 },
+        "max_okres_zasilkowy_ciaza_dni": { "type": "integer", "minimum": 1 },
+        "max_okres_zasilkowy_standard_dni": { "type": "integer", "minimum": 1 },
+        "limit_wieku_ojcowski_miesiace": { "type": "integer", "minimum": 1 },
+        "limit_wieku_adopcja_ojcowski_lat": { "type": "integer", "minimum": 1 },
+        "termin_wniosku_macierzynski_81_5_dni": { "type": "integer", "minimum": 1 },
+        "placa_minimalna_2026": { "type": "number", "minimum": 0 },
+        "skladki_spoleczne_proc": { "type": "number", "minimum": 0, "maximum": 100 },
+        "procent_zadluzenia_limit_zus": { "type": "number", "minimum": 0, "maximum": 100 }
+      }
+    }
+  }
+}
