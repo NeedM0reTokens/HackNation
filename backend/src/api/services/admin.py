@@ -1,13 +1,12 @@
 import json
 from pathlib import Path
-from typing import Any
-from ..models import AdminConfig, AdminConfigUpdate
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
+
+from fastapi import HTTPException
+
+from src.api.models.admin import AdminConfig, AdminConfigUpdate
+
 
 class ConfigService:
-    """Service to load and update configuration parameters at runtime (BE-02)."""
-
     def __init__(self, config_file: Path | None = None):
         self.config_file = config_file or (Path(__file__).resolve().parent.parent / "config.json")
         self._config: AdminConfig = self.load_from_disk()
@@ -50,5 +49,12 @@ class ConfigService:
             ) from e
 
 
-# Global configuration service instance
 config_service = ConfigService()
+
+
+def get_admin_config_service() -> AdminConfig:
+    return config_service.get_config()
+
+
+def update_admin_config_service(data: AdminConfigUpdate) -> AdminConfig:
+    return config_service.update_config(data)

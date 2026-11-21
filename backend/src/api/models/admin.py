@@ -1,39 +1,35 @@
-# paste all models from admin.py here
-import json
-from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 
 class BenefitRates(BaseModel):
     pregnancy_sick_leave_rate: float = Field(
-        100.0, description="% pregnancy sick leave (code B)"
+        default=100.0, description="% pregnancy sick leave (code B)"
     )
     standard_sick_leave_rate: float = Field(
-        80.0, description="% standard sick leave"
+        default=80.0, description="% standard sick leave"
     )
     unified_benefit_rate: float = Field(
-        81.5, description="% long application (maternity + parental)"
+        default=81.5, description="% long application (maternity + parental)"
     )
     full_maternity_rate: float = Field(
-        100.0, description="% full maternity allowance"
+        default=100.0, description="% full maternity allowance"
     )
     standard_parental_rate: float = Field(
-        70.0, description="% standard parental allowance"
+        default=70.0, description="% standard parental allowance"
     )
     paternity_benefit_rate: float = Field(
-        100.0, description="% paternity allowance"
+        default=100.0, description="% paternity allowance"
     )
     rehabilitation_benefit_rate_first_3_months: float = Field(
-        90.0, description="% rehabilitation benefit first 3 months"
+        default=90.0, description="% rehabilitation benefit first 3 months"
     )
     rehabilitation_benefit_rate_remaining: float = Field(
-        75.0, description="% rehabilitation benefit remaining months"
+        default=75.0, description="% rehabilitation benefit remaining months"
     )
     rehabilitation_benefit_rate_pregnancy: float = Field(
-        100.0, description="% rehabilitation benefit during pregnancy"
+        default=100.0, description="% rehabilitation benefit during pregnancy"
     )
 
 
@@ -67,14 +63,13 @@ class PeriodsAndLimits(BaseModel):
     zus_debt_limit_percentage: float = 1.0
 
 
-
 class AdminConfig(BaseModel):
-    benefit_rates: BenefitRates = Field(default_factory=BenefitRates)
-    leave_durations: LeaveDurations = Field(default_factory=LeaveDurations)
-    periods_and_limits: PeriodsAndLimits = Field(default_factory=PeriodsAndLimits)
+    benefit_rates: BenefitRates = Field(default_factory=lambda: BenefitRates())
+    leave_durations: LeaveDurations = Field(default_factory=lambda: LeaveDurations())
+    periods_and_limits: PeriodsAndLimits = Field(default_factory=lambda: PeriodsAndLimits())
 
 
 class AdminConfigUpdate(BaseModel):
-    benefit_rates: dict[str, Any] | None = None
-    leave_durations: dict[str, Any] | None = None
-    periods_and_limits: dict[str, Any] | None = None
+    benefit_rates: dict[str, Any] | None = Field(default=None)
+    leave_durations: dict[str, Any] | None = Field(default=None)
+    periods_and_limits: dict[str, Any] | None = Field(default=None)

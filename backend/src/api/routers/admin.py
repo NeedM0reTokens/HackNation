@@ -1,39 +1,47 @@
-import json
-from pathlib import Path
 from typing import Any
-from ..models import AdminConfig, AdminConfigUpdate
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
-from ..services.admin import config_service
+
+from fastapi import APIRouter
+
+from src.api.models.admin import AdminConfig, AdminConfigUpdate
+from src.api.services.admin import (
+    config_service,
+    get_admin_config_service,
+    update_admin_config_service,
+)
+
+router = APIRouter(prefix="/admin", tags=["Panel Admina"])
 
 
+@router.get(
+    "/config",
+    response_model=AdminConfig,
+    summary="Get current legal and configuration parameters",
+)
+def get_admin_config() -> AdminConfig:
+    return get_admin_config_service()
 
 
-
-
-
-
-
+@router.put(
+    "/config",
+    response_model=AdminConfig,
+    summary="Update parameters at runtime (without restarting server)",
+)
+def update_admin_config(payload: AdminConfigUpdate) -> AdminConfig:
+    return update_admin_config_service(payload)
 
 
 class AdminRouter(APIRouter):
-    """
-    Router class for Admin Panel (BE-03).
-    Exposes GET and PUT endpoints for runtime configuration management.
-    """
-
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(prefix="/admin", tags=["Admin Panel"], **kwargs)
         self._setup_routes()
 
-    def _setup_routes(self):
+    def _setup_routes(self) -> None:
         self.add_api_route(
             "/config",
             self.get_admin_config,
             methods=["GET"],
             response_model=AdminConfig,
             summary="Get current legal and configuration parameters",
-            description="Returns current configuration of rates, limits and leave durations.",
         )
         self.add_api_route(
             "/config",
@@ -41,7 +49,6 @@ class AdminRouter(APIRouter):
             methods=["PUT"],
             response_model=AdminConfig,
             summary="Update parameters at runtime (without restarting server)",
-            description="Allows modifying rates and limits and saves them to config.json.",
         )
 
     def get_admin_config(self) -> AdminConfig:
@@ -51,5 +58,4 @@ class AdminRouter(APIRouter):
         return config_service.update_config(data)
 
 
-# Alias for compatibility
 AdminAPI = AdminRouter
