@@ -101,8 +101,6 @@ class PaternityRouter(APIRouter):
         return calculate_parental_sharing(payload)
 
 
-<<<<<<< HEAD
 router = PaternityRouter()
-=======
->>>>>>> c6e189d6c07fea4503a797e5834df1f985859c4a
 PaternityAPI = PaternityRouter
+
