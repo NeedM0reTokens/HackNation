@@ -25,6 +25,7 @@ htmlcov/
 node_modules/
 dist/
 dist-ssr/
+*.tsbuildinfo
 
 # Logs
 logs/
