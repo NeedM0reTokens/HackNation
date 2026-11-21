@@ -1,0 +1,29 @@
+[
+  {
+    "pesel": "92011501234",
+    "first_name": "Anna",
+    "last_name": "Kowalska",
+    "date_of_birth": "1992-01-15",
+    "email": "anna.kowalska@obywatel.gov.pl",
+    "role": "user",
+    "label": "Anna Kowalska - Przyszła Matka (Obywatel)"
+  },
+  {
+    "pesel": "89032005678",
+    "first_name": "Piotr",
+    "last_name": "Zieliński",
+    "date_of_birth": "1989-03-20",
+    "email": "piotr.zielinski@obywatel.gov.pl",
+    "role": "user",
+    "label": "Piotr Zieliński - Przyszły Ojciec (Obywatel)"
+  },
+  {
+    "pesel": "80051209876",
+    "first_name": "Marek",
+    "last_name": "Nowak",
+    "date_of_birth": "1980-05-12",
+    "email": "admin.nowak@zus.pl",
+    "role": "admin",
+    "label": "Marek Nowak - Inspektor ZUS (Administrator)"
+  }
+]
