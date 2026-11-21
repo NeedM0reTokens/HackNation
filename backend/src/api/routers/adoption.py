@@ -2,11 +2,11 @@ from typing import Any
 
 from fastapi import APIRouter
 
-from src.api.models.adoption import (
+from ..models.adoption import (
     AdoptionLeaveInput,
     AdoptionLeaveResult,
 )
-from src.api.services.adoption import calculate_adoption_leave
+from ..services.adoption import calculate_adoption_leave
 
 
 class AdoptionRouter(APIRouter):

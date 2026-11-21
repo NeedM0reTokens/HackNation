@@ -2,7 +2,7 @@ from typing import Any
 
 from fastapi import APIRouter
 
-from src.api.models.paternity import (
+from ..models.paternity import (
     MaternityTransferInput,
     MaternityTransferResult,
     ParentalSharingInput,
@@ -10,7 +10,7 @@ from src.api.models.paternity import (
     PaternityLeaveInput,
     PaternityLeaveResult,
 )
-from src.api.services.paternity import (
+from ..services.paternity import (
     calculate_maternity_transfer,
     calculate_parental_sharing,
     calculate_paternity_leave,
@@ -101,5 +101,8 @@ class PaternityRouter(APIRouter):
         return calculate_parental_sharing(payload)
 
 
+<<<<<<< HEAD
 router = PaternityRouter()
+=======
+>>>>>>> c6e189d6c07fea4503a797e5834df1f985859c4a
 PaternityAPI = PaternityRouter

@@ -1,8 +1,7 @@
 from collections import defaultdict
 from datetime import date, timedelta
 
-from src.api.models.maternity import BenefitPaymentVariant
-from src.constants import (
+from ...constants import (
     ADOPTION_CHILD_STANDARD_AGE_LIMIT,
     ADOPTION_MIN_GUARANTEED_MATERNITY_WEEKS,
     FULL_MATERNITY_RATE,
@@ -25,7 +24,6 @@ from src.constants import (
     STILLBIRTH_MATERNITY_WEEKS,
     UNIFIED_BENEFIT_RATE,
 )
-
 from ..models.calculator import (
     AllowanceRatesResponse,
     CalculatorPreset,
@@ -35,6 +33,7 @@ from ..models.calculator import (
     TimelineMilestone,
     TimelinePeriod,
 )
+from ..models.maternity import BenefitPaymentVariant
 
 
 def get_allowance_rates_service() -> AllowanceRatesResponse:
