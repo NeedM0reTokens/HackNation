@@ -94,7 +94,26 @@ class MockRouter(APIRouter):
         return self.mobywatel.authenticate(payload.pesel)
 
 
+class SimulationRouter(APIRouter):
+    """Router alias for PUE ZUS and mObywatel simulation (BE-26)."""
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(
+            prefix="/simulation",
+            tags=["Symulacje zewnętrznych serwisów (Mock)"],
+            **kwargs,
+        )
+        self.add_api_route(
+            "/profile/{user_id}",
+            get_mock_user_profile_service,
+            methods=["GET"],
+            response_model=UserProfileResponse,
+            summary="Pobranie profilu ubezpieczonego z symulacji PUE ZUS / mObywatel (BE-26)",
+            description="Zwraca profil ubezpieczonego dla wybranego ID / PESEL.",
+        )
+
+
 router = MockRouter()
 MockAPI = MockRouter
-SimulationRouter = MockRouter
-SimulationAPI = MockRouter
+SimulationAPI = SimulationRouter
+

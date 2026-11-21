@@ -9,7 +9,7 @@ if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 from fastapi.testclient import TestClient  # noqa: E402
-from src.api.API import app  # noqa: E402
+from src.api import app  # noqa: E402
 from src.api.models.adoption import (  # noqa: E402
     AdoptionLeaveInput,
     CaregiverType,
