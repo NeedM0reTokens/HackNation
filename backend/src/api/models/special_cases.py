@@ -2,7 +2,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
-from src.api.models.maternity import MaternityEmploymentType, PeriodBreakdown
+from .maternity import MaternityEmploymentType, PeriodBreakdown
 
 
 class SpecialCaseType(StrEnum):
@@ -18,12 +18,10 @@ class SpecialCasesInput(BaseModel):
     children_born_count: int = Field(1, ge=1, le=10)
     is_insured_at_birth: bool = Field(True)
 
-    # BE-13: Za życiem
     has_za_zyciem_certificate: bool = Field(
         False, description="Certificate under 'Za życiem' Act (severe/irreversible disability)"
     )
 
-    # BE-14: Premature / Hospitalization
     child_birth_week: int | None = Field(
         None, ge=20, le=44, description="Gestational week at birth (e.g. 26 for premature)"
     )
@@ -34,7 +32,6 @@ class SpecialCasesInput(BaseModel):
         0, ge=0, le=30, description="Total duration of child's hospital stay in full weeks"
     )
 
-    # BE-15: Stillbirth / Child death
     is_stillbirth: bool = Field(
         False, description="True if child was stillborn (urodzenie martwe)"
     )
@@ -53,7 +50,6 @@ class SpecialCasesResult(BaseModel):
     case_type: SpecialCaseType
     is_eligible: bool
 
-    # Durations in weeks
     base_maternity_weeks: int
     supplementary_maternity_weeks: int
     total_maternity_weeks: int
@@ -61,13 +57,11 @@ class SpecialCasesResult(BaseModel):
     non_transferable_parental_weeks: int
     total_leave_weeks: int
 
-    # Financial breakdown
     calculation_base_net: float
     daily_rate: float
     total_benefit_amount: float
     one_time_grant_pln: float = 0.0
 
-    # Specific rights and rules
     can_interrupt_maternity_for_hospitalization: bool = False
     min_mandatory_mother_maternity_weeks: int = 14
 

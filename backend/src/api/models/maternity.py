@@ -23,7 +23,7 @@ class MaternityParentalInput(BaseModel):
     has_za_zyciem_certificate: bool = Field(default=False)
     applied_within_21_days: bool = Field(default=True)
     chosen_variant: BenefitPaymentVariant = BenefitPaymentVariant.UNIFIED_81_5
-    mother_maternity_weeks: int = Field(default=20, ge=14)
+    mother_maternity_weeks: int = Field(default=20, ge=0)
     father_parental_weeks: int = Field(default=9, ge=0)
     mother_parental_weeks: int = Field(default=32, ge=0)
     parental_leave_parts_count: int = Field(default=1, ge=1, le=10)
