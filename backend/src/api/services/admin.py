@@ -3,7 +3,7 @@ from pathlib import Path
 
 from fastapi import HTTPException
 
-from src.api.models.admin import AdminConfig, AdminConfigUpdate
+from ..models.admin import AdminConfig, AdminConfigUpdate
 
 
 class ConfigService:

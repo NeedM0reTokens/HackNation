@@ -40,16 +40,16 @@ class PregnancyBenefitInput(BaseModel):
     employment_type: EmploymentType
     gross_monthly_income: float = Field(..., gt=0)
     insurance_duration_days: int = Field(..., ge=0)
-    exempt_from_waiting_period: bool = Field(False)
-    has_pregnancy_code_b: bool = Field(True)
-    employee_age: int = Field(30, ge=16, le=100)
-    prior_sick_days_current_year: int = Field(0, ge=0)
-    sick_leave_duration_days: int = Field(30, gt=0)
+    exempt_from_waiting_period: bool = Field(default=False)
+    has_pregnancy_code_b: bool = Field(default=True)
+    employee_age: int = Field(default=30, ge=16, le=100)
+    prior_sick_days_current_year: int = Field(default=0, ge=0)
+    sick_leave_duration_days: int = Field(default=30, gt=0)
     payer_size: PayerSize = PayerSize.ABOVE_20
-    zus_debt_amount: float = Field(0.0, ge=0.0)
+    zus_debt_amount: float = Field(default=0.0, ge=0.0)
     company_status: CompanyStatus = CompanyStatus.NORMAL
-    pregnancy_week: int | None = Field(None, ge=1, le=42)
-    exhausted_sickness_period: bool = Field(False)
+    pregnancy_week: int | None = Field(default=None, ge=1, le=42)
+    exhausted_sickness_period: bool = Field(default=False)
 
 
 class PregnancyBenefitResult(BaseModel):

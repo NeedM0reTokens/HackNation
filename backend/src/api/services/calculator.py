@@ -1,5 +1,4 @@
-from src.api.models.calculator import AllowanceRatesResponse
-from src.constants import (
+from ...constants import (
     FULL_MATERNITY_RATE,
     NON_TRANSFERABLE_PARENTAL_WEEKS,
     PATERNITY_LEAVE_DAYS,
@@ -7,6 +6,7 @@ from src.constants import (
     STANDARD_PARENTAL_RATE,
     UNIFIED_BENEFIT_RATE,
 )
+from ..models.calculator import AllowanceRatesResponse
 
 
 def get_allowance_rates_service() -> AllowanceRatesResponse:

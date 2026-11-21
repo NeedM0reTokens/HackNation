@@ -2,8 +2,8 @@ from typing import Any
 
 from fastapi import APIRouter
 
-from src.api.models.simulation import UserProfileResponse
-from src.api.services.simulation import get_mock_user_profile_service
+from ..models.simulation import UserProfileResponse
+from ..services.simulation import get_mock_user_profile_service
 
 router = APIRouter(prefix="/simulation", tags=["Symulacja mObywatel / ZUS"])
 

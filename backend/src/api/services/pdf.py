@@ -1,6 +1,6 @@
 from fastapi import HTTPException, UploadFile
 
-from src.api.models.pdf import PdfParseResponse
+from ..models.pdf import PdfParseResponse
 
 
 async def parse_pdf_service(file: UploadFile) -> PdfParseResponse:

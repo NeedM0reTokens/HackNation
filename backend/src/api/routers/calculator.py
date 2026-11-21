@@ -2,8 +2,8 @@ from typing import Any
 
 from fastapi import APIRouter
 
-from src.api.models.calculator import AllowanceRatesResponse
-from src.api.services.calculator import get_allowance_rates_service
+from ..models.calculator import AllowanceRatesResponse
+from ..services.calculator import get_allowance_rates_service
 
 router = APIRouter(prefix="/calculator", tags=["Kalkulator Zasiłków"])
 

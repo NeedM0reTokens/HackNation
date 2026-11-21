@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.routers.admin import AdminRouter
-from src.api.routers.calculator import CalculatorRouter
-from src.api.routers.health import HealthRouter
-from src.api.routers.maternity import router as maternity_router
-from src.api.routers.pdf import PdfRouter
-from src.api.routers.pregnancy import router as pregnancy_router
-from src.api.routers.simulation import SimulationRouter
+from .routers.admin import AdminRouter
+from .routers.calculator import CalculatorRouter
+from .routers.health import HealthRouter
+from .routers.maternity import router as maternity_router
+from .routers.pdf import PdfRouter
+from .routers.pregnancy import router as pregnancy_router
+from .routers.simulation import SimulationRouter
 
 
 class MainAPI(FastAPI):

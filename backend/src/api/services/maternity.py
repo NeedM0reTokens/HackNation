@@ -1,11 +1,4 @@
-from src.api.models.maternity import (
-    BenefitPaymentVariant,
-    MaternityEmploymentType,
-    MaternityParentalInput,
-    MaternityParentalResult,
-    PeriodBreakdown,
-)
-from src.constants import (
+from ...constants import (
     FULL_MATERNITY_RATE,
     LONG_APPLICATION_DEADLINE_DAYS,
     MANDATORY_MOTHER_MATERNITY_WEEKS,
@@ -21,6 +14,13 @@ from src.constants import (
     SOCIAL_CONTRIBUTIONS_RATE,
     STANDARD_PARENTAL_RATE,
     UNIFIED_BENEFIT_RATE,
+)
+from ..models.maternity import (
+    BenefitPaymentVariant,
+    MaternityEmploymentType,
+    MaternityParentalInput,
+    MaternityParentalResult,
+    PeriodBreakdown,
 )
 
 

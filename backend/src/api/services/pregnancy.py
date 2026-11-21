@@ -1,13 +1,4 @@
-from src.api.models.pregnancy import (
-    BenefitType,
-    CompanyStatus,
-    EmploymentType,
-    PayerSize,
-    PayerType,
-    PregnancyBenefitInput,
-    PregnancyBenefitResult,
-)
-from src.constants import (
+from ...constants import (
     EMPLOYER_SICK_DAYS_SENIOR,
     EMPLOYER_SICK_DAYS_STANDARD,
     MANDATORY_WAITING_PERIOD_DAYS,
@@ -19,6 +10,15 @@ from src.constants import (
     STANDARD_SICK_LEAVE_RATE,
     VOLUNTARY_WAITING_PERIOD_DAYS,
     ZUS_DEBT_LIMIT,
+)
+from ..models.pregnancy import (
+    BenefitType,
+    CompanyStatus,
+    EmploymentType,
+    PayerSize,
+    PayerType,
+    PregnancyBenefitInput,
+    PregnancyBenefitResult,
 )
 
 

@@ -2,8 +2,8 @@ from typing import Any
 
 from fastapi import APIRouter
 
-from src.api.models.admin import AdminConfig, AdminConfigUpdate
-from src.api.services.admin import (
+from ..models.admin import AdminConfig, AdminConfigUpdate
+from ..services.admin import (
     config_service,
     get_admin_config_service,
     update_admin_config_service,

@@ -2,8 +2,8 @@ from typing import Any
 
 from fastapi import APIRouter
 
-from src.api.models.health import HealthResponse
-from src.api.services.health import get_health_status
+from ..models.health import HealthResponse
+from ..services.health import get_health_status
 
 router = APIRouter(tags=["Health"])
 

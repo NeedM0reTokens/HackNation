@@ -1,4 +1,4 @@
-from src.api.models.simulation import UserProfileResponse
+from ..models.simulation import UserProfileResponse
 
 
 def get_mock_user_profile_service(user_id: str) -> UserProfileResponse:

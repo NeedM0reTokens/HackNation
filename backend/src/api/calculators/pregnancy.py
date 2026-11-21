@@ -1,4 +1,4 @@
-from src.api.models.pregnancy import (
+from ..models.pregnancy import (
     BenefitType,
     CompanyStatus,
     EmploymentType,
@@ -7,7 +7,7 @@ from src.api.models.pregnancy import (
     PregnancyBenefitInput,
     PregnancyBenefitResult,
 )
-from src.api.services.pregnancy import (
+from ..services.pregnancy import (
     _build_ineligible_result,
     _calculate_net_base,
     calculate_pregnancy_benefit,

@@ -1,4 +1,4 @@
-from src.api.models.health import HealthResponse
+from ..models.health import HealthResponse
 
 
 def get_health_status() -> HealthResponse:

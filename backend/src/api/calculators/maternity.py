@@ -1,11 +1,11 @@
-from src.api.models.maternity import (
+from ..models.maternity import (
     BenefitPaymentVariant,
     MaternityEmploymentType,
     MaternityParentalInput,
     MaternityParentalResult,
     PeriodBreakdown,
 )
-from src.api.services.maternity import (
+from ..services.maternity import (
     _calculate_net_base,
     calculate_maternity_parental_benefit,
     get_maternity_weeks,
