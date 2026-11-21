@@ -7,34 +7,26 @@ Monorepo projektu zawierające:
 
 ---
 
-## Szybki start z Makefile (rekomendowany)
-
-Dla wygody przygotowano plik `Makefile` ze skrótami najpopularniejszych poleceń:
-
-```bash
-make          # Wyświetla pomoc i listę wszystkich komend
-make up       # Buduje i uruchamia aplikację (frontend + backend)
-make up-d     # Uruchamia aplikację w tle (detached)
-make logs     # Podgląd logów na żywo
-make down     # Zatrzymuje działające kontenery
-make restart  # Restartuje kontenery
-make clean    # Zatrzymuje kontenery i usuwa wolumeny
-```
-
-Po uruchomieniu aplikacji:
-
-- **Frontend**: [http://localhost:5173](http://localhost:5173)
-- **Backend API**: [http://localhost:8000](http://localhost:8000)
-- **API Docs (Swagger)**: [http://localhost:8000/docs](http://localhost:8000/docs)
-
-Kod źródłowy jest podmontowany jako wolumeny, więc zmiany w plikach odświeżają się automatycznie (live reload / HMR).
-
----
-
 ## Uruchomienie bezpośrednio przez Docker Compose
 
+Zawsze uruchamiaj komendy compose w root folderze projektu:
+
+Uruchom aplikację:
+
 ```bash
-docker compose up --build
+docker compose up --build -d
+```
+
+Zatrzymaj:
+
+```bash
+docker compose down
+```
+
+Logi:
+
+```bash
+docker compose logs -f
 ```
 
 ---
