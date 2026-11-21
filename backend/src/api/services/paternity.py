@@ -126,7 +126,6 @@ def calculate_paternity_leave(data: PaternityLeaveInput) -> PaternityLeaveResult
 
 
 def calculate_maternity_transfer(data: MaternityTransferInput) -> MaternityTransferResult:
-    """Calculates father taking over maternity leave (BE-17)."""
     refusal_reasons: list[str] = []
     total_maternity_weeks = get_maternity_weeks(data.children_born_count)
 
@@ -213,7 +212,6 @@ def calculate_maternity_transfer(data: MaternityTransferInput) -> MaternityTrans
 
 
 def calculate_parental_sharing(data: ParentalSharingInput) -> ParentalSharingResult:
-    """Simulates parental care sharing between both parents (BE-18)."""
     maternity_pool = get_maternity_weeks(data.children_born_count)
     parental_pool = get_parental_weeks(data.children_born_count, data.has_za_zyciem_certificate)
     combined_total = maternity_pool + parental_pool

@@ -2,8 +2,8 @@ from typing import Any
 
 from fastapi import APIRouter
 
-from src.api.models.special_cases import SpecialCasesInput, SpecialCasesResult
-from src.api.services.special_cases import calculate_special_cases
+from ..models.special_cases import SpecialCasesInput, SpecialCasesResult
+from ..services.special_cases import calculate_special_cases
 
 router = APIRouter(prefix="/api/calculators", tags=["Special Cases"])
 

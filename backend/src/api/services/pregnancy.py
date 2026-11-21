@@ -162,6 +162,11 @@ def calculate_pregnancy_benefit(data: PregnancyBenefitInput) -> PregnancyBenefit
         required_documents.append("e-ZLA z kodem B (elektronicznie do ZUS i pracodawcy)")
         if data.payer_size == PayerSize.UP_TO_20:
             required_documents.append("Zaświadczenie płatnika składek Z-3")
+        else:
+            legal_notes.append(
+                "Płatnik > 20 ubezpieczonych: pracodawca wypłaca zasiłek bezpośrednio "
+                + "(rozliczając w ciężar składek FUS/ZUS w deklaracji ZUS DRA)."
+            )
         legal_notes.append("Ochrona stosunku pracy pracownicy w ciąży (art. 177 KP).")
         if data.pregnancy_week and data.pregnancy_week >= 13:
             legal_notes.append("Przedłużenie umowy do dnia porodu (art. 177 § 3 KP).")
