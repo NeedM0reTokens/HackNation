@@ -1,10 +1,9 @@
 import unittest
 
 from fastapi.testclient import TestClient
-
-from ..api.api import app
-from ..api.services.admin import config_service
-from ..api.services.calculator import get_allowance_rates_service
+from src.api.api import app
+from src.api.services.admin import config_service
+from src.api.services.calculator import get_allowance_rates_service
 
 
 class TestAdminConfigEndpoints(unittest.TestCase):

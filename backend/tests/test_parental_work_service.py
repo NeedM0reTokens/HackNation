@@ -1,7 +1,7 @@
 import unittest
 
-from ..api.models.parental_work import ParentalWorkInput
-from ..api.services.parental_work import (
+from src.api.models.parental_work import ParentalWorkInput
+from src.api.services.parental_work import (
     _get_base_parental_pool,
     _get_maximum_extension_limit,
     calculate_parental_work_combination,

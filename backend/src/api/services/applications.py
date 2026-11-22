@@ -12,8 +12,8 @@ try:
 
     HAS_CAIRO = True
 except ImportError:
-    cairo = None  # type: ignore[assignment]
-    HAS_CAIRO = False
+    cairo: Any = None
+    HAS_CAIRO = False  # pyright: ignore[reportConstantRedefinition]
 
 from ..models.applications import (
     ApplicantData,
