@@ -140,17 +140,6 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
       <div className="zus-container">
         {/* NAGŁÓWEK SEKCJI */}
         <div className="zus-catalog-header">
-          <div className="zus-catalog-header-top">
-            <div className="zus-catalog-auth-status">
-              <span className={`zus-status-dot ${isLoggedIn ? 'online' : 'manual'}`}></span>
-              <span className="zus-status-mode-label">
-                {isLoggedIn
-                  ? 'Tryb automatyczny: Dane pobrane z mObywatel / ZUS'
-                  : 'Tryb manualny: Symulacja na podstawie filtrów'}
-              </span>
-            </div>
-          </div>
-
           <h2 className="zus-catalog-title">Twoje uprawnienia i świadczenia</h2>
           <p className="zus-catalog-subtitle">
             Interaktywny katalog 16 świadczeń społecznych i rodzicielskich ZUS. Sprawdź na jakie wsparcie możesz

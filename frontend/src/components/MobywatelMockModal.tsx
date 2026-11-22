@@ -177,7 +177,7 @@ export const MobywatelMockModal: React.FC<MobywatelMockModalProps> = ({
           display: 'flex',
           flexDirection: 'column',
           color: '#1A1A1A',
-          fontFamily: "'Segoe UI', Roboto, 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif",
+          fontFamily: '"Lato Regular", "Helvetica Neue", "Helvetica", "Arial", sans-serif',
           overflow: 'hidden',
           border: '1px solid #E2E8F0',
         }}
