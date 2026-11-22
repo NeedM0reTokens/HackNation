@@ -15,8 +15,11 @@ from ..models.assistant import (
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_GEMINI_MODEL = "gemini-3.5-flash-light"
-FALLBACK_GEMINI_MODEL = "gemini-2.0-flash"
+DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
+FALLBACK_GEMINI_MODELS = (
+    "gemini-3.1-flash-lite",
+    "gemini-3.5-flash-lite",
+)
 GEMINI_ENDPOINT_TEMPLATE = (
     "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
 )
@@ -1263,7 +1266,6 @@ class GeminiAssistantService:
         self, request: AssistantAskRequest, api_key: str
     ) -> AssistantAskResponse | None:
         prompt_content = self._build_gemini_prompt(request)
-        url = GEMINI_ENDPOINT_TEMPLATE.format(model=self.active_model, key=api_key)
 
         request_body = {
             "contents": [
@@ -1277,37 +1279,58 @@ class GeminiAssistantService:
             },
             "generationConfig": {
                 "temperature": 0.2,
-                "maxOutputTokens": 1024,
+                "topP": 0.9,
+                "topK": 40,
+                "maxOutputTokens": 2048,
                 "responseMimeType": "application/json",
+                "thinkingConfig": {
+                    "thinkingBudget": 2048,
+                },
             },
         }
 
+        models_to_try = (self.active_model, *FALLBACK_GEMINI_MODELS)
+        # Nie powtarzamy tego samego modelu, np. gdy jest już ustawiony jako pierwszy fallback.
+        models_to_try = tuple(dict.fromkeys(models_to_try))
+
         async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.post(url, json=request_body)
+            for model_name in models_to_try:
+                model_url = GEMINI_ENDPOINT_TEMPLATE.format(model=model_name, key=api_key)
+                model_body = json.loads(json.dumps(request_body))
 
-            if resp.status_code == 404 and self.active_model != FALLBACK_GEMINI_MODEL:
-                fallback_url = GEMINI_ENDPOINT_TEMPLATE.format(
-                    model=FALLBACK_GEMINI_MODEL, key=api_key
-                )
-                resp = await client.post(fallback_url, json=request_body)
+                if model_name.startswith(("gemini-3", "gemini-4")):
+                    model_body["generationConfig"]["thinkingConfig"] = {
+                        "thinkingLevel": "LOW"
+                    }
+                elif model_name.startswith("gemini-2.5"):
+                    model_body["generationConfig"]["thinkingConfig"] = {
+                        "thinkingBudget": 512
+                    }
+                else:
+                    model_body["generationConfig"].pop("thinkingConfig", None)
 
-            if resp.status_code != 200:
-                logger.warning(
-                    f"Gemini API returned error {resp.status_code}: {resp.text[:200]}"
-                )
-                return None
+                resp = await client.post(model_url, json=model_body)
 
-            data = resp.json()
-            candidates = data.get("candidates", [])
-            if not candidates:
-                return None
+                if resp.status_code != 200:
+                    logger.warning(
+                        f"Gemini model {model_name} returned {resp.status_code}: "
+                        f"{resp.text[:200]}"
+                    )
+                    continue
 
-            parts = candidates[0].get("content", {}).get("parts", [])
-            if not parts:
-                return None
+                data = resp.json()
+                candidates = data.get("candidates", [])
+                if not candidates:
+                    continue
 
-            text = parts[0].get("text", "")
-            return self._parse_gemini_json_response(text, self.active_model)
+                parts = candidates[0].get("content", {}).get("parts", [])
+                if not parts:
+                    continue
+
+                text = parts[0].get("text", "")
+                return self._parse_gemini_json_response(text, model_name)
+
+        return None
 
     def _build_gemini_prompt(self, request: AssistantAskRequest) -> str:
         prompt_parts: list[str] = []

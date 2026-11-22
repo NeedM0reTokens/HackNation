@@ -35,7 +35,7 @@ class AssistantAskResponse(BaseModel):
         default=None, description="Podstawa prawna (art. Kodeksu pracy lub ustawy zasiłkowej)"
     )
     model_used: str = Field(
-        default="gemini-2.0-flash", description="Model AI lub silnik wiedzy użyty do odpowiedzi"
+        default="gemini-3.8-flash", description="Model AI lub silnik wiedzy użyty do odpowiedzi"
     )
     is_live_ai: bool = Field(
         default=True, description="Czy odpowiedź została wygenerowana na żywo przez Gemini API"
