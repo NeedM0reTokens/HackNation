@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { BookOpen, Pencil, CheckCircle2, Wallet, CalendarDays, FileText, ShieldAlert } from 'lucide-react';
+import { BookOpen, Pencil, CheckCircle2, Wallet, CalendarDays, ShieldAlert } from 'lucide-react';
 import {
   buildAlerts,
-  buildDocuments,
   buildKnowledge,
   buildMilestones,
   calculate,
@@ -20,10 +19,9 @@ import { QualificationBanner } from './qualification-banner';
 import { KnowledgePanel } from './knowledge-panel';
 import { SummaryTab } from './tabs/summary-tab';
 import { TimelineTab } from './tabs/timeline-tab';
-import { DocumentsTab } from './tabs/documents-tab';
 import { AlertsTab } from './tabs/alerts-tab';
 
-type TabId = 'summary' | 'timeline' | 'documents' | 'alerts';
+type TabId = 'summary' | 'timeline' | 'alerts';
 
 export function ResultsView({
   input,
@@ -40,7 +38,6 @@ export function ResultsView({
   const qualification = useMemo(() => qualify(input), [input]);
   const calc = useMemo(() => calculate(input, options), [input, options]);
   const milestones = useMemo(() => buildMilestones(input, calc), [input, calc]);
-  const documents = useMemo(() => buildDocuments(input), [input]);
   const alerts = useMemo(() => {
     if (backendResult?.risk_alerts && backendResult.risk_alerts.length > 0) {
       return backendResult.risk_alerts;
@@ -233,16 +230,6 @@ export function ResultsView({
 
               <button
                 type="button"
-                className={`zus-tab-btn ${tab === 'documents' ? 'active' : ''}`}
-                onClick={() => setTab('documents')}
-              >
-                <FileText className="zus-tab-icon" size={18} />
-                <span className="zus-tab-text-desktop">Dokumenty i Wnioski</span>
-                <span className="zus-tab-text-mobile">Wnioski</span>
-              </button>
-
-              <button
-                type="button"
                 className={`zus-tab-btn ${tab === 'alerts' ? 'active' : ''}`}
                 onClick={() => setTab('alerts')}
               >
@@ -279,10 +266,6 @@ export function ResultsView({
 
           {tab === 'timeline' && (
             <TimelineTab milestones={milestones} backendResult={backendResult} />
-          )}
-
-          {tab === 'documents' && (
-            <DocumentsTab key={`${input.role}-${input.employment}`} documents={documents} />
           )}
 
           {tab === 'alerts' && (
