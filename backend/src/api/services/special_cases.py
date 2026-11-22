@@ -155,10 +155,7 @@ def _calculate_premature_hospitalization(
     weight = data.birth_weight_grams or 3500
     hosp_weeks = data.hospitalization_weeks
 
-    if (
-        birth_week <= PREMATURE_EXTREME_WEEK_THRESHOLD
-        or weight <= PREMATURE_EXTREME_WEIGHT_GRAMS
-    ):
+    if birth_week <= PREMATURE_EXTREME_WEEK_THRESHOLD or weight <= PREMATURE_EXTREME_WEIGHT_GRAMS:
         supplementary_weeks = min(hosp_weeks, PREMATURE_EXTREME_MAX_SUPPLEMENTARY_WEEKS)
         min_w = PREMATURE_EXTREME_WEEK_THRESHOLD
         max_w = PREMATURE_EXTREME_MAX_SUPPLEMENTARY_WEEKS

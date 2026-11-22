@@ -1,16 +1,3 @@
-from ...constants import (
-    EMPLOYER_SICK_DAYS_SENIOR,
-    EMPLOYER_SICK_DAYS_STANDARD,
-    MANDATORY_WAITING_PERIOD_DAYS,
-    MAX_PREGNANCY_SICK_LEAVE_DAYS,
-    MIN_WAGE_2026,
-    PREGNANCY_SICK_LEAVE_RATE,
-    SENIOR_AGE_THRESHOLD,
-    SOCIAL_CONTRIBUTIONS_RATE,
-    STANDARD_SICK_LEAVE_RATE,
-    VOLUNTARY_WAITING_PERIOD_DAYS,
-    ZUS_DEBT_LIMIT,
-)
 from ..models.pregnancy import (
     BenefitType,
     CompanyStatus,
@@ -20,10 +7,12 @@ from ..models.pregnancy import (
     PregnancyBenefitInput,
     PregnancyBenefitResult,
 )
+from .admin import config_service
 
 
 def _calculate_net_base(gross: float) -> float:
-    return round(gross * (1 - SOCIAL_CONTRIBUTIONS_RATE / 100), 2)
+    social_rate = config_service.get_config().benefit_rates.social_contributions_rate
+    return round(gross * (1 - social_rate / 100), 2)
 
 
 def _build_ineligible_result(
@@ -31,6 +20,7 @@ def _build_ineligible_result(
     documents: list[str] | None = None,
     legal_notes: list[str] | None = None,
 ) -> PregnancyBenefitResult:
+    max_days = config_service.get_config().periods_and_limits.max_pregnancy_sick_leave_days
     return PregnancyBenefitResult(
         is_eligible=False,
         benefit_type=BenefitType.NONE,
@@ -43,7 +33,7 @@ def _build_ineligible_result(
         employer_amount=0.0,
         zus_days=0,
         zus_amount=0.0,
-        max_coverage_days=MAX_PREGNANCY_SICK_LEAVE_DAYS,
+        max_coverage_days=max_days,
         refusal_reasons=reasons,
         required_documents=documents or [],
         legal_notes=legal_notes or [],
@@ -51,6 +41,19 @@ def _build_ineligible_result(
 
 
 def calculate_pregnancy_benefit(data: PregnancyBenefitInput) -> PregnancyBenefitResult:
+    cfg = config_service.get_config()
+    rates = cfg.benefit_rates
+    amounts = cfg.benefit_amounts
+    limits = cfg.periods_and_limits
+
+    min_wage = amounts.min_wage_2026
+    debt_limit = amounts.zus_debt_limit
+    sick_b_rate = rates.pregnancy_sick_leave_rate
+    sick_std_rate = rates.standard_sick_leave_rate
+    max_days = limits.max_pregnancy_sick_leave_days
+    waiting_mandatory = limits.mandatory_waiting_period_days
+    waiting_voluntary = limits.voluntary_waiting_period_days
+
     refusal_reasons: list[str] = []
     legal_notes: list[str] = []
     required_documents: list[str] = []
@@ -63,9 +66,9 @@ def calculate_pregnancy_benefit(data: PregnancyBenefitInput) -> PregnancyBenefit
         )
 
     required_waiting_days = (
-        MANDATORY_WAITING_PERIOD_DAYS
+        waiting_mandatory
         if data.employment_type == EmploymentType.EMPLOYMENT_CONTRACT
-        else VOLUNTARY_WAITING_PERIOD_DAYS
+        else waiting_voluntary
     )
     if not data.exempt_from_waiting_period and data.insurance_duration_days < required_waiting_days:
         missing_days = required_waiting_days - data.insurance_duration_days
@@ -74,10 +77,10 @@ def calculate_pregnancy_benefit(data: PregnancyBenefitInput) -> PregnancyBenefit
             + f"Aktualny staż: {data.insurance_duration_days} dni (brakuje {missing_days} dni)."
         )
 
-    if data.employment_type == EmploymentType.B2B and data.zus_debt_amount > ZUS_DEBT_LIMIT:
+    if data.employment_type == EmploymentType.B2B and data.zus_debt_amount > debt_limit:
         refusal_reasons.append(
             f"Zadłużenie w ZUS ({data.zus_debt_amount:.2f} zł) przekracza limit "
-            + f"{ZUS_DEBT_LIMIT:.2f} zł. Spłata w ciągu 6 miesięcy przywraca prawo do zasiłku."
+            + f"{debt_limit:.2f} zł. Spłata w ciągu 6 miesięcy przywraca prawo do zasiłku."
         )
 
     if refusal_reasons:
@@ -85,13 +88,11 @@ def calculate_pregnancy_benefit(data: PregnancyBenefitInput) -> PregnancyBenefit
 
     calculation_base = _calculate_net_base(data.gross_monthly_income)
     if data.employment_type == EmploymentType.EMPLOYMENT_CONTRACT:
-        min_base = _calculate_net_base(MIN_WAGE_2026)
+        min_base = _calculate_net_base(min_wage)
         calculation_base = max(calculation_base, min_base)
 
     daily_rate = round(calculation_base / 30, 2)
-    benefit_rate = (
-        PREGNANCY_SICK_LEAVE_RATE if data.has_pregnancy_code_b else STANDARD_SICK_LEAVE_RATE
-    )
+    benefit_rate = sick_b_rate if data.has_pregnancy_code_b else sick_std_rate
 
     is_terminated = data.company_status in (
         CompanyStatus.BANKRUPTCY_OR_LIQUIDATION,
@@ -129,9 +130,9 @@ def calculate_pregnancy_benefit(data: PregnancyBenefitInput) -> PregnancyBenefit
         benefit_type = BenefitType.SICKNESS_BENEFIT
         if data.employment_type == EmploymentType.EMPLOYMENT_CONTRACT:
             employer_limit = (
-                EMPLOYER_SICK_DAYS_SENIOR
-                if data.employee_age >= SENIOR_AGE_THRESHOLD
-                else EMPLOYER_SICK_DAYS_STANDARD
+                limits.employer_sick_days_senior
+                if data.employee_age >= limits.senior_age_threshold
+                else limits.employer_sick_days_standard
             )
             available_employer_days = max(0, employer_limit - data.prior_sick_days_current_year)
             employer_days = min(data.sick_leave_duration_days, available_employer_days)
@@ -175,7 +176,7 @@ def calculate_pregnancy_benefit(data: PregnancyBenefitInput) -> PregnancyBenefit
     elif data.employment_type == EmploymentType.B2B:
         required_documents.extend(["e-ZLA z kodem B", "Wniosek o zasiłek chorobowy ZAS-53"])
 
-    legal_notes.append(f"Maksymalny okres zasiłkowy w ciąży: {MAX_PREGNANCY_SICK_LEAVE_DAYS} dni.")
+    legal_notes.append(f"Maksymalny okres zasiłkowy w ciąży: {max_days} dni.")
     legal_notes.append(f"Wysokość świadczenia: {benefit_rate}% podstawy wymiaru.")
 
     return PregnancyBenefitResult(
@@ -190,7 +191,7 @@ def calculate_pregnancy_benefit(data: PregnancyBenefitInput) -> PregnancyBenefit
         employer_amount=employer_amount,
         zus_days=zus_days,
         zus_amount=zus_amount,
-        max_coverage_days=MAX_PREGNANCY_SICK_LEAVE_DAYS,
+        max_coverage_days=max_days,
         refusal_reasons=[],
         required_documents=required_documents,
         legal_notes=legal_notes,

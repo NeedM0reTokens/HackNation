@@ -178,8 +178,7 @@ def calculate_adoption_leave(data: AdoptionLeaveInput) -> AdoptionLeaveResult:
     total_weeks = maternity_weeks + actual_parental_weeks
 
     use_unified = (
-        data.applied_within_21_days
-        and data.chosen_variant == BenefitPaymentVariant.UNIFIED_81_5
+        data.applied_within_21_days and data.chosen_variant == BenefitPaymentVariant.UNIFIED_81_5
     )
     maternity_rate = UNIFIED_BENEFIT_RATE if use_unified else FULL_MATERNITY_RATE
     parental_rate = UNIFIED_BENEFIT_RATE if use_unified else STANDARD_PARENTAL_RATE
