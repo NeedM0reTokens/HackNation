@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700&display=swap');
+
 /* ==========================================================================
    ZASIŁKOWY PRZEWODNIK PRZYSZŁEGO RODZICA - DESIGN SYSTEM (ZUS.PL STYLE)
    Czysty CSS (Pure CSS) bez Tailwind CSS i bibliotek zewnętrznych
@@ -57,7 +59,7 @@
   --zus-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
   /* Typografia */
-  --font-family: 'Segoe UI', Roboto, 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family: "Lato Regular", "Lato", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
   --font-size-base: 16px;
   --line-height-base: 1.5;
 
@@ -110,7 +112,7 @@ a {
   text-decoration: none;
 }
 
-button {
+button, input, select, textarea {
   font-family: inherit;
   cursor: pointer;
   border: none;
