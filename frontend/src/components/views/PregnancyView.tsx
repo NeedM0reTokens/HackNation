@@ -42,7 +42,7 @@ export const PregnancyView: React.FC = () => {
     <div className="zus-view-container">
       <ViewHeader
         title="Kwalifikator i Kalkulator Zasiłku Chorobowego (Kod B)"
-        description={<>Zwolnienie lekarskie z kodem literowym <strong>„B”</strong> przysługuje kobiecie w okresie ciąży i jest płatne w wysokości <strong>100% podstawy wymiaru</strong>. Okres zasiłkowy wynosi aż <strong>270 dni</strong> (zamiast standardowych 182 dni).</>}
+        description={<>Zwolnienie lekarskie z kodem literowym <strong>„B”</strong> przysługuje kobiecie w okresie ciąży i jest płatne w wysokości <strong>100% podstawy wymiaru</strong>. Maksymalny okres zasiłkowy wynosi <strong>270 dni</strong> (zamiast standardowych 182 dni), gdy niezdolność do pracy trwa odpowiednio długo.</>}
       />
 
       <div className="zus-view-grid">

@@ -987,8 +987,8 @@ export function SetupStep({
                   }}
                 />
                 <span style={{ color: "#1E293B" }}>
-                  Zaświadczenie z Ustawy „Za życiem” (+24 tyg. rodzicielskiego i
-                  jednorazowe 4 000 zł)
+                  Zaświadczenie z Ustawy „Za życiem” (wydłuża urlop rodzicielski;
+                  świadczenie 4 000 zł jest wypłacane oddzielnie)
                 </span>
               </label>
               <AiFieldExplainer

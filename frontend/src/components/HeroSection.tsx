@@ -39,7 +39,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       benefits: [
         {
           title: 'Zasiłek chorobowy w ciąży (100% podstawy)',
-          desc: 'Wystawiany na e-ZLA z kodem „B”. Okres zasiłkowy wynosi aż 270 dni. Brak limitu 182 dni.',
+          desc: 'Wystawiany na e-ZLA z kodem „B”. Maksymalny okres zasiłkowy wynosi 270 dni zamiast standardowych 182 dni.',
         },
         {
           title: 'Urlop macierzyński (20 do 37 tygodni)',

@@ -181,8 +181,8 @@ STATUTORY_GLOSSARY: dict[str, dict[str, Any]] = {
         ),
         "details": [
             "Terminy deklaracji DRA: do 15. dnia (jednostki budżetowe) lub do 20. dnia miesiąca (pozostali płatnicy).",
-            "Ciągłość uprawnień: status aktywny potwierdza prawo do zasiłku macierzyńskiego od pierwszego dnia porodu.",
-            "Stan konta płatnika: brak zadłużenia blokującego wypłatę powyżej 48,06 zł (art. 2a).",
+            "Znaczenie statusu: oznacza aktywne ubezpieczenie chorobowe i poprawne zgłoszenie przez płatnika; prawo do konkretnego świadczenia wymaga też spełnienia pozostałych warunków.",
+            "Zadłużenie: dla JDG art. 2a może wstrzymać świadczenie, gdy zaległość przekracza 48,06 zł w 2026 r.; decyzja zależy także od terminu i sposobu uregulowania długu.",
             "Weryfikacja online: dane są zsynchronizowane z Centralnym Rejestrem Ubezpieczonych ZUS.",
         ],
         "legal_basis": "Art. 36 i art. 47 ustawy o systemie ubezpieczeń społecznych (Dz.U. 2026 poz. 1245)",
@@ -291,7 +291,7 @@ STATUTORY_GLOSSARY: dict[str, dict[str, Any]] = {
         ),
         "details": [
             "Wysokość świadczenia: 100% podstawy wymiaru zasiłku (zamiast standardowych 80%).",
-            "Maksymalny okres pobierania: 270 dni w okresie ciąży (standardowo 182 dni).",
+            "Maksymalny okres pobierania: do 270 dni w okresie ciąży (standardowo 182 dni); długość zależy od trwałości niezdolności do pracy.",
             "Kto płaci pracownikowi: pierwsze 33 dni w roku – pracodawca (wynagrodzenie chorobowe), od 34. dnia – ZUS (zasiłek).",
             "Przejście na macierzyński: jeśli niezdolność trwa do porodu, od dnia narodzin automatycznie przysługuje zasiłek macierzyński.",
         ],
@@ -314,14 +314,15 @@ STATUTORY_GLOSSARY: dict[str, dict[str, Any]] = {
     },
     "pole-ustawa-za-zyciem": {
         "id": "pole-ustawa-za-zyciem",
-        "title": "Zaświadczenie z Ustawy „Za życiem” (+24 tyg. i 4 000 zł)",
+        "title": "Zaświadczenie z Ustawy „Za życiem”",
         "summary": (
             "Zaświadczenie potwierdzające ciężkie i nieodwracalne upośledzenie albo nieuleczalną chorobę "
-            "zagrażającą życiu powstałą w prenatalnym okresie rozwoju dziecka uprawnia do wydłużonego urlopu i wsparcia."
+            "zagrażającą życiu powstałą w prenatalnym okresie rozwoju dziecka uprawnia do wydłużonego urlopu rodzicielskiego. "
+            "Jednorazowe świadczenie z programu „Za życiem” jest osobnym świadczeniem i nie jest wypłacane przez ZUS automatycznie."
         ),
         "details": [
             "Wydłużony urlop rodzicielski: do 65 tygodni (jedno dziecko) lub 67 tygodni (bliźnięta) – o 24 tygodnie dłużej.",
-            "Jednorazowe świadczenie 'Za życiem': 4 000 zł bezzwrotnego wsparcia finansowego.",
+            "Jednorazowe świadczenie: 4 000 zł wypłaca właściwa jednostka samorządu terytorialnego po odrębnym wniosku.",
             "Kto wystawia: lekarz ubezpieczenia zdrowotnego ze specjalizacją II stopnia (położnictwo, perinatologia, neonatologia itp.).",
             "Wniosek do ZUS: formularz ZAM wraz z dołączonym zaświadczeniem lekarskim.",
         ],
@@ -362,13 +363,14 @@ STATUTORY_GLOSSARY: dict[str, dict[str, Any]] = {
         "title": "Weryfikacja zadłużenia składkowego (art. 2a ustawy zasiłkowej)",
         "summary": (
             "Dla osób prowadzących działalność gospodarczą (JDG) zadłużenie z tytułu składek "
-            "przekraczające 1% minimalnego wynagrodzenia (w 2026 r.: 48,06 zł) blokuje wypłatę zasiłku!"
+            "przekraczające 1% minimalnego wynagrodzenia (w 2026 r. 48,06 zł) może spowodować wstrzymanie świadczenia. "
+            "Konkretny skutek zależy od terminu i sposobu uregulowania długu."
         ),
         "details": [
-            "Ustawowy próg tolerancji w 2026 r.: dokładnie 48,06 zł zaległości.",
-            "Zawieszenie wypłaty: ZUS wstrzymuje wypłatę do czasu pełnego uregulowania długu.",
-            "Termin 6 miesięcy: jeśli dług zostanie spłacony w ciągu 6 miesięcy, ZUS wypłaci zasiłek wstecz.",
-            "Przedawnienie po 6 miesiącach: brak spłaty oznacza bezpowrotną utratę prawa do świadczenia za ten okres.",
+            "Próg w 2026 r.: zaległość powyżej 48,06 zł może ograniczyć prawo do świadczeń.",
+            "Wypłata wstrzymana: ZUS może wstrzymać świadczenie do momentu uregulowania długu.",
+            "Spłata w ciągu 6 miesięcy: po uregulowaniu należności ZUS może wypłacić świadczenie za wchodzący w zakres prawa okres.",
+            "Brak spłaty po 6 miesiącach: prawo do świadczenia za ten okres może ulec przedawnieniu.",
         ],
         "legal_basis": "Art. 2a ustawy o świadczeniach pieniężnych z ubezpieczenia społecznego",
     },

@@ -33,7 +33,7 @@ ZUS_ENDPOINT_DESCRIPTION = (
     "- **Okres wyczekiwania (karencja)**: weryfikacja 30 dni dla UoP / 90 dni dla innych.\n"
     "- **Podstawa wymiaru składek**: średnia z 12 miesięcy i wykaz miesięczny (-13,71%).\n"
     "- **Płatnik składek**: NIP, nazwa, status wielkości płatnika (>20 pracowników).\n"
-    "- **Zadłużenie (art. 2a ustawy)**: limit 1% minimalnego wynagrodzenia (48,06 zł).\n"
+    "- **Zadłużenie (art. 2a ustawy)**: próg 1% minimalnego wynagrodzenia wynosi 48,06 zł; o skutkach decyduje termin i sposób uregulowania długu.\n"
     "- **Zaświadczenia e-ZLA**: aktywne zwolnienia lekarskich (kod B) i limit dni."
 )
 

@@ -41,11 +41,10 @@ import type {
 } from "@/types/applications";
 
 export const API_BASE_URL =
-  import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== 'http://localhost:8000'
-    ? import.meta.env.VITE_API_URL
-    : typeof window !== 'undefined'
-    ? (window.location.port === '5173' ? '' : `${window.location.protocol}//${window.location.hostname}:8000`)
-    : 'http://127.0.0.1:8000';
+  import.meta.env.VITE_API_URL ||
+  (typeof window !== "undefined" && window.location.hostname
+    ? `${window.location.protocol}//${window.location.hostname}:8000`
+    : "http://127.0.0.1:8000");
 
 /**
  * Dedykowany błąd rzucany w przypadku braku połączenia z backendem ZUS.
@@ -959,18 +958,42 @@ export async function askAssistantApi(
       legalBasis: data.legal_basis || undefined,
     };
   } catch (err: any) {
-    if (userContext?.requested_topic) {
-      const topicKey = userContext.requested_topic;
+    // 1. Sprawdzenie czy kontekst lub treść pytania wskazuje konkretne zagadnienie
+    let topicKey = userContext?.requested_topic;
+    if (!topicKey) {
+      const match = message.match(/\(kod:\s*([a-z0-9_-]+)\)/i);
+      if (match) {
+        topicKey = match[1];
+      }
+    }
+
+    if (topicKey && glossary[topicKey]) {
       const local = glossary[topicKey];
-      if (local) {
-        return {
-          id: `fallback-${Date.now()}`,
-          title: userContext.requested_title || local.title,
-          summary: userContext.topic_summary || local.summary,
-          details: (userContext.topic_rules && userContext.topic_rules.length > 0)
+      return {
+        id: `fallback-${Date.now()}`,
+        title: userContext?.requested_title || local.title,
+        summary: userContext?.topic_summary || local.summary,
+        details:
+          userContext?.topic_rules && userContext.topic_rules.length > 0
             ? [...local.details, ...userContext.topic_rules.filter((r: string) => !local.details.includes(r))]
             : local.details,
-          legalBasis: userContext.topic_legal_basis || local.legalBasis,
+        legalBasis: userContext?.topic_legal_basis || local.legalBasis,
+      };
+    }
+
+    // 2. Wyszukanie w lokalnym leksykonie po słowach kluczowych
+    const msgLower = message.toLowerCase();
+    for (const [key, item] of Object.entries(glossary)) {
+      if (
+        msgLower.includes(key.toLowerCase()) ||
+        (item.title && msgLower.includes(item.title.toLowerCase()))
+      ) {
+        return {
+          id: `fallback-${Date.now()}`,
+          title: item.title,
+          summary: item.summary,
+          details: item.details,
+          legalBasis: item.legalBasis,
         };
       }
     }
