@@ -183,7 +183,6 @@ class UserProfileResponse(BaseModel):
     """
 
     # Identifiers
-    user_id: str | None = Field(default=None, description="Identyfikator użytkownika / PESEL")
     pesel: str = Field(..., description="Numer PESEL ubezpieczonego")
     user_id: str | None = Field(
         default=None,
