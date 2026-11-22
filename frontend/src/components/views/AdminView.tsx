@@ -1,3 +1,5 @@
+import { ViewHeader } from "../common/ViewHeader";
+import { Sliders, Search, X, ShieldAlert, RotateCcw } from "lucide-react";
 import React, { useState, useEffect, useMemo } from "react";
 import {
   getAdminConfig,
@@ -827,123 +829,76 @@ export const AdminView: React.FC = () => {
 
   return (
     <div className="zus-view-container">
-      {/* Header and Disclaimer */}
-      <div className="zus-view-header">
+      {/* Header and Quick Stats */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          flexWrap: "wrap",
+          gap: "16px",
+          marginBottom: "16px",
+        }}
+      >
+        <ViewHeader
+          title="Zarządzanie Parametrami Ustawowymi"
+          description="Centralny panel konfiguracji stawek procentowych, kwot minimalnych, wymiarów urlopów oraz okresów wyczekiwania ZUS. Zmiany są natychmiast zapisywane w bazie i wpływają na wszystkie kalkulatory."
+        />
+
+        {/* Quick Stats & Action shortcuts */}
         <div
           style={{
-            backgroundColor: "#FFFBEB",
-            border: "2px solid #F59E0B",
-            borderRadius: "8px",
-            padding: "16px 20px",
             display: "flex",
-            alignItems: "flex-start",
-            gap: "14px",
-            boxShadow: "0 2px 4px rgba(245, 158, 11, 0.1)",
-            marginBottom: "20px",
+            alignItems: "center",
+            gap: "10px",
+            flexWrap: "wrap",
+            paddingTop: "4px",
           }}
         >
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div
+          {changedKeys.size > 0 && (
+            <span
+              className="zus-auth-verified-pill"
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                flexWrap: "wrap",
-                marginBottom: "4px",
+                backgroundColor: "var(--zus-orange-light, #fef5e9)",
+                color: "var(--zus-orange-dark, #b86e0f)",
+                borderColor: "var(--zus-orange, #F3A847)",
+                textTransform: "none",
+                fontWeight: 700,
+                padding: "6px 12px",
+                borderRadius: "9999px",
+                fontSize: "0.82rem",
               }}
             >
-              <span
-                style={{
-                  backgroundColor: "#B45309",
-                  color: "#FFFFFF",
-                  fontWeight: 800,
-                  fontSize: "0.72rem",
-                  letterSpacing: "0.05em",
-                  padding: "2px 8px",
-                  borderRadius: "4px",
-                  textTransform: "uppercase",
-                }}
-              >
-                Panel Administracyjny ZUS
-              </span>
-              <strong
-                style={{
-                  fontSize: "0.98rem",
-                  color: "#92400E",
-                  fontWeight: 800,
-                }}
-              >
-                ZARZĄDZANIE WSZYSTKIMI PARAMETRAMI USTAWOWYMI W LOCIE (BE-03)
-              </strong>
-            </div>
-            <p style={{ margin: 0, fontSize: "0.86rem", color: "#78350F" }}>
-              Wszystkie zmiany są natychmiast utrwalane w bazie danych JSON
-              backendu i wpływają w czasie rzeczywistym na wyniki wszystkich
-              kalkulatorów (macierzyński, ojcowski, praca na rodzicielskim,
-              wcześniaki, Za Życiem).
-            </p>
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
-            gap: "16px",
-          }}
-        >
-          <div>
-            <h1 className="zus-view-title" style={{ margin: "0 0 6px 0" }}>
-              Zarządzanie Parametrami Ustawowymi
-            </h1>
-          </div>
-
-          {/* Quick Stats & Action shortcuts */}
-          <div
+              Zmienione parametry: {changedKeys.size}
+            </span>
+          )}
+          <button
+            type="button"
+            className="zus-btn-secondary"
+            onClick={handleReset}
+            disabled={resetting || saving}
+            title="Przywraca wszystkie wartości fabryczne z JSON"
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              flexWrap: "wrap",
+              fontSize: "0.88rem",
+              padding: "8px 16px",
+              borderRadius: "9999px",
             }}
           >
-            {changedKeys.size > 0 && (
-              <span
-                className="zus-badge"
-                style={{
-                  backgroundColor: "#FEF3C7",
-                  color: "#92400E",
-                  border: "1px solid #F59E0B",
-                  fontWeight: 700,
-                  padding: "6px 12px",
-                  borderRadius: "6px",
-                }}
-              >
-                Liczba zmodyfikowanych parametrów: {changedKeys.size}
-              </span>
-            )}
-            <button
-              type="button"
-              className="zus-btn-secondary"
-              onClick={handleReset}
-              disabled={resetting || saving}
-              title="Przywraca wszystkie wartości fabryczne z JSON"
-              style={{ fontSize: "0.88rem", padding: "8px 14px" }}
-            >
-              {resetting ? "Przywracanie..." : "↺ Przywróć domyślne"}
-            </button>
-            <button
-              type="button"
-              className="zus-btn-primary"
-              onClick={handleSave}
-              disabled={saving || resetting}
-              style={{ fontSize: "0.88rem", padding: "8px 16px" }}
-            >
-              {saving ? "Zapisywanie w API..." : "✓ Zapisz wszystkie zmiany"}
-            </button>
-          </div>
+            {resetting ? "Przywracanie..." : "↺ Przywróć domyślne"}
+          </button>
+          <button
+            type="button"
+            className="zus-btn-primary"
+            onClick={handleSave}
+            disabled={saving || resetting}
+            style={{
+              fontSize: "0.88rem",
+              padding: "8px 20px",
+              borderRadius: "9999px",
+            }}
+          >
+            {saving ? "Zapisywanie w API..." : "✓ Zapisz wszystkie zmiany"}
+          </button>
         </div>
       </div>
 
@@ -967,18 +922,20 @@ export const AdminView: React.FC = () => {
 
       {/* Navigation tabs & search bar */}
       <div
+        className="zus-card"
         style={{
+          padding: "16px 20px",
+          marginBottom: "24px",
           display: "flex",
           flexDirection: "column",
-          gap: "14px",
-          marginBottom: "24px",
+          gap: "16px",
         }}
       >
         <div
           style={{
             display: "flex",
             gap: "8px",
-            borderBottom: "2px solid #E2E8F0",
+            borderBottom: "1px solid var(--zus-border)",
             flexWrap: "wrap",
           }}
         >
@@ -994,7 +951,7 @@ export const AdminView: React.FC = () => {
             className={`zus-tab-btn ${activeTab === "benefit_rates" ? "active" : ""}`}
             onClick={() => setActiveTab("benefit_rates")}
           >
-            Stopy procentowe (%) (10)
+            Stopy procentowe (10)
           </button>
           <button
             type="button"
@@ -1024,11 +981,14 @@ export const AdminView: React.FC = () => {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "10px",
-            maxWidth: "600px",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "12px",
           }}
         >
-          <div style={{ position: "relative", width: "100%" }}>
+          <div
+            style={{ position: "relative", width: "100%", maxWidth: "560px" }}
+          >
             <input
               type="text"
               className="zus-input"
@@ -1037,23 +997,21 @@ export const AdminView: React.FC = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
                 width: "100%",
-                paddingLeft: "36px",
+                paddingLeft: "38px",
+                paddingRight: "36px",
                 fontSize: "0.92rem",
               }}
             />
-            <span
+            <Search
+              className="size-4 text-[var(--zus-text-muted)]"
               style={{
                 position: "absolute",
                 left: "12px",
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: "#6B7280",
-                fontSize: "0.9rem",
                 pointerEvents: "none",
               }}
-            >
-              🔍
-            </span>
+            />
             {searchQuery && (
               <button
                 type="button"
@@ -1066,23 +1024,29 @@ export const AdminView: React.FC = () => {
                   background: "transparent",
                   border: "none",
                   cursor: "pointer",
-                  color: "#6B7280",
-                  fontWeight: "bold",
-                  fontSize: "1rem",
+                  color: "var(--zus-text-muted)",
+                  padding: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                ✕
+                <X className="size-4" />
               </button>
             )}
           </div>
           <span
             style={{
               fontSize: "0.85rem",
-              color: "#6B7280",
+              color: "var(--zus-text-muted)",
               whiteSpace: "nowrap",
             }}
           >
-            Znaleziono: <strong>{filteredParameters.length}</strong>
+            Znaleziono:{" "}
+            <strong style={{ color: "var(--zus-text-main)" }}>
+              {filteredParameters.length}
+            </strong>{" "}
+            parametrów
           </span>
         </div>
       </div>
@@ -1122,42 +1086,15 @@ export const AdminView: React.FC = () => {
               };
 
               return (
-                <div
-                  key={catKey}
-                  className="zus-card"
-                  style={{ padding: "24px" }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      borderBottom: "2px solid #E2E8F0",
-                      paddingBottom: "12px",
-                      marginBottom: "20px",
-                      flexWrap: "wrap",
-                      gap: "8px",
-                    }}
-                  >
-                    <h2
-                      className="zus-card-header-title"
-                      style={{
-                        margin: 0,
-                        fontSize: "1.2rem",
-                        color: "#003B6F",
-                      }}
-                    >
-                      {meta.title}
-                    </h2>
+                <div key={catKey} className="zus-card">
+                  <div className="zus-card-header">
+                    <div className="zus-card-header-title">
+                      <Sliders className="size-5 text-[var(--zus-green)]" />
+                      <span>{meta.title}</span>
+                    </div>
                     <span
-                      style={{
-                        fontSize: "0.82rem",
-                        color: "#6B7280",
-                        backgroundColor: "#F1F5F9",
-                        padding: "4px 10px",
-                        borderRadius: "12px",
-                        fontWeight: 600,
-                      }}
+                      className="zus-auth-verified-pill"
+                      style={{ textTransform: "none", letterSpacing: "normal" }}
                     >
                       {params.length} z {meta.count} parametrów
                     </span>
@@ -1186,14 +1123,19 @@ export const AdminView: React.FC = () => {
                         <div
                           key={param.key}
                           style={{
-                            padding: "14px 16px",
-                            backgroundColor: isModified ? "#FEFCE8" : "#FAFBFD",
-                            border: `1px solid ${isModified ? "#FACC15" : "#E2E8F0"}`,
-                            borderRadius: "8px",
+                            padding: "16px",
+                            backgroundColor: isModified
+                              ? "var(--zus-orange-light, #fef5e9)"
+                              : "#FFFFFF",
+                            border: `1.5px solid ${isModified ? "var(--zus-orange, #F3A847)" : "var(--zus-border, #E2E8F0)"}`,
+                            borderRadius: "var(--zus-radius-md, 6px)",
                             display: "flex",
                             flexDirection: "column",
                             justifyContent: "space-between",
                             transition: "all 0.15s ease",
+                            boxShadow: isModified
+                              ? "0 2px 8px rgba(243, 168, 71, 0.15)"
+                              : "none",
                           }}
                         >
                           <div>
@@ -1221,12 +1163,13 @@ export const AdminView: React.FC = () => {
                               {isModified && (
                                 <span
                                   style={{
-                                    fontSize: "0.7rem",
+                                    fontSize: "0.72rem",
                                     fontWeight: 700,
-                                    backgroundColor: "#FEF08A",
-                                    color: "#854D0E",
-                                    padding: "2px 6px",
-                                    borderRadius: "4px",
+                                    backgroundColor:
+                                      "var(--zus-orange, #F3A847)",
+                                    color: "#FFFFFF",
+                                    padding: "2px 8px",
+                                    borderRadius: "9999px",
                                     whiteSpace: "nowrap",
                                   }}
                                   title={`Poprzednia wartość: ${initialValue}`}
@@ -1319,16 +1262,24 @@ export const AdminView: React.FC = () => {
                                 }
                                 title="Cofnij zmianę tego parametru"
                                 style={{
-                                  padding: "8px 10px",
-                                  fontSize: "0.8rem",
-                                  backgroundColor: "#F1F5F9",
-                                  border: "1px solid #CBD5E1",
-                                  borderRadius: "4px",
+                                  padding: "8px 12px",
+                                  fontSize: "0.82rem",
+                                  fontWeight: 600,
+                                  backgroundColor:
+                                    "var(--zus-card-alt, #F8FAFC)",
+                                  border:
+                                    "1px solid var(--zus-border, #CBD5E1)",
+                                  borderRadius: "6px",
                                   cursor: "pointer",
-                                  color: "#475569",
+                                  color: "var(--zus-text-main, #1A1A1A)",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "4px",
+                                  transition: "all 0.15s ease",
                                 }}
                               >
-                                ↺
+                                <RotateCcw className="size-3.5 text-[var(--zus-text-muted)]" />
+                                <span>Cofnij</span>
                               </button>
                             )}
                           </div>
@@ -1342,12 +1293,12 @@ export const AdminView: React.FC = () => {
           </div>
         )}
 
-        {/* Footer Actions */}
+        {/* Footer Actions Island */}
         <div
+          className="zus-card"
           style={{
             marginTop: "28px",
-            paddingTop: "20px",
-            borderTop: "2px solid #E2E8F0",
+            padding: "16px 24px",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -1355,10 +1306,18 @@ export const AdminView: React.FC = () => {
             gap: "16px",
           }}
         >
-          <div style={{ fontSize: "0.86rem", color: "#6B7280" }}>
+          <div
+            style={{ fontSize: "0.9rem", color: "var(--zus-text-secondary)" }}
+          >
             Łącznie zmodyfikowanych wartości:{" "}
             <strong
-              style={{ color: changedKeys.size > 0 ? "#B45309" : "#007834" }}
+              style={{
+                color:
+                  changedKeys.size > 0
+                    ? "var(--zus-orange-dark, #b86e0f)"
+                    : "var(--zus-green, #007834)",
+                fontWeight: 800,
+              }}
             >
               {changedKeys.size}
             </strong>
@@ -1370,15 +1329,25 @@ export const AdminView: React.FC = () => {
               className="zus-btn-secondary"
               onClick={handleReset}
               disabled={resetting || saving}
+              style={{
+                height: "40px",
+                padding: "0 18px",
+                borderRadius: "9999px",
+              }}
             >
               {resetting
-                ? "Przywracanie fabrycznych..."
+                ? "Przywracanie domyślnych..."
                 : "↺ Przywróć fabryczne domyślne"}
             </button>
             <button
               type="submit"
               className="zus-btn-primary"
               disabled={saving || resetting}
+              style={{
+                height: "40px",
+                padding: "0 22px",
+                borderRadius: "9999px",
+              }}
             >
               {saving
                 ? "Zapisywanie w bazie ZUS..."
