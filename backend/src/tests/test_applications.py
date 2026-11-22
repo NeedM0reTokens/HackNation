@@ -202,7 +202,7 @@ class TestApplicationsModule(unittest.TestCase):
         self.assertTrue(pdf_bytes.startswith(b"%PDF-"))
 
         reader = PdfReader(io.BytesIO(pdf_bytes))
-        self.assertGreaterEqual(len(reader.pages), 1)
+        self.assertEqual(len(reader.pages), 1)
         extracted = reader.pages[0].extract_text()
         self.assertTrue("WNIOSEK" in extracted or "Wniosek" in extracted)
         self.assertTrue("OJCOWSK" in extracted or "ojcowsk" in extracted)
@@ -212,11 +212,11 @@ class TestApplicationsModule(unittest.TestCase):
         fallback_bytes = _render_pdf_with_pure_python(app_obj)
         self.assertTrue(fallback_bytes.startswith(b"%PDF-1.4"))
         reader = PdfReader(io.BytesIO(fallback_bytes))
-        self.assertGreaterEqual(len(reader.pages), 1)
+        self.assertEqual(len(reader.pages), 1)
         extracted = reader.pages[0].extract_text()
         self.assertIn("WNIOSEK", extracted)
 
-    def test_preseeded_demo_applications_available_immediately(self) -> None:
+    def test_all_applications_generate_strictly_single_page_pdf(self) -> None:
         for app_id in [
             "APP-2026-0001",
             "APP-2026-0002",
@@ -230,7 +230,17 @@ class TestApplicationsModule(unittest.TestCase):
             pdf_bytes = generate_application_pdf_service(app_id)
             self.assertTrue(pdf_bytes.startswith(b"%PDF-"))
             reader = PdfReader(io.BytesIO(pdf_bytes))
-            self.assertGreaterEqual(len(reader.pages), 1)
+            self.assertEqual(len(reader.pages), 1)
+            text_extracted = reader.pages[0].extract_text()
+            self.assertIn("RZECZPOSPOLITA POLSKA", text_extracted)
+            self.assertTrue(any(c in text_extracted for c in "ąćęłńóśźżĄĆĘŁŃÓŚŹŻ"))
+
+            py_bytes = _render_pdf_with_pure_python(app_obj)
+            py_reader = PdfReader(io.BytesIO(py_bytes))
+            self.assertEqual(len(py_reader.pages), 1)
+            py_extracted = py_reader.pages[0].extract_text()
+            self.assertIn("RZECZPOSPOLITA POLSKA", py_extracted)
+            self.assertTrue(any(c in py_extracted for c in "ąćęłńóśźżĄĆĘŁŃÓŚŹŻ"))
 
     def test_direct_render_pdf_from_request(self) -> None:
         req = ApplicationCreateRequest(

@@ -133,7 +133,17 @@ export const ApplicationSimulator: React.FC = () => {
     setSelectedType(tpl.type);
     setSelectedCategory(tpl.category);
     handleAutoPrefill(tpl.type);
-    setStep(2);
+  };
+
+  const handleCategoryChange = (cat: ApplicationCategory) => {
+    setSelectedCategory(cat);
+    const catTemplates = templates.filter((t) => t.category === cat);
+    if (catTemplates.length > 0) {
+      const isCurrentInCat = catTemplates.some((t) => t.type === selectedType);
+      if (!isCurrentInCat) {
+        handleSelectTemplate(catTemplates[0]);
+      }
+    }
   };
 
   const handleCreateApplication = async () => {
@@ -331,7 +341,7 @@ export const ApplicationSimulator: React.FC = () => {
               <button
                 type="button"
                 className={`zus-btn ${selectedCategory === 'EMPLOYER_LEAVE' ? 'zus-btn-primary' : 'zus-btn-outline'}`}
-                onClick={() => setSelectedCategory('EMPLOYER_LEAVE')}
+                onClick={() => handleCategoryChange('EMPLOYER_LEAVE')}
                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <Building2 size={16} />
@@ -340,7 +350,7 @@ export const ApplicationSimulator: React.FC = () => {
               <button
                 type="button"
                 className={`zus-btn ${selectedCategory === 'ZUS_BENEFIT' ? 'zus-btn-primary' : 'zus-btn-outline'}`}
-                onClick={() => setSelectedCategory('ZUS_BENEFIT')}
+                onClick={() => handleCategoryChange('ZUS_BENEFIT')}
                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <Landmark size={16} />
@@ -352,72 +362,102 @@ export const ApplicationSimulator: React.FC = () => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
             {templates
               .filter((t) => t.category === selectedCategory)
-              .map((tpl) => (
-                <div
-                  key={tpl.type}
-                  style={{
-                    padding: '20px',
-                    borderRadius: '8px',
-                    border: selectedType === tpl.type ? '2px solid #007834' : '1px solid #CBD5E1',
-                    backgroundColor: selectedType === tpl.type ? '#F0FDF4' : '#FFFFFF',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    boxShadow: selectedType === tpl.type ? '0 4px 12px rgba(0,120,52,0.1)' : 'none',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                  }}
-                  onClick={() => handleSelectTemplate(tpl)}
-                >
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                      <span style={{
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        padding: '3px 8px',
-                        borderRadius: '4px',
-                        backgroundColor: tpl.is_custom_designed ? '#E0F2FE' : '#FEF3C7',
-                        color: tpl.is_custom_designed ? '#0369A1' : '#B45309',
-                      }}>
-                        {tpl.is_custom_designed ? 'PROJEKT AUTORSKI (MRPiPS 2025)' : `DRUK URZĘDOWY: ${tpl.official_form_number || 'ZUS'}`}
-                      </span>
-                      <span style={{ fontSize: '0.8rem', color: '#64748B', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Clock size={14} />
-                        {tpl.deadline_description.split('(')[0]}
-                      </span>
+              .map((tpl) => {
+                const isSelected = selectedType === tpl.type;
+                return (
+                  <div
+                    key={tpl.type}
+                    style={{
+                      padding: '20px',
+                      borderRadius: '8px',
+                      border: isSelected ? '2px solid #007834' : '1px solid #CBD5E1',
+                      backgroundColor: isSelected ? '#F0FDF4' : '#FFFFFF',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: isSelected ? '0 4px 12px rgba(0,120,52,0.12)' : 'none',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                    }}
+                    onClick={() => handleSelectTemplate(tpl)}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 600 }}>
+                          {tpl.official_form_number ? `Druk urzędowy: ${tpl.official_form_number}` : 'Wniosek do pracodawcy'}
+                        </span>
+                        <span style={{ fontSize: '0.8rem', color: '#64748B', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Clock size={14} />
+                          {tpl.deadline_description.split('(')[0]}
+                        </span>
+                      </div>
+
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0F172A', marginBottom: '8px' }}>
+                        {tpl.title}
+                      </h3>
+
+                      <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.5, marginBottom: '12px' }}>
+                        {tpl.description}
+                      </p>
+
+                      <div style={{ fontSize: '0.78rem', color: '#64748B', fontStyle: 'italic', marginBottom: '12px' }}>
+                        Podstawa prawna: {tpl.legal_basis}
+                      </div>
                     </div>
 
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0F172A', marginBottom: '8px' }}>
-                      {tpl.title}
-                    </h3>
-
-                    <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.5, marginBottom: '12px' }}>
-                      {tpl.description}
-                    </p>
-
-                    <div style={{ fontSize: '0.78rem', color: '#64748B', fontStyle: 'italic', marginBottom: '12px' }}>
-                      Podstawa prawna: {tpl.legal_basis}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #E2E8F0', paddingTop: '12px' }}>
+                      <span style={{ fontSize: '0.82rem', color: isSelected ? '#007834' : '#64748B', fontWeight: isSelected ? 700 : 500 }}>
+                        {isSelected ? '✓ Wybrany wniosek' : `${tpl.required_attachments.length} załączniki formalne`}
+                      </span>
+                      <button
+                        type="button"
+                        className={`zus-btn ${isSelected ? 'zus-btn-primary' : 'zus-btn-outline'}`}
+                        style={{ padding: '6px 14px', fontSize: '0.85rem' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (isSelected) {
+                            setStep(2);
+                          } else {
+                            handleSelectTemplate(tpl);
+                          }
+                        }}
+                      >
+                        {isSelected ? 'Wypełnij ten wniosek \u2192' : 'Wybierz'}
+                      </button>
                     </div>
                   </div>
+                );
+              })}
+          </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #E2E8F0', paddingTop: '12px' }}>
-                    <span style={{ fontSize: '0.8rem', color: '#007834', fontWeight: 600 }}>
-                      {tpl.required_attachments.length} załączniki formalne
-                    </span>
-                    <button
-                      type="button"
-                      className="zus-btn zus-btn-primary"
-                      style={{ padding: '6px 14px', fontSize: '0.85rem' }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSelectTemplate(tpl);
-                      }}
-                    >
-                      Wypełnij wniosek &rarr;
-                    </button>
-                  </div>
-                </div>
-              ))}
+          {/* Dolny pasek potwierdzenia wyboru wniosku i przejścia do kroku 2 */}
+          <div style={{
+            marginTop: '24px',
+            padding: '16px 20px',
+            backgroundColor: '#F8FAFC',
+            borderRadius: '8px',
+            border: '1px solid #E2E8F0',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '16px',
+          }}>
+            <div>
+              <div style={{ fontSize: '0.8rem', color: '#64748B' }}>Aktualnie zaznaczony wniosek:</div>
+              <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#003B6F' }}>
+                {currentTemplate?.title || 'Wybierz wniosek z listy powyżej'}
+              </div>
+            </div>
+            <button
+              type="button"
+              className="zus-btn zus-btn-primary"
+              disabled={!selectedType}
+              onClick={() => setStep(2)}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', fontSize: '1rem' }}
+            >
+              Dalej: Wypełnij wniosek <ArrowRight size={18} />
+            </button>
           </div>
         </div>
       )}
