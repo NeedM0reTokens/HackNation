@@ -1,26 +1,11 @@
 import React from 'react';
-import { Sparkles } from 'lucide-react';
-import { useAppState } from '@/components/app-state';
 
+/**
+ * AssistantFab - Pływający przycisk AI z dołu ekranu (wyłączony zgodnie z wytycznymi użytkownika).
+ * Asystent AI jest teraz wywoływany w sposób celowy i kontekstowy poprzez opcję "Dopytaj Asystenta AI".
+ */
 export const AssistantFab: React.FC = () => {
-  const { assistantOpen, setAssistantOpen } = useAppState();
-
-  if (assistantOpen) return null;
-
-  return (
-    <button
-      type="button"
-      onClick={() => setAssistantOpen(true)}
-      className="zus-assistant-fab"
-      aria-label="Otwórz Asystenta AI ZUS"
-      title="Zadaj pytanie asystentowi AI"
-    >
-      <span className="zus-assistant-fab-icon">
-        <Sparkles size={18} color="#FFFFFF" />
-      </span>
-      <span className="zus-assistant-fab-text">Zapytaj AI</span>
-    </button>
-  );
+  return null;
 };
 
 export default AssistantFab;

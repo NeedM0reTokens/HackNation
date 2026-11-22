@@ -1,5 +1,6 @@
 import { useAppState } from "./app-state";
 import React, { useState } from 'react';
+import { AiFieldExplainer } from './ai/AiFieldExplainer';
 
 export type RoleType = 'mother' | 'father' | 'adoption' | 'difficult';
 
@@ -321,7 +322,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
                 {/* 1. Status ubezpieczenia chorobowego */}
                 <div className="zus-data-row">
-                  <span className="zus-data-label">Ubezpieczenie chorobowe</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                    <span className="zus-data-label" style={{ margin: 0 }}>Ubezpieczenie chorobowe</span>
+                    <AiFieldExplainer topicId="status-ubezpieczenia-aktywny" label="Status ubezpieczenia" variant="compact" />
+                  </div>
                   <span className="zus-data-val-primary">
                     {user?.simulation?.has_sickness_insurance !== false
                       ? `Aktywne – ${user?.simulation?.insurance_title || "Umowa o pracę"}`

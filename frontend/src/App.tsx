@@ -10,7 +10,6 @@ import { MobywatelMockModal } from "./components/MobywatelMockModal";
 import { MobileBottomNav } from "./components/MobileBottomNav";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { AppStateProvider, useAppState } from "./components/app-state";
-import { AssistantFab } from "./components/assistant/assistant-fab";
 import { AssistantPanel } from "./components/assistant/assistant-panel";
 import { GuideFlow } from "./components/guide/guide-flow";
 import { BenefitsCatalogSection } from "./components/benefits/BenefitsCatalogSection";
@@ -274,6 +273,7 @@ const AppContent: React.FC = () => {
         {activeTab === 'macierzynski' && <PaternityView />}
         {activeTab === 'wnioski' && <DocumentsView />}
         {activeTab === 'trudne-sytuacje' && <SpecialCasesView />}
+        {activeTab === 'strefa-pdf' && <PdfZoneView />}
         {activeTab === 'admin' && <AdminView />}
       </main>
 
@@ -345,7 +345,6 @@ const AppContent: React.FC = () => {
       />
 
       {/* ASYSTENT AI */}
-      <AssistantFab />
       <AssistantPanel />
 
       {/* MOBILNA NAWIGACJA NA DOLE EKRANU */}

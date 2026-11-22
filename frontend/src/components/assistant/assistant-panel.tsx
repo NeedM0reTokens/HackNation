@@ -186,35 +186,6 @@ export const AssistantPanel: React.FC = () => {
         </div>
       </div>
 
-      {/* PASEK KONTEKSTU BIEŻĄCEJ SPRAWY */}
-      <div className="zus-assistant-context-bar">
-        <div className="zus-assistant-context-left">
-          <span className="zus-assistant-context-label">Sprawa:</span>
-          <span className="zus-assistant-context-badge" title={currentContext.label}>
-            {currentContext.label}
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={() => {
-            setShowSuggestions((prev) => !prev);
-            setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
-          }}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#005c27',
-            fontSize: '0.74rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            padding: 0,
-          }}
-          title="Kliknij, aby pokazać/ukryć sugerowane pytania dla tej sprawy"
-        >
-          {currentContext.badge}
-        </button>
-      </div>
-
       {/* OBSZAR WIADOMOŚCI */}
       <div className="zus-assistant-body" aria-live="polite">
         {messages.map((message) => {

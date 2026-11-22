@@ -13,7 +13,9 @@ import {
   FileUp,
 } from "lucide-react";
 import { waitingPeriodDays, qualify, type GuideInput } from "@/lib/guide";
+import { SampleCasesMenu } from "./sample-cases-menu";
 import { parsePdfDocument } from "@/lib/api-client";
+import { AiFieldExplainer } from "@/components/ai/AiFieldExplainer";
 
 export function SetupStep({
   initialInput,
@@ -29,6 +31,16 @@ export function SetupStep({
 
   const update = <K extends keyof GuideInput>(key: K, value: GuideInput[K]) =>
     setInput((current) => ({ ...current, [key]: value }));
+
+  const handleSelectSample = (sample: GuideInput) => {
+    setInput(sample);
+    if (sample.insuredDays !== undefined) {
+      setDaysStr(String(sample.insuredDays));
+    }
+    if (sample.grossSalary !== undefined) {
+      setSalaryStr(String(sample.grossSalary));
+    }
+  };
 
   const [daysStr, setDaysStr] = useState<string>(
     initialInput.insuredDays ? String(initialInput.insuredDays) : "",
@@ -168,6 +180,9 @@ export function SetupStep({
               flexWrap: "wrap",
             }}
           >
+            {/* Załaduj przykładową sprawę ZUS - identycznie jak w Kroku 2 */}
+            <SampleCasesMenu onSelect={handleSelectSample} />
+
             {/* Opcja wgrania PDF */}
             <button
               type="button"
@@ -372,6 +387,11 @@ export function SetupStep({
             >
               <CreditCard className="size-4 text-[var(--zus-green)]" />
               <span>Forma zatrudnienia (Tytuł ubezpieczenia społecznego)</span>
+              <AiFieldExplainer
+                topicId="pole-forma-zatrudnienia"
+                label="Forma zatrudnienia"
+                buttonText="Różnice umów"
+              />
             </label>
             <div
               style={{
@@ -593,6 +613,11 @@ export function SetupStep({
               >
                 <Calendar className="size-4 text-[var(--zus-green)]" />
                 <span>Staż ubezpieczenia w dniach</span>
+                <AiFieldExplainer
+                  topicId="pole-staz-ubezpieczenia"
+                  label="Staż ubezpieczenia"
+                  variant="compact"
+                />
               </label>
               <input
                 id="insured-days"
@@ -795,9 +820,16 @@ export function SetupStep({
             </label>
             {input.includePartner && (
               <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #E2E8F0' }}>
-                <label style={{ fontSize: '0.8rem', color: '#475569', display: 'block', marginBottom: '4px' }}>
-                  Średnie miesięczne wynagrodzenie brutto drugiego rodzica (PLN):
-                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <label style={{ fontSize: '0.8rem', color: '#475569', margin: 0 }}>
+                    Średnie miesięczne wynagrodzenie brutto drugiego rodzica (PLN):
+                  </label>
+                  <AiFieldExplainer
+                    topicId="pole-dochod-drugiego-rodzica"
+                    label="Dochód partnera"
+                    buttonText="9 tyg. ojca"
+                  />
+                </div>
                 <div style={{ position: 'relative' }}>
                   <input
                     type="number"
@@ -854,29 +886,36 @@ export function SetupStep({
 
             {input.role === "mother" && (
               <>
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    cursor: "pointer",
-                    fontSize: "0.84rem",
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={input.pregnancySickLeave}
-                    onChange={(e) => update("pregnancySickLeave", e.target.checked)}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <label
                     style={{
-                      accentColor: "var(--zus-green)",
-                      width: "16px",
-                      height: "16px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      cursor: "pointer",
+                      fontSize: "0.84rem",
                     }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={input.pregnancySickLeave}
+                      onChange={(e) => update("pregnancySickLeave", e.target.checked)}
+                      style={{
+                        accentColor: "var(--zus-green)",
+                        width: "16px",
+                        height: "16px",
+                      }}
+                    />
+                    <span style={{ color: "#1E293B" }}>
+                      Przebywam na zwolnieniu lekarskim w ciąży (L4 z kodem B, 100% płatne przed porodem)
+                    </span>
+                  </label>
+                  <AiFieldExplainer
+                    topicId="pole-l4-ciaza"
+                    label="L4 z kodem B"
+                    variant="compact"
                   />
-                  <span style={{ color: "#1E293B" }}>
-                    Przebywam na zwolnieniu lekarskim w ciąży (L4 z kodem B, 100% płatne przed porodem)
-                  </span>
-                </label>
+                </div>
 
                 {input.pregnancySickLeave && (
                   <div style={{ marginLeft: "24px", display: "flex", alignItems: "center", gap: "8px" }}>
@@ -893,57 +932,71 @@ export function SetupStep({
                   </div>
                 )}
 
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    cursor: "pointer",
-                    fontSize: "0.84rem",
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={input.premature}
-                    onChange={(e) => update("premature", e.target.checked)}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <label
                     style={{
-                      accentColor: "var(--zus-green)",
-                      width: "16px",
-                      height: "16px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      cursor: "pointer",
+                      fontSize: "0.84rem",
                     }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={input.premature}
+                      onChange={(e) => update("premature", e.target.checked)}
+                      style={{
+                        accentColor: "var(--zus-green)",
+                        width: "16px",
+                        height: "16px",
+                      }}
+                    />
+                    <span style={{ color: "#1E293B" }}>
+                      Wcześniak lub hospitalizacja noworodka (+ do 15 tyg. urlopu
+                      uzupełniającego 100%)
+                    </span>
+                  </label>
+                  <AiFieldExplainer
+                    topicId="pole-wczesniak-hospitalizacja"
+                    label="Wcześniak i hospitalizacja"
+                    variant="compact"
                   />
-                  <span style={{ color: "#1E293B" }}>
-                    Wcześniak lub hospitalizacja noworodka (+ do 15 tyg. urlopu
-                    uzupełniającego 100%)
-                  </span>
-                </label>
+                </div>
               </>
             )}
 
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                cursor: "pointer",
-                fontSize: "0.84rem",
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={input.zaZyciem}
-                onChange={(e) => update("zaZyciem", e.target.checked)}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+              <label
                 style={{
-                  accentColor: "var(--zus-green)",
-                  width: "16px",
-                  height: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  cursor: "pointer",
+                  fontSize: "0.84rem",
                 }}
+              >
+                <input
+                  type="checkbox"
+                  checked={input.zaZyciem}
+                  onChange={(e) => update("zaZyciem", e.target.checked)}
+                  style={{
+                    accentColor: "var(--zus-green)",
+                    width: "16px",
+                    height: "16px",
+                  }}
+                />
+                <span style={{ color: "#1E293B" }}>
+                  Zaświadczenie z Ustawy „Za życiem” (+24 tyg. rodzicielskiego i
+                  jednorazowe 4 000 zł)
+                </span>
+              </label>
+              <AiFieldExplainer
+                topicId="pole-ustawa-za-zyciem"
+                label="Ustawa Za życiem"
+                variant="compact"
               />
-              <span style={{ color: "#1E293B" }}>
-                Zaświadczenie z Ustawy „Za życiem” (+24 tyg. rodzicielskiego i
-                jednorazowe 4 000 zł)
-              </span>
-            </label>
+            </div>
           </div>
         </div>
       </div>

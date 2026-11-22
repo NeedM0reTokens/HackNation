@@ -10,6 +10,7 @@ import {
 import type { PaternityLeaveResult, MaternityTransferResult, ParentalSharingResult } from '@/types/paternity';
 import type { ParentalWorkResult } from '@/types/parental_work';
 import type { AdoptionLeaveResult, CaregiverType } from '@/types/adoption';
+import { AiFieldExplainer } from '@/components/ai/AiFieldExplainer';
 
 type SubTab = 'paternity' | 'transfer' | 'sharing' | 'work' | 'adoption';
 
@@ -251,7 +252,7 @@ export const PaternityView: React.FC = () => {
             <h2 className="zus-card-header-title">Dane do urlopu ojcowskiego (art. 182(3) KP)</h2>
             <div className="zus-form">
               <div className="zus-form-group">
-                <label className="zus-label">Miesięczne zarobki brutto ojca (PLN)</label>
+                <label className="zus-label" style={{ marginBottom: '6px', display: 'block' }}>Miesięczne zarobki brutto ojca (PLN)</label>
                 <input
                   type="number"
                   min="0"
@@ -263,7 +264,10 @@ export const PaternityView: React.FC = () => {
               </div>
 
               <div className="zus-form-group">
-                <label className="zus-label">Wiek dziecka w miesiącach (limit kodeksowy: do 12 m.ż.)</label>
+                <label className="zus-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <span>Wiek dziecka w miesiącach (limit kodeksowy: do 12 m.ż.)</span>
+                  <AiFieldExplainer topicId="ojcowski" label="Urlop ojcowski 14 dni" variant="compact" />
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -397,7 +401,10 @@ export const PaternityView: React.FC = () => {
               </div>
 
               <div className="zus-form-group">
-                <label className="zus-label">Przyczyna przejęcia urlopu przez ojca</label>
+                <label className="zus-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <span>Przyczyna przejęcia urlopu przez ojca</span>
+                  <AiFieldExplainer topicId="przejecie-urlopu-ojciec" label="Przejęcie urlopu przez ojca" variant="compact" />
+                </label>
                 <select
                   className="zus-input"
                   value={transferReason}
@@ -508,7 +515,12 @@ export const PaternityView: React.FC = () => {
       {activeSubTab === 'sharing' && (
         <div className="zus-view-grid">
           <div className="zus-card">
-            <h2 className="zus-card-header-title">Podział puli 41 tygodni urlopu rodzicielskiego</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
+              <h2 className="zus-card-header-title" style={{ margin: 0, border: 'none', padding: 0 }}>
+                Podział puli 41 tygodni urlopu rodzicielskiego
+              </h2>
+              <AiFieldExplainer topicId="nieprzenoszalne-9-tygodni" label="9 tygodni dla ojca" buttonText="9 tyg. ojca" />
+            </div>
             <div className="zus-form">
               <div className="zus-form-row">
                 <div className="zus-form-group">
@@ -646,7 +658,12 @@ export const PaternityView: React.FC = () => {
       {activeSubTab === 'work' && (
         <div className="zus-view-grid">
           <div className="zus-card">
-            <h2 className="zus-card-header-title">Łączenie urlopu rodzicielskiego z pracą (art. 182(1e)-182(1f) KP)</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
+              <h2 className="zus-card-header-title" style={{ margin: 0, border: 'none', padding: 0 }}>
+                Łączenie urlopu rodzicielskiego z pracą (art. 182(1e)-182(1f) KP)
+              </h2>
+              <AiFieldExplainer topicId="pole-pol-etatu" label="Praca na 1/2 etatu" buttonText="1/2 etatu" />
+            </div>
             <div className="zus-form">
               <div className="zus-form-group">
                 <label className="zus-label">Miesięczne wynagrodzenie brutto przed urlopem (PLN)</label>
@@ -782,7 +799,12 @@ export const PaternityView: React.FC = () => {
       {activeSubTab === 'adoption' && (
         <div className="zus-view-grid">
           <div className="zus-card">
-            <h2 className="zus-card-header-title">Adopcja i rodzina zastępcza niezawodowa (art. 183 KP)</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
+              <h2 className="zus-card-header-title" style={{ margin: 0, border: 'none', padding: 0 }}>
+                Adopcja i rodzina zastępcza niezawodowa (art. 183 KP)
+              </h2>
+              <AiFieldExplainer topicId="adopcja" label="Adopcja i rodzina zastępcza" buttonText="Opiekun" />
+            </div>
             <div className="zus-form">
               <div className="zus-form-group">
                 <label className="zus-label">Miesięczne wynagrodzenie brutto opiekuna (PLN)</label>

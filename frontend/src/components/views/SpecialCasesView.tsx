@@ -2,6 +2,7 @@ import { ViewHeader } from "../common/ViewHeader";
 import React, { useState } from 'react';
 import { calculateSpecialCases } from '@/lib/api-client';
 import type { SpecialCasesInput, SpecialCasesResult } from '@/types/special_cases';
+import { AiFieldExplainer } from '@/components/ai/AiFieldExplainer';
 
 export const SpecialCasesView: React.FC = () => {
   const [caseType, setCaseType] = useState<SpecialCasesInput['case_type']>('PREMATURE_HOSPITALIZATION');
@@ -40,7 +41,20 @@ export const SpecialCasesView: React.FC = () => {
           <h2 className="zus-card-header-title">Konfiguracja przypadku</h2>
           <div className="zus-form">
             <div className="zus-form-group">
-              <label className="zus-label">Rodzaj sytuacji szczególnej</label>
+              <label className="zus-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                <span>Rodzaj sytuacji szczególnej</span>
+                <AiFieldExplainer
+                  topicId={
+                    caseType === 'PREMATURE_HOSPITALIZATION'
+                      ? 'pole-wczesniak-hospitalizacja'
+                      : caseType === 'ZA_ZYCIEM'
+                        ? 'pole-ustawa-za-zyciem'
+                        : 'martwe-urodzenie'
+                  }
+                  label="Sytuacja szczególna"
+                  buttonText="Wymogi i przepisy"
+                />
+              </label>
               <select
                 className="zus-input"
                 value={caseType}
@@ -53,7 +67,7 @@ export const SpecialCasesView: React.FC = () => {
             </div>
 
             <div className="zus-form-group">
-              <label className="zus-label">Miesięczne wynagrodzenie brutto (PLN)</label>
+              <label className="zus-label" style={{ marginBottom: '6px', display: 'block' }}>Miesięczne wynagrodzenie brutto (PLN)</label>
               <input
                 type="number"
                 min="0"
@@ -67,7 +81,7 @@ export const SpecialCasesView: React.FC = () => {
             {caseType === 'PREMATURE_HOSPITALIZATION' && (
               <div className="zus-form-row">
                 <div className="zus-form-group">
-                  <label className="zus-label">Tydzień ciąży w chwili porodu</label>
+                  <label className="zus-label" style={{ marginBottom: '4px', display: 'block' }}>Tydzień ciąży w chwili porodu</label>
                   <input
                     type="number"
                     min="20"
@@ -78,7 +92,7 @@ export const SpecialCasesView: React.FC = () => {
                   />
                 </div>
                 <div className="zus-form-group">
-                  <label className="zus-label">Masa urodzeniowa (gramy)</label>
+                  <label className="zus-label" style={{ marginBottom: '4px', display: 'block' }}>Masa urodzeniowa (gramy)</label>
                   <input
                     type="number"
                     min="300"

@@ -25,6 +25,7 @@ import type {
 } from "@/lib/guide";
 import type { IntegratedCalculatorResult } from "@/types/calculator";
 import { SegmentedControl } from "../segmented-control";
+import { AiFieldExplainer } from "@/components/ai/AiFieldExplainer";
 
 const variantOptions: { value: PaymentVariant; label: string; hint: string }[] =
   [
@@ -407,21 +408,37 @@ export function SummaryTab({
             style={{
               display: "flex",
               alignItems: "center",
+              justifyContent: "space-between",
               gap: "8px",
               marginBottom: "12px",
+              flexWrap: "wrap",
             }}
           >
-            <TrendingUp className="size-4 text-[#007834]" />
-            <h3
+            <div
               style={{
-                fontSize: "0.98rem",
-                fontWeight: 700,
-                color: "#1A1A1A",
-                margin: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                flexWrap: "wrap",
               }}
             >
-              Porównanie wariantów wypłaty zasiłku macierzyńskiego
-            </h3>
+              <TrendingUp className="size-4 text-[#007834]" />
+              <h3
+                style={{
+                  fontSize: "0.98rem",
+                  fontWeight: 700,
+                  color: "#1A1A1A",
+                  margin: 0,
+                }}
+              >
+                Porównanie wariantów wypłaty zasiłku macierzyńskiego
+              </h3>
+              <AiFieldExplainer
+                topicId="wariant-815"
+                label="Wariant 81,5% vs 100/70%"
+                variant="compact"
+              />
+            </div>
           </div>
 
           <div
@@ -637,17 +654,40 @@ export function SummaryTab({
                 gap: "12px",
               }}
             >
-              <div>
-                <h3
+              <div style={{ flex: 1 }}>
+                <div
                   style={{
-                    fontSize: "0.98rem",
-                    fontWeight: 700,
-                    color: "#1A1A1A",
-                    margin: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    flexWrap: "wrap",
                   }}
                 >
-                  Prognoza wpływów do budżetu domowego (Miesięczny Cashflow)
-                </h3>
+                  <h3
+                    style={{
+                      fontSize: "0.98rem",
+                      fontWeight: 700,
+                      color: "#1A1A1A",
+                      margin: 0,
+                    }}
+                  >
+                    Prognoza wpływów do budżetu domowego (Miesięczny Cashflow)
+                  </h3>
+                  <AiFieldExplainer
+                    topicId="potracenie-1371"
+                    label="Odliczenie 13,71% składek"
+                    buttonText="−13,71%"
+                  />
+                  {backendResult.monthly_cashflow.some(
+                    (m) => m.father_benefit > 0,
+                  ) && (
+                    <AiFieldExplainer
+                      topicId="cashflow-ojciec-70"
+                      label="Stawka ojca 70%"
+                      buttonText="Tata 70%"
+                    />
+                  )}
+                </div>
                 <p
                   style={{
                     fontSize: "0.8rem",
@@ -700,9 +740,15 @@ export function SummaryTab({
                 }}
               >
                 {(() => {
-                  const hasFather = backendResult.monthly_cashflow.some((m) => m.father_benefit > 0);
-                  const hasSalary = backendResult.monthly_cashflow.some((m) => m.work_salary > 0);
-                  const hasMother = backendResult.monthly_cashflow.some((m) => m.mother_benefit > 0);
+                  const hasFather = backendResult.monthly_cashflow.some(
+                    (m) => m.father_benefit > 0,
+                  );
+                  const hasSalary = backendResult.monthly_cashflow.some(
+                    (m) => m.work_salary > 0,
+                  );
+                  const hasMother = backendResult.monthly_cashflow.some(
+                    (m) => m.mother_benefit > 0,
+                  );
 
                   return (
                     <table
@@ -721,9 +767,34 @@ export function SummaryTab({
                           }}
                         >
                           <th style={{ padding: "8px 12px" }}>Okres</th>
-                          {hasMother && <th style={{ padding: "8px 12px" }}>Zasiłek matki</th>}
-                          {hasFather && <th style={{ padding: "8px 12px" }}>Zasiłek ojca</th>}
-                          {hasSalary && <th style={{ padding: "8px 12px" }}>Pensja z pracy</th>}
+                          {hasMother && (
+                            <th style={{ padding: "8px 12px" }}>
+                              Zasiłek matki
+                            </th>
+                          )}
+                          {hasFather && (
+                            <th style={{ padding: "8px 12px" }}>
+                              <div
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "6px",
+                                }}
+                              >
+                                <span>Zasiłek ojca</span>
+                                <AiFieldExplainer
+                                  topicId="cashflow-ojciec-70"
+                                  label="Zasiłek ojca (70%)"
+                                  variant="compact"
+                                />
+                              </div>
+                            </th>
+                          )}
+                          {hasSalary && (
+                            <th style={{ padding: "8px 12px" }}>
+                              Pensja z pracy
+                            </th>
+                          )}
                           <th
                             style={{
                               padding: "8px 12px",
@@ -741,7 +812,9 @@ export function SummaryTab({
                             key={idx}
                             style={{ borderBottom: "1px solid #E2E8F0" }}
                           >
-                            <td style={{ padding: "8px 12px", fontWeight: 600 }}>
+                            <td
+                              style={{ padding: "8px 12px", fontWeight: 600 }}
+                            >
                               {m.year_month}
                             </td>
                             {hasMother && (
@@ -760,7 +833,9 @@ export function SummaryTab({
                             )}
                             {hasSalary && (
                               <td style={{ padding: "8px 12px" }}>
-                                {m.work_salary > 0 ? `${m.work_salary} zł` : "—"}
+                                {m.work_salary > 0
+                                  ? `${m.work_salary} zł`
+                                  : "—"}
                               </td>
                             )}
                             <td
@@ -808,8 +883,13 @@ export function SummaryTab({
             <AccordionContent>
               <dl className="flex flex-col divide-y pb-2 text-sm">
                 <div className="flex justify-between gap-4 py-2.5">
-                  <dt className="text-muted-foreground">
-                    Podstawa wymiaru (brutto − 13,71%)
+                  <dt className="text-muted-foreground flex items-center gap-2">
+                    <span>Podstawa wymiaru (brutto − 13,71%)</span>
+                    <AiFieldExplainer
+                      topicId="potracenie-1371"
+                      label="Podstawa netto (-13,71%)"
+                      variant="compact"
+                    />
                   </dt>
                   <dd className="font-medium tabular-nums text-foreground">
                     {formatPLN(calc.assessmentBase)}
