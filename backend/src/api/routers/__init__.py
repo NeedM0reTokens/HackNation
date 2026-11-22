@@ -3,6 +3,7 @@ from .adoption import AdoptionRouter
 from .assistant import AssistantRouter
 from .auth import AuthRouter
 from .calculator import CalculatorRouter
+from .cases import CasesRouter
 from .health import HealthRouter
 from .maternity import MaternityRouter
 from .mock import MockRouter, SimulationRouter
@@ -18,6 +19,7 @@ __all__ = [
     "AssistantRouter",
     "AuthRouter",
     "CalculatorRouter",
+    "CasesRouter",
     "HealthRouter",
     "MaternityRouter",
     "MockRouter",

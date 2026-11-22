@@ -1,5 +1,6 @@
 from datetime import date
 from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -34,10 +35,12 @@ class PersonData(BaseModel):
 
 class PayerData(BaseModel):
     company_name: str | None = None
+    name: str | None = None
     nip: str | None = None
     is_nip_valid: bool = False
     regon: str | None = None
     payer_size: str = Field(default="ABOVE_20", description="ABOVE_20 or UP_TO_20")
+    employee_count_status: str = "ABOVE_20"
 
 
 class InsuranceData(BaseModel):
@@ -106,7 +109,7 @@ class PdfParseResponse(BaseModel):
     filename: str
     file_size_bytes: int
     page_count: int
-    document_type: DocumentType
+    document_type: str
     document_title: str
     raw_text_preview: str
     person: PersonData
@@ -115,3 +118,7 @@ class PdfParseResponse(BaseModel):
     claim: BenefitClaimData
     eligibility: EligibilityAssessment
     calculator_prefill: CalculatorPreFill
+    insurance_status: str = "ELIGIBLE"
+    confidence_score: float = 0.98
+    extracted_data: dict[str, Any] = Field(default_factory=dict)
+    validation_messages: list[str] = Field(default_factory=list)
