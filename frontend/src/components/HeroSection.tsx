@@ -1,3 +1,4 @@
+import { useAppState } from "./app-state";
 import React, { useState } from 'react';
 
 export type RoleType = 'mother' | 'father' | 'adoption' | 'difficult';
@@ -15,6 +16,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onOpenPdfModal,
   onSelectRoleAction,
 }) => {
+  const { user } = useAppState();
   const [selectedRole, setSelectedRole] = useState<RoleType>('mother');
 
   // Dane dla poszczególnych ról
@@ -293,13 +295,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             ) : (
               /* Wariant ZALOGOWANY (Mockowe dane ZUS / mObywatel) */
               <div className="zus-logged-box">
-                <div className="zus-user-header">
-                  <div className="zus-user-avatar">AK</div>
-                  <div className="zus-user-details">
-                    <span className="zus-user-name">Anna Kowalska</span>
-                    <span className="zus-user-pesel">PESEL: 920512•••••</span>
-                  </div>
-                </div>
+                {(() => {
+                  const initials = user ? `${user.firstName[0] || "O"}${user.lastName[0] || "B"}` : "AK";
+                  const fullName = user ? `${user.firstName} ${user.lastName}` : "Anna Kowalska";
+                  const peselDisplay = user ? user.peselMasked : "920512•••••";
+                  return (
+                    <div className="zus-user-header">
+                      <div className="zus-user-avatar">{initials}</div>
+                      <div className="zus-user-details">
+                        <span className="zus-user-name">{fullName}</span>
+                        <span className="zus-user-pesel">PESEL: {peselDisplay}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* 1. Status ubezpieczenia chorobowego */}
                 <div className="zus-data-row">

@@ -93,7 +93,7 @@ OPENAPI_TAGS = [
         "name": "PDF Processing & Extraction",
         "description": (
             "Ekstrakcja formularzy ZUS (Z-3, Z-3a, ZAM, e-ZLA) z plików PDF, walidacja PESEL/NIP "
-            "i automatyczne zasilanie kalkulatorów (BE-22 - BE-25)."
+            'i automatyczne zasilanie kalkulatorów (BE-22 - BE-25)."\n'
         ),
     },
     {
@@ -157,6 +157,7 @@ class MainAPI(FastAPI):
         self.pdf_router = PdfRouter()
         self.cases_router = CasesRouter()
         self.mock_router = MockRouter()
+        self.simulation_router = MockRouter(prefix="/simulation")
         self.zus_router = ZusRouter()
         self.admin_router = AdminRouter()
         self.pregnancy_router = PregnancyRouter()
@@ -174,6 +175,7 @@ class MainAPI(FastAPI):
         self.include_router(self.pdf_router, prefix="/api")
         self.include_router(self.cases_router, prefix="/api")
         self.include_router(self.mock_router, prefix="/api")
+        self.include_router(self.simulation_router, prefix="/api")
         self.include_router(self.zus_router, prefix="/api")
         self.include_router(self.admin_router, prefix="/api")
         self.include_router(self.pregnancy_router, prefix="/api")

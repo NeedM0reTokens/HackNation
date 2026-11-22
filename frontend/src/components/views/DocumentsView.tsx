@@ -6,7 +6,6 @@ export const DocumentsView: React.FC = () => {
   return (
     <div className="zus-view-container">
       <div className="zus-view-header">
-        <div className="zus-official-pill">Procedury, Wnioski i Kodeks Pracy</div>
         <h1 className="zus-view-title">Co, gdzie i kiedy złożyć? – Przewodnik formalności ZUS</h1>
         <p className="zus-view-desc">
           Terminowe złożenie właściwych formularzy jest kluczem do uzyskania optymalnych stawek (np. <strong>81,5% za cały okres</strong>) oraz pełnej ochrony przed zwolnieniem z pracy.

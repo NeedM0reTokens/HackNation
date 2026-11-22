@@ -147,7 +147,6 @@ export const PaternityView: React.FC = () => {
     <div className="zus-view-container">
       {/* NAGŁÓWEK WIDOKU */}
       <div className="zus-view-header">
-        <div className="zus-official-pill">Kodeks Pracy & Ustawa Zasiłkowa 2026</div>
         <h1 className="zus-view-title">Urlopy Rodzicielskie, Prawa Ojca i Opiekunów</h1>
         <p className="zus-view-desc">
           Zgodnie z unijną dyrektywą <strong>Work-Life Balance</strong> oraz przepisami ZUS, rodzice i opiekunowie dysponują elastycznymi narzędziami podziału opieki: <strong>14 dni urlopu ojcowskiego</strong> (100%), <strong>9 tygodni nieprzenoszalnego urlopu dla taty</strong> (70%), <strong>przejęcie macierzyńskiego</strong>, <strong>łączenie urlopu z pracą na 1/2 etatu</strong> oraz <strong>uprawnienia adopcyjne</strong>.
