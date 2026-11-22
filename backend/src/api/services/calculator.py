@@ -7,6 +7,9 @@ from ..models.calculator import (
     IntegratedCalculatorInput,
     IntegratedCalculatorResult,
     MonthlyCashflow,
+    RiskAlertItem,
+    RiskAnalysisRequest,
+    RiskAnalysisResponse,
     TimelineMilestone,
     TimelinePeriod,
 )
@@ -714,6 +717,23 @@ def calculate_integrated_parental_service(
             + "świadczenie rodzicielskie (tzw. kosiniakowe 1000 zł/mc z MOPS/GOPS)."
         )
 
+    # Główny ubezpieczony do analizy ryzyk i czerwonych flag
+    emp_type = data.mother_employment_type
+    income = data.mother_gross_monthly_income
+    is_insured = data.is_mother_insured
+    if not data.is_mother_insured and data.is_father_insured:
+        emp_type = data.father_employment_type
+        income = data.father_gross_monthly_income
+        is_insured = data.is_father_insured
+
+    days = data.insurance_duration_days if data.insurance_duration_days != 365 else data.insured_days
+    evaluated_risks = evaluate_risk_alerts(
+        employment_type=emp_type,
+        gross_monthly_income=income,
+        insured_days=days,
+        has_sickness_insurance=is_insured,
+    )
+
     return IntegratedCalculatorResult(
         is_eligible=is_eligible,
         child_birth_date=data.child_birth_date,
@@ -734,4 +754,95 @@ def calculate_integrated_parental_service(
         summary_notes=summary_notes,
         required_documents=required_documents,
         legal_basis=legal_basis,
+        risk_alerts=evaluated_risks,
+    )
+
+
+def evaluate_risk_alerts(
+    employment_type: MaternityEmploymentType,
+    gross_monthly_income: float,
+    insured_days: int,
+    has_sickness_insurance: bool,
+) -> list[RiskAlertItem]:
+    alerts: list[RiskAlertItem] = []
+    is_voluntary = employment_type in (
+        MaternityEmploymentType.MANDATE_CONTRACT,
+        MaternityEmploymentType.B2B,
+    )
+    waiting_days = 30 if employment_type == MaternityEmploymentType.EMPLOYMENT_CONTRACT else 90
+
+    if not has_sickness_insurance:
+        alerts.append(
+            RiskAlertItem(
+                id="no-insurance",
+                title="Brak dobrowolnego ubezpieczenia chorobowego",
+                description="Na umowie zlecenie i w JDG ubezpieczenie chorobowe jest dobrowolne. Zgłoś je w ZUS (ZUA/ZZA), bez niego nie nabędziesz prawa do świadczeń.",
+                severity="danger",
+            )
+        )
+    elif insured_days < waiting_days:
+        alerts.append(
+            RiskAlertItem(
+                id="waiting-period",
+                title="Okres wyczekiwania nie minął",
+                description=f"Zasiłek chorobowy w ciąży wymaga {waiting_days} dni nieprzerwanego ubezpieczenia. Sprawdź w ZUS, od kiedy przysługuje Ci zasiłek macierzyński.",
+                severity="warning",
+            )
+        )
+
+    if insured_days < 180 and (is_voluntary or gross_monthly_income > 12000.0):
+        alerts.append(
+            RiskAlertItem(
+                id="sham-contract",
+                title="Ryzyko zakwestionowania umowy lub JDG jako pozornej",
+                description="ZUS często kontroluje tytuły ubezpieczenia zawarte krótko przed lub w trakcie ciąży. Zachowaj dowody faktycznej pracy: faktury, korespondencję, ewidencję.",
+                severity="warning",
+            )
+        )
+
+    if employment_type == MaternityEmploymentType.B2B and gross_monthly_income > 9000.0:
+        alerts.append(
+            RiskAlertItem(
+                id="raised-contributions",
+                title="Sztuczne podwyższenie składek w ciąży",
+                description="Wysoka zadeklarowana podstawa składek u przedsiębiorcy może zostać obniżona przez ZUS, jeśli nie odpowiada realnym przychodom firmy.",
+                severity="warning",
+            )
+        )
+
+    if is_voluntary:
+        if employment_type == MaternityEmploymentType.MANDATE_CONTRACT:
+            alerts.append(
+                RiskAlertItem(
+                    id="lose-insurance",
+                    title="Utrata ubezpieczenia przed porodem",
+                    description="Jeśli umowa zlecenie skończy się przed porodem, tracisz prawo do zasiłku macierzyńskiego. Na zleceniu nie ma kodeksowej ochrony przedłużenia umowy.",
+                    severity="warning",
+                )
+            )
+        else:
+            alerts.append(
+                RiskAlertItem(
+                    id="lose-insurance",
+                    title="Utrata ubezpieczenia przed porodem",
+                    description="Zadłużenie składkowe powyżej określonej kwoty może wstrzymać wypłatę zasiłku. Dbaj o terminowe opłacanie składek ZUS do 20. dnia miesiąca.",
+                    severity="warning",
+                )
+            )
+
+    return alerts
+
+
+def analyze_risks_service(data: RiskAnalysisRequest) -> RiskAnalysisResponse:
+    alerts = evaluate_risk_alerts(
+        employment_type=data.employment_type,
+        gross_monthly_income=data.gross_monthly_income,
+        insured_days=data.insured_days,
+        has_sickness_insurance=data.has_sickness_insurance,
+    )
+    status = "STATUS: BEZPIECZNY" if len(alerts) == 0 else f"WYKRYTE RYZYKA: {len(alerts)}"
+    return RiskAnalysisResponse(
+        status=status,
+        risk_count=len(alerts),
+        alerts=alerts,
     )

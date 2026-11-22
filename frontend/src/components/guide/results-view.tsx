@@ -43,7 +43,12 @@ export function ResultsView({
   const calc = useMemo(() => calculate(input, options), [input, options]);
   const milestones = useMemo(() => buildMilestones(input, calc), [input, calc]);
   const documents = useMemo(() => buildDocuments(input), [input]);
-  const alerts = useMemo(() => buildAlerts(input), [input]);
+  const alerts = useMemo(() => {
+    if (backendResult?.risk_alerts && backendResult.risk_alerts.length > 0) {
+      return backendResult.risk_alerts;
+    }
+    return buildAlerts(input);
+  }, [backendResult, input]);
   const knowledge = useMemo(() => buildKnowledge(input), [input]);
 
   // Połączenie z backendem FastAPI (POST /api/calculator/parental)
@@ -66,6 +71,9 @@ export function ResultsView({
       father_employment_type: 'EMPLOYMENT_CONTRACT',
       is_mother_insured: input.employment === 'uop' || input.sicknessInsurance,
       is_father_insured: true,
+      insurance_duration_days: input.insuredDays,
+      insured_days: input.insuredDays,
+      sickness_insurance: input.employment === 'uop' || input.sicknessInsurance,
       children_count: 1,
       chosen_variant: options.variant === 'single' ? 'UNIFIED_81_5' : 'VARIABLE_100_70',
       applied_within_21_days: options.variant === 'single',
@@ -176,9 +184,9 @@ export function ResultsView({
       {/* Główny baner kwalifikacji ZUS */}
       <QualificationBanner qualification={qualification} />
 
-      {/* Siatka 2-kolumnowa: Wyniki/Zakładki (lewa) + Przewodnik wiedzy (prawa) */}
-      <div className="zus-calc-grid">
-        <div style={{ minWidth: 0 }}>
+      {/* Układ w czystej, prostej linii (bez bocznych kolumn) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', width: '100%' }}>
+        <div style={{ width: '100%' }}>
           {/* Zakładki szczegółowe wyników */}
           <div
             style={{
@@ -259,16 +267,17 @@ export function ResultsView({
           )}
 
           {tab === 'alerts' && (
-            <AlertsTab alerts={alerts} shielded={hasLegalShield(input)} />
+            <AlertsTab
+              alerts={alerts}
+              shielded={hasLegalShield(input)}
+            />
           )}
         </div>
 
-        {/* Prawa kolumna: Karty wiedzy dopasowane do sytuacji */}
-        <aside style={{ minWidth: 0 }}>
-          <div style={{ position: 'sticky', top: '24px' }}>
-            <KnowledgePanel cards={knowledge} />
-          </div>
-        </aside>
+        {/* Sekcja dolna: Przewodnik sytuacji i dodatkowe wyjaśnienia ZUS w prostej linii */}
+        <section style={{ width: '100%', borderTop: '1px solid #E2E8F0', paddingTop: '28px' }}>
+          <KnowledgePanel cards={knowledge} />
+        </section>
       </div>
     </div>
   );

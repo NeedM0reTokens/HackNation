@@ -74,21 +74,26 @@ export function qualify(input: GuideInput): Qualification {
   if (!hasSicknessInsurance(input)) {
     return {
       eligible: false,
-      headline: 'Nie podlegasz – brak prawa do zasiłku',
-      reason: 'Brak dobrowolnego ubezpieczenia chorobowego. Bez niego ZUS nie wypłaci zasiłku macierzyńskiego ani chorobowego.',
+      headline: 'Brak dobrowolnego ubezpieczenia chorobowego',
+      reason: 'Brak zgłoszenia do ubezpieczenia chorobowego. Bez niego ZUS nie wypłaci zasiłku macierzyńskiego ani ojcowskiego.',
     }
   }
+
+  // Zgodnie z art. 4 ust. 2 pkt 3 ustawy zasiłkowej, prawo do zasiłku macierzyńskiego
+  // i rodzicielskiego przysługuje od 1. dnia ubezpieczenia (brak okresu wyczekiwania).
+  // Okres wyczekiwania 30/90 dni dotyczy wyłącznie zasiłku chorobowego (L4).
   if (input.insuredDays < waiting) {
     return {
-      eligible: false,
-      headline: 'Nie podlegasz – brak prawa do zasiłku',
-      reason: `Nie minęło ${waiting} dni okresu wyczekiwania (masz ${input.insuredDays}). Brakuje ${waiting - input.insuredDays} dni ubezpieczenia.`,
+      eligible: true,
+      headline: 'Prawo do zasiłku macierzyńskiego (0 dni karencji)',
+      reason: `Zasiłek macierzyński/ojcowski przysługuje od 1. dnia ubezpieczenia. Uwaga: na zwolnienie lekarskie L4 przed porodem obowiązuje okres wyczekiwania ${waiting} dni (posiadasz ${input.insuredDays} dni).`,
     }
   }
+
   return {
     eligible: true,
-    headline: 'Podlegasz ubezpieczeniu – masz prawo do zasiłku',
-    reason: `Spełniasz warunek ${waiting} dni okresu wyczekiwania na ${employmentShort[input.employment]}.`,
+    headline: 'Kwalifikacja pozytywna – pełne prawo do świadczeń',
+    reason: `Masz prawo do zasiłku macierzyńskiego od 1. dnia oraz spełniasz warunek ${waiting} dni okresu wyczekiwania dla zasiłku chorobowego na ${employmentShort[input.employment]}.`,
   }
 }
 
@@ -460,8 +465,8 @@ export function buildAlerts(input: GuideInput): RiskAlert[] {
       title: 'Utrata ubezpieczenia przed porodem',
       description:
         input.employment === 'jdg'
-          ? 'Spóźniona lub niepełna wpłata składki choćby o 1 grosz przerywa ubezpieczenie chorobowe. Pilnuj terminu do 20. dnia miesiąca.'
-          : 'Jeśli umowa zlecenie skończy się przed porodem, tracisz prawo do zasiłku macierzyńskiego. Nie ma ochrony przedłużenia umowy.',
+          ? 'Zadłużenie składkowe powyżej określonej kwoty może wstrzymać wypłatę zasiłku. Dbaj o terminowe opłacanie składek ZUS do 20. dnia miesiąca.'
+          : 'Jeśli umowa zlecenie skończy się przed porodem, tracisz prawo do zasiłku macierzyńskiego. Na zleceniu nie ma kodeksowej ochrony przedłużenia umowy.',
     })
   }
 
@@ -483,33 +488,34 @@ export type KnowledgeCard = {
 const knowledgeByEmployment: Record<Employment, KnowledgeCard> = {
   uop: {
     id: 'uop',
-    title: 'Etat daje najszerszą ochronę',
-    summary: 'Ubezpieczenie chorobowe jest obowiązkowe, więc nie musisz o nie dbać samodzielnie.',
+    title: 'Etat (UoP) daje pełną ochronę Kodeksu pracy',
+    summary: 'Ubezpieczenie chorobowe jest obowiązkowe od pierwszego dnia pracy.',
     points: [
-      'Okres wyczekiwania to 30 dni.',
-      'Pracodawca nie może Cię zwolnić w ciąży ani na urlopie.',
-      'Umowa na czas określony przedłuża się do dnia porodu.',
+      'Zasiłek macierzyński przysługuje od 1. dnia pracy – brak okresu wyczekiwania (na L4 chorobowe karencja wynosi 30 dni).',
+      'Szczególna ochrona trwałego zatrudnienia: zakaz wypowiedzenia umowy w ciąży oraz w trakcie urlopów.',
+      'Umowa na czas określony (zawarta na ponad 1 mies.) przedłuża się do dnia porodu po 3. miesiącu ciąży.',
     ],
     topicId: 'podstawa-wymiaru',
   },
   zlecenie: {
     id: 'zlecenie',
-    title: 'Chorobowe na zleceniu jest dobrowolne',
-    summary: 'Prawo do zasiłku masz tylko, gdy zleceniodawca zgłosił Cię do ubezpieczenia chorobowego.',
+    title: 'Zlecenie: zasiłek macierzyński bez karencji',
+    summary: 'Warunkiem jest zgłoszenie do dobrowolnego ubezpieczenia chorobowego przed porodem.',
     points: [
-      'Okres wyczekiwania to 90 dni.',
-      'Zasiłek wypłaca bezpośrednio ZUS.',
-      'Umowa nie przedłuża się automatycznie do porodu.',
+      'Zasiłek macierzyński i ojcowski przysługuje od 1. dnia ubezpieczenia (brak okresu wyczekiwania).',
+      'Zasiłek chorobowy (L4 w ciąży): wymaga 90 dni ubezpieczenia chorobowego.',
+      'Zasiłek wypłaca bezpośrednio ZUS na Twoje konto bankowe.',
+      'Umowa zlecenie nie przedłuża się automatycznie do porodu (brak ochrony kodeksowej).',
     ],
   },
   jdg: {
     id: 'jdg',
-    title: 'W JDG jesteś płatnikiem i ubezpieczonym',
-    summary: 'Sam(a) zgłaszasz się do ubezpieczeń i sam(a) płacisz składki – ZUS rozlicza Cię w obu rolach.',
+    title: 'JDG: jesteś płatnikiem i ubezpieczonym',
+    summary: 'Sam(a) zgłaszasz się do ubezpieczeń i rozliczasz składki w ZUS.',
     points: [
-      'Płatnik = Twoja firma, ubezpieczony = Ty.',
-      'Zasiłek chorobowy wypłaca ZUS od 1. dnia zwolnienia.',
-      'Składka chorobowa (2,45%) jest dobrowolna – bez niej nie ma zasiłku.',
+      'Zasiłek macierzyński i ojcowski przysługuje od 1. dnia ubezpieczenia chorobowego (bez karencji).',
+      'Zasiłek chorobowy (L4 w ciąży): przysługuje po 90 dniach ubezpieczenia.',
+      'Składka chorobowa (2,45%) jest dobrowolna – bez niej ZUS nie wypłaci żadnego zasiłku.',
     ],
     topicId: 'podstawa-wymiaru',
   },
@@ -519,21 +525,21 @@ const knowledgeByRole: Partial<Record<Role, KnowledgeCard>> = {
   father: {
     id: 'father',
     title: '9 tygodni tylko dla taty',
-    summary: 'Z 41 tygodni urlopu rodzicielskiego 9 jest zarezerwowanych dla ojca. Jeśli z nich nie skorzystasz – przepadają.',
+    summary: 'Z 41 tygodni urlopu rodzicielskiego 9 tygodni przysługuje wyłącznie drugiemu rodzicowi (ojcu). Jeśli z nich nie skorzysta – ta część przepada.',
     points: [
-      'Urlop ojcowski: 2 tygodnie, 100% podstawy, do 12. miesiąca dziecka.',
-      'Rodzicielski taty: 9 tygodni, 70% podstawy, do 6. urodzin dziecka.',
-      'Możesz łączyć rodzicielski z pracą na 1/2 etatu.',
+      'Urlop ojcowski: 2 tygodnie, 100% podstawy – do ukończenia przez dziecko 12. miesiąca życia.',
+      'Rodzicielski dla taty: 9 tygodni, 70% podstawy – do końca roku kalendarzowego, w którym dziecko kończy 6 lat.',
+      'Na etacie (UoP) możesz łączyć rodzicielski z pracą do 1/2 etatu; na zleceniu/JDG wykonujesz zlecenia bez limitu etatu.',
     ],
     topicId: 'urlop-ojcowski',
   },
   guardian: {
     id: 'guardian',
     title: 'Urlop na warunkach macierzyńskiego',
-    summary: 'Przy przysposobieniu lub rodzinie zastępczej masz te same tygodnie urlopu, liczone od przyjęcia dziecka.',
+    summary: 'Przy przysposobieniu lub rodzinie zastępczej przysługują te same uprawnienia liczone od przyjęcia dziecka.',
     points: [
-      'Dotyczy dziecka do 7. roku życia (do 10. przy odroczonym obowiązku szkolnym).',
-      'Rodzina zastępcza niezawodowa ma prawo do urlopu, zawodowa – nie.',
+      'Wiek dziecka: do 7 lat (do 10 lat przy odroczonym obowiązku szkolnym) dla rodziny zastępczej; do 14 lat przy wniosku o przysposobienie.',
+      'Rodzina zastępcza niezawodowa ma prawo do urlopu, rodzina zawodowa – nie.',
     ],
   },
 }
@@ -548,22 +554,22 @@ export const moreKnowledge: { id: string; title: string; body: string }[] = [
   {
     id: 'base',
     title: 'Jak liczona jest podstawa wymiaru?',
-    body: 'To średnie wynagrodzenie brutto z ostatnich 12 miesięcy pomniejszone o 13,71% składek społecznych. Przy JDG – zadeklarowana podstawa składek.',
+    body: 'To średni przychód lub wynagrodzenie brutto z ostatnich 12 miesięcy kalendarzowych poprzedzających poród, pomniejszone o 13,71% (składki ZUS finansowane przez pracownika). Przy JDG – zadeklarowana podstawa składek.',
   },
   {
     id: 'variants',
     title: '100% + 70% czy 81,5% przez cały rok?',
-    body: 'Łączna kwota jest zbliżona. Wariant 81,5% daje równe wypłaty, ale wymaga wniosku do 21 dni po porodzie. Wariant 100% + 70% daje więcej na początku.',
+    body: 'Wariant jednolity 81,5% za cały okres przysługuje przy złożeniu tzw. długiego wniosku do 21 dni po porodzie. Wariant zmienny (100% macierzyński, 70% rodzicielski) daje wyższe środki na początku. Część 9 tygodni dla ojca zawsze wynosi 70%.',
   },
   {
     id: 'part-time',
     title: 'Łączenie rodzicielskiego z pracą',
-    body: 'Możesz pracować do 1/2 etatu. Zasiłek maleje proporcjonalnie, a urlop wydłuża się – maksymalnie dwukrotnie.',
+    body: 'Na etacie (UoP) możesz pracować u swojego pracodawcy maksymalnie na 1/2 etatu – wówczas urlop ulega proporcjonalnemu wydłużeniu (nawet do 82 tygodni). Na zleceniu lub JDG możesz pracować bez limitu wymiaru.',
   },
   {
     id: 'minimum',
     title: 'Minimalna kwota zasiłku',
-    body: `Zasiłek macierzyński nie może być niższy niż ${MIN_BENEFIT} zł miesięcznie (przy pracy w niepełnym wymiarze – proporcjonalnie mniej).`,
+    body: `Zasiłek macierzyński nie może być niższy niż ${MIN_BENEFIT} zł miesięcznie (ustawowe podwyższenie do kwoty świadczenia rodzicielskiego, tzw. kosiniakowego).`,
   },
 ]
 

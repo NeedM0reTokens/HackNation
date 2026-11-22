@@ -112,7 +112,7 @@ export function SetupStep({
               disabled={isParsingPdf}
               title="Wgraj zaświadczenie płatnika lub wniosek ZUS w formacie PDF (np. Z-3, Z-3a, ZAM, e-ZLA)"
             >
-              <FileUp className="size-4 text-[#003B6F]" />
+              <FileUp className="size-4 text-[#475569]" />
               <span>{isParsingPdf ? 'Parsowanie PDF...' : 'Wgraj PDF'}</span>
             </button>
             <input
@@ -164,7 +164,7 @@ export function SetupStep({
           {/* 1. Rola: Kto wnioskuje o świadczenie */}
           <div className="zus-form-group">
             <label className="zus-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <User className="size-4 text-[#007834]" />
+              <User className="size-4 text-[#475569]" />
               <span>Kto wnioskuje o świadczenie? (Rola wnioskodawcy)</span>
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '10px' }}>
@@ -172,78 +172,72 @@ export function SetupStep({
                 type="button"
                 onClick={() => update('role', 'mother')}
                 style={{
-                  padding: '12px 8px',
+                  padding: '12px 10px',
                   borderRadius: '6px',
-                  border: input.role === 'mother' ? '2px solid #007834' : '1.5px solid #CBD5E0',
-                  backgroundColor: input.role === 'mother' ? '#E6F4EC' : '#FFFFFF',
-                  color: input.role === 'mother' ? '#00441c' : '#1A1A1A',
+                  border: input.role === 'mother' ? '2px solid #334155' : '1.5px solid #CBD5E0',
+                  backgroundColor: input.role === 'mother' ? '#F1F5F9' : '#FFFFFF',
+                  color: input.role === 'mother' ? '#0F172A' : '#475569',
                   fontWeight: input.role === 'mother' ? 700 : 500,
+                  fontSize: '0.94rem',
                   textAlign: 'center',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: input.role === 'mother' ? '0 1px 3px rgba(0, 120, 52, 0.2)' : 'none',
+                  minHeight: '44px',
+                  boxShadow: input.role === 'mother' ? '0 1px 2px rgba(0, 0, 0, 0.05)' : 'none',
                 }}
               >
-                <div style={{ fontSize: '0.94rem', fontWeight: 700 }}>Matka</div>
-                <div style={{ fontSize: '0.73rem', color: input.role === 'mother' ? '#005c27' : '#6B7280', marginTop: '2px' }}>
-                  Ciąża i macierzyński
-                </div>
+                Matka
               </button>
 
               <button
                 type="button"
                 onClick={() => update('role', 'father')}
                 style={{
-                  padding: '12px 8px',
+                  padding: '12px 10px',
                   borderRadius: '6px',
-                  border: input.role === 'father' ? '2px solid #007834' : '1.5px solid #CBD5E0',
-                  backgroundColor: input.role === 'father' ? '#E6F4EC' : '#FFFFFF',
-                  color: input.role === 'father' ? '#00441c' : '#1A1A1A',
+                  border: input.role === 'father' ? '2px solid #334155' : '1.5px solid #CBD5E0',
+                  backgroundColor: input.role === 'father' ? '#F1F5F9' : '#FFFFFF',
+                  color: input.role === 'father' ? '#0F172A' : '#475569',
                   fontWeight: input.role === 'father' ? 700 : 500,
+                  fontSize: '0.94rem',
                   textAlign: 'center',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: input.role === 'father' ? '0 1px 3px rgba(0, 120, 52, 0.2)' : 'none',
+                  minHeight: '44px',
+                  boxShadow: input.role === 'father' ? '0 1px 2px rgba(0, 0, 0, 0.05)' : 'none',
                 }}
               >
-                <div style={{ fontSize: '0.94rem', fontWeight: 700 }}>Ojciec</div>
-                <div style={{ fontSize: '0.73rem', color: input.role === 'father' ? '#005c27' : '#6B7280', marginTop: '2px' }}>
-                  Ojcowski i 9 tyg. taty
-                </div>
+                Ojciec
               </button>
 
               <button
                 type="button"
                 onClick={() => update('role', 'guardian')}
                 style={{
-                  padding: '12px 8px',
+                  padding: '12px 10px',
                   borderRadius: '6px',
-                  border: input.role === 'guardian' ? '2px solid #007834' : '1.5px solid #CBD5E0',
-                  backgroundColor: input.role === 'guardian' ? '#E6F4EC' : '#FFFFFF',
-                  color: input.role === 'guardian' ? '#00441c' : '#1A1A1A',
+                  border: input.role === 'guardian' ? '2px solid #334155' : '1.5px solid #CBD5E0',
+                  backgroundColor: input.role === 'guardian' ? '#F1F5F9' : '#FFFFFF',
+                  color: input.role === 'guardian' ? '#0F172A' : '#475569',
                   fontWeight: input.role === 'guardian' ? 700 : 500,
+                  fontSize: '0.94rem',
                   textAlign: 'center',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: input.role === 'guardian' ? '0 1px 3px rgba(0, 120, 52, 0.2)' : 'none',
+                  minHeight: '44px',
+                  boxShadow: input.role === 'guardian' ? '0 1px 2px rgba(0, 0, 0, 0.05)' : 'none',
                 }}
               >
-                <div style={{ fontSize: '0.94rem', fontWeight: 700 }}>Opiekun</div>
-                <div style={{ fontSize: '0.73rem', color: input.role === 'guardian' ? '#005c27' : '#6B7280', marginTop: '2px' }}>
-                  Adopcja i rodzina zastępcza
-                </div>
+                Opiekun
               </button>
             </div>
           </div>
@@ -251,7 +245,7 @@ export function SetupStep({
           {/* 2. Forma zatrudnienia (Tytuł ubezpieczenia) */}
           <div className="zus-form-group">
             <label className="zus-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <CreditCard className="size-4 text-[#007834]" />
+              <CreditCard className="size-4 text-[#475569]" />
               <span>Forma zatrudnienia (Tytuł ubezpieczenia społecznego)</span>
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '10px' }}>
@@ -259,75 +253,72 @@ export function SetupStep({
                 type="button"
                 onClick={() => update('employment', 'uop')}
                 style={{
-                  padding: '12px 8px',
+                  padding: '12px 10px',
                   borderRadius: '6px',
-                  border: input.employment === 'uop' ? '2px solid #007834' : '1.5px solid #CBD5E0',
-                  backgroundColor: input.employment === 'uop' ? '#E6F4EC' : '#FFFFFF',
-                  color: input.employment === 'uop' ? '#00441c' : '#1A1A1A',
+                  border: input.employment === 'uop' ? '2px solid #334155' : '1.5px solid #CBD5E0',
+                  backgroundColor: input.employment === 'uop' ? '#F1F5F9' : '#FFFFFF',
+                  color: input.employment === 'uop' ? '#0F172A' : '#475569',
                   fontWeight: input.employment === 'uop' ? 700 : 500,
                   fontSize: '0.9rem',
                   cursor: 'pointer',
                   textAlign: 'center',
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  minHeight: '44px',
+                  transition: 'all 0.15s ease',
+                  boxShadow: input.employment === 'uop' ? '0 1px 2px rgba(0, 0, 0, 0.05)' : 'none',
                 }}
               >
-                <span style={{ fontWeight: 700 }}>Umowa o pracę</span>
-                <span style={{ fontSize: '0.73rem', color: input.employment === 'uop' ? '#005c27' : '#6B7280' }}>
-                  Etat (UoP)
-                </span>
+                Umowa o pracę
               </button>
 
               <button
                 type="button"
                 onClick={() => update('employment', 'zlecenie')}
                 style={{
-                  padding: '12px 8px',
+                  padding: '12px 10px',
                   borderRadius: '6px',
-                  border: input.employment === 'zlecenie' ? '2px solid #007834' : '1.5px solid #CBD5E0',
-                  backgroundColor: input.employment === 'zlecenie' ? '#E6F4EC' : '#FFFFFF',
-                  color: input.employment === 'zlecenie' ? '#00441c' : '#1A1A1A',
+                  border: input.employment === 'zlecenie' ? '2px solid #334155' : '1.5px solid #CBD5E0',
+                  backgroundColor: input.employment === 'zlecenie' ? '#F1F5F9' : '#FFFFFF',
+                  color: input.employment === 'zlecenie' ? '#0F172A' : '#475569',
                   fontWeight: input.employment === 'zlecenie' ? 700 : 500,
                   fontSize: '0.9rem',
                   cursor: 'pointer',
                   textAlign: 'center',
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  minHeight: '44px',
+                  transition: 'all 0.15s ease',
+                  boxShadow: input.employment === 'zlecenie' ? '0 1px 2px rgba(0, 0, 0, 0.05)' : 'none',
                 }}
               >
-                <span style={{ fontWeight: 700 }}>Umowa zlecenie</span>
-                <span style={{ fontSize: '0.73rem', color: input.employment === 'zlecenie' ? '#005c27' : '#6B7280' }}>
-                  Zleceniobiorca
-                </span>
+                Umowa zlecenie
               </button>
 
               <button
                 type="button"
                 onClick={() => update('employment', 'jdg')}
                 style={{
-                  padding: '12px 8px',
+                  padding: '12px 10px',
                   borderRadius: '6px',
-                  border: input.employment === 'jdg' ? '2px solid #007834' : '1.5px solid #CBD5E0',
-                  backgroundColor: input.employment === 'jdg' ? '#E6F4EC' : '#FFFFFF',
-                  color: input.employment === 'jdg' ? '#00441c' : '#1A1A1A',
+                  border: input.employment === 'jdg' ? '2px solid #334155' : '1.5px solid #CBD5E0',
+                  backgroundColor: input.employment === 'jdg' ? '#F1F5F9' : '#FFFFFF',
+                  color: input.employment === 'jdg' ? '#0F172A' : '#475569',
                   fontWeight: input.employment === 'jdg' ? 700 : 500,
                   fontSize: '0.9rem',
                   cursor: 'pointer',
                   textAlign: 'center',
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  minHeight: '44px',
+                  transition: 'all 0.15s ease',
+                  boxShadow: input.employment === 'jdg' ? '0 1px 2px rgba(0, 0, 0, 0.05)' : 'none',
                 }}
               >
-                <span style={{ fontWeight: 700 }}>Działalność (JDG)</span>
-                <span style={{ fontSize: '0.73rem', color: input.employment === 'jdg' ? '#005c27' : '#6B7280' }}>
-                  Samozatrudnienie
-                </span>
+                Działalność (JDG)
               </button>
             </div>
 
@@ -335,19 +326,19 @@ export function SetupStep({
             {isEmployee ? (
               <div style={{
                 padding: '10px 14px',
-                backgroundColor: '#E6F4EC',
-                border: '1px solid #99D2AF',
+                backgroundColor: '#F8FAFC',
+                border: '1px solid #E2E8F0',
                 borderRadius: '6px',
                 marginTop: '8px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
                 fontSize: '0.84rem',
-                color: '#00441c',
+                color: '#334155',
               }}>
-                <CheckCircle2 className="size-4 text-[#007834] shrink-0" />
+                <Info className="size-4 text-[#475569] shrink-0" />
                 <span>
-                  ✓ Na umowie o pracę (etat) ubezpieczenie chorobowe jest obowiązkowe od 1. dnia. Brak wymogu okresu wyczekiwania (karencji) przy macierzyńskim.
+                  Ubezpieczenie chorobowe na etacie jest obowiązkowe od 1. dnia pracy. Brak karencji przy macierzyńskim.
                 </span>
               </div>
             ) : (
@@ -361,12 +352,12 @@ export function SetupStep({
               }}>
                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', gap: '12px' }}>
                   <div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: input.sicknessInsurance ? '#1A1A1A' : '#991B1B' }}>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: input.sicknessInsurance ? '#1A1A1A' : '#991B1B' }}>
                       Opłacam dobrowolne ubezpieczenie chorobowe (składka 2,45%)
                     </div>
-                    <div style={{ fontSize: '0.78rem', color: input.sicknessInsurance ? '#6B7280' : '#B91C1C', marginTop: '2px' }}>
+                    <div style={{ fontSize: '0.78rem', color: input.sicknessInsurance ? '#64748B' : '#B91C1C', marginTop: '2px' }}>
                       {input.sicknessInsurance
-                        ? 'Zgłoszenie do ZUS (ZUA/ZZA) – warunek konieczny do otrzymania zasiłku macierzyńskiego.'
+                        ? 'Zgłoszenie do ZUS (ZUA/ZZA) – warunek prawa do zasiłku macierzyńskiego.'
                         : 'UWAGA: Bez ubezpieczenia chorobowego ZUS wyda decyzję odmowną!'}
                     </div>
                   </div>
@@ -374,7 +365,7 @@ export function SetupStep({
                     type="checkbox"
                     checked={input.sicknessInsurance}
                     onChange={(e) => update('sicknessInsurance', e.target.checked)}
-                    style={{ width: '20px', height: '20px', accentColor: '#007834', cursor: 'pointer', flexShrink: 0 }}
+                    style={{ width: '18px', height: '18px', accentColor: '#334155', cursor: 'pointer', flexShrink: 0 }}
                   />
                 </label>
               </div>
@@ -385,7 +376,7 @@ export function SetupStep({
           <div className="zus-form-row">
             <div className="zus-form-group">
               <label className="zus-label" htmlFor="insured-days" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Calendar className="size-4 text-[#007834]" />
+                <Calendar className="size-4 text-[#475569]" />
                 <span>Staż ubezpieczenia w dniach</span>
               </label>
               <input
@@ -397,14 +388,14 @@ export function SetupStep({
                 onChange={(e) => update('insuredDays', Math.max(0, Number(e.target.value) || 0))}
                 placeholder="np. 365"
               />
-              <span style={{ fontSize: '0.76rem', color: '#6B7280', marginTop: '4px' }}>
-                Karencja chorobowa: min. {waitingPeriodDays(input.employment)} dni ({input.employment === 'uop' ? 'przy UoP brak karencji na macierzyński' : 'wymagana ciągłość'})
+              <span style={{ fontSize: '0.76rem', color: '#64748B', marginTop: '3px' }}>
+                Min. {waitingPeriodDays(input.employment)} dni okresu wyczekiwania ({input.employment === 'uop' ? 'przy UoP brak karencji na macierzyński' : 'wymagana ciągłość składek'}).
               </span>
             </div>
 
             <div className="zus-form-group">
               <label className="zus-label" htmlFor="due-date" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Calendar className="size-4 text-[#007834]" />
+                <Calendar className="size-4 text-[#475569]" />
                 <span>{input.role === 'guardian' ? 'Data przyjęcia dziecka' : 'Planowana data porodu'}</span>
               </label>
               <input
@@ -415,8 +406,8 @@ export function SetupStep({
                 value={input.dueDate}
                 onChange={(e) => update('dueDate', e.target.value)}
               />
-              <span style={{ fontSize: '0.76rem', color: '#6B7280', marginTop: '4px' }}>
-                Wyznacza początek okresów zasiłkowych oraz 21-dniowy termin na wniosek długi (81,5%).
+              <span style={{ fontSize: '0.76rem', color: '#64748B', marginTop: '3px' }}>
+                Początek okresu pobierania świadczenia.
               </span>
             </div>
           </div>
@@ -424,7 +415,7 @@ export function SetupStep({
           {/* 4. Wynagrodzenie brutto / podstawa składek */}
           <div className="zus-form-group">
             <label className="zus-label" htmlFor="gross-salary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <CreditCard className="size-4 text-[#007834]" />
+              <CreditCard className="size-4 text-[#475569]" />
               <span>
                 {input.employment === 'jdg'
                   ? 'Zadeklarowana miesięczna podstawa wymiaru składek (PLN)'
@@ -450,67 +441,57 @@ export function SetupStep({
                 top: '50%',
                 transform: 'translateY(-50%)',
                 fontWeight: 600,
-                color: '#6B7280',
+                color: '#64748B',
                 fontSize: '0.88rem',
                 pointerEvents: 'none',
               }}>
                 zł
               </span>
             </div>
-            <span style={{ fontSize: '0.76rem', color: '#6B7280', marginTop: '4px' }}>
-              Średnia z ostatnich 12 miesięcy kalendarzowych poprzedzających miesiąc porodu (pomniejszana o 13,71% na składki ZUS).
+            <span style={{ fontSize: '0.76rem', color: '#64748B', marginTop: '3px' }}>
+              Przeciętne wynagrodzenie z ostatnich 12 miesięcy kalendarzowych przed porodem.
             </span>
           </div>
 
           {/* 5. Sytuacje szczególne (opcjonalnie) */}
           <div style={{
-            padding: '14px 16px',
+            padding: '12px 14px',
             backgroundColor: '#F8FAFC',
             border: '1px solid #E2E8F0',
             borderRadius: '6px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px',
+            gap: '8px',
           }}>
-            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#00441c', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <ShieldCheck className="size-4 text-[#007834]" />
-              <span>Sytuacje szczególne i dodatkowe uprawnienia (opcjonalnie):</span>
+            <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#1E293B', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <ShieldCheck className="size-4 text-[#475569]" />
+              <span>Sytuacje szczególne (opcjonalnie):</span>
             </div>
 
             {input.role === 'mother' && (
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', fontSize: '0.84rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.84rem' }}>
                 <input
                   type="checkbox"
                   checked={input.premature}
                   onChange={(e) => update('premature', e.target.checked)}
-                  style={{ marginTop: '2px', accentColor: '#007834', width: '16px', height: '16px' }}
+                  style={{ accentColor: '#334155', width: '16px', height: '16px' }}
                 />
-                <div>
-                  <span style={{ fontWeight: 600, color: '#1A1A1A' }}>
-                    Dziecko urodzi się / urodziło się jako wcześniak lub wymaga hospitalizacji
-                  </span>
-                  <div style={{ fontSize: '0.76rem', color: '#6B7280', marginTop: '2px' }}>
-                    Art. 180² KP – uprawnienie do uzupełniającego urlopu macierzyńskiego (do 8 lub 15 tygodni, płatne 100%).
-                  </div>
-                </div>
+                <span style={{ color: '#1E293B' }}>
+                  Wcześniak lub hospitalizacja noworodka (+ do 15 tyg. urlopu uzupełniającego 100%)
+                </span>
               </label>
             )}
 
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', fontSize: '0.84rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.84rem' }}>
               <input
                 type="checkbox"
                 checked={input.zaZyciem}
                 onChange={(e) => update('zaZyciem', e.target.checked)}
-                style={{ marginTop: '2px', accentColor: '#007834', width: '16px', height: '16px' }}
+                style={{ accentColor: '#334155', width: '16px', height: '16px' }}
               />
-              <div>
-                <span style={{ fontWeight: 600, color: '#1A1A1A' }}>
-                  Zaświadczenie z Ustawy „Za życiem” (ciężkie i nieodwracalne upośledzenie)
-                </span>
-                <div style={{ fontSize: '0.76rem', color: '#6B7280', marginTop: '2px' }}>
-                  Wydłużenie urlopu rodzicielskiego o dodatkowe 24 tygodnie (łącznie do 65 tyg.) oraz jednorazowe 4 000 zł.
-                </div>
-              </div>
+              <span style={{ color: '#1E293B' }}>
+                Zaświadczenie z Ustawy „Za życiem” (+24 tyg. rodzicielskiego i jednorazowe 4 000 zł)
+              </span>
             </label>
           </div>
 
@@ -531,48 +512,60 @@ export function SetupStep({
               opacity: canSubmit ? 1 : 0.6,
               cursor: canSubmit ? 'pointer' : 'not-allowed',
               borderRadius: '6px',
-              boxShadow: canSubmit ? '0 2px 4px rgba(0, 120, 52, 0.25)' : 'none',
-              marginTop: '8px',
+              boxShadow: canSubmit ? '0 2px 4px rgba(0, 0, 0, 0.1)' : 'none',
+              marginTop: '4px',
             }}
           >
-            <span>Oblicz uprawnienia i wysokość zasiłku (Przejdź do Kroku 2)</span>
+            <span>Oblicz uprawnienia i wysokość zasiłku (Krok 2)</span>
             <ArrowRight className="size-4" />
           </button>
         </form>
       </div>
 
-      {/* 2. PRAWA KOLUMNA: Wstępna kwalifikacja na żywo i wskazówki ZUS */}
+      {/* 2. PRAWA KOLUMNA: Spokojne, czytelne podsumowanie wstępne */}
       <div className="zus-card">
         <h2 className="zus-card-header-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span>Wstępna weryfikacja uprawnień ZUS</span>
-          <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#007834' }}>
-            Przeliczanie na żywo
+          <span>Wstępne podsumowanie</span>
+          <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#475569' }}>
+            Szacunek na żywo
           </span>
         </h2>
 
         <div className="zus-results-box" style={{ padding: '0', background: 'transparent', border: 'none' }}>
-          {/* Status Kwalifikacji */}
+          {/* Status Kwalifikacji w stonowanym stylu */}
           <div style={{
-            padding: '16px',
-            backgroundColor: qualification.eligible ? '#E6F4EC' : '#FEE2E2',
-            border: `1.5px solid ${qualification.eligible ? '#007834' : '#DC2626'}`,
-            borderRadius: '8px',
-            marginBottom: '18px',
+            padding: '12px 14px',
+            backgroundColor: qualification.eligible ? '#F8FAFC' : '#FEF2F2',
+            border: `1px solid ${qualification.eligible ? '#CBD5E1' : '#FCA5A5'}`,
+            borderRadius: '6px',
+            marginBottom: '16px',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
-              <span className={`zus-badge ${qualification.eligible ? 'success' : 'danger'}`} style={{ fontSize: '0.86rem', padding: '6px 12px' }}>
-                {qualification.eligible ? 'KWALIFIKACJA POZYTYWNA' : 'BRAK UPRAWNIEŃ DO ZASIŁKU'}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
+              <span style={{
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                color: qualification.eligible ? '#1E293B' : '#DC2626',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}>
+                <span style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: qualification.eligible ? '#475569' : '#DC2626',
+                }}></span>
+                {qualification.eligible ? 'Warunki formalne spełnione' : 'Brak wymaganego stażu'}
               </span>
-              <span className="zus-badge info" style={{ fontSize: '0.8rem' }}>
-                {input.employment === 'uop' ? 'ETAT (UOP)' : (input.employment === 'zlecenie' ? 'ZLECENIE' : 'SAMOZATRUDNIENIE (JDG)')}
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase' }}>
+                {input.employment === 'uop' ? 'Etat (UoP)' : (input.employment === 'zlecenie' ? 'Zlecenie' : 'Działalność')}
               </span>
             </div>
 
             <p style={{
-              fontSize: '0.9rem',
-              color: qualification.eligible ? '#00441c' : '#991B1B',
-              fontWeight: 600,
-              lineHeight: 1.5,
+              fontSize: '0.84rem',
+              color: qualification.eligible ? '#334155' : '#991B1B',
+              lineHeight: 1.45,
               margin: 0,
             }}>
               {qualification.reason}
@@ -580,70 +573,59 @@ export function SetupStep({
           </div>
 
           {/* Statystyki wstępne na kafelkach (2x2) */}
-          <div className="zus-stat-grid" style={{ marginBottom: '18px' }}>
+          <div className="zus-stat-grid" style={{ marginBottom: '16px' }}>
             <div className="zus-stat-item">
-              <div className="zus-stat-label">Podstawa wymiaru netto</div>
-              <div className="zus-stat-value">{baseNet > 0 ? `${baseNet.toLocaleString('pl-PL')} zł` : '—'}</div>
-              <div style={{ fontSize: '0.72rem', color: '#6B7280', marginTop: '4px' }}>
-                Po potrąceniu 13,71% składek ZUS
+              <div className="zus-stat-label">Podstawa netto</div>
+              <div className="zus-stat-value" style={{ color: '#0F172A' }}>{baseNet > 0 ? `${baseNet.toLocaleString('pl-PL')} zł` : '—'}</div>
+              <div style={{ fontSize: '0.72rem', color: '#64748B', marginTop: '2px' }}>
+                Po potrąceniu 13,71% składek
               </div>
             </div>
 
             <div className="zus-stat-item">
-              <div className="zus-stat-label">Wariant jednolity 81,5%</div>
-              <div className="zus-stat-value" style={{ color: '#007834' }}>
+              <div className="zus-stat-label">Wariant stały 81,5%</div>
+              <div className="zus-stat-value" style={{ color: '#0F172A' }}>
                 {estimatedMonthlyUnified > 0 ? `${estimatedMonthlyUnified.toLocaleString('pl-PL')} zł` : '—'}
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#6B7280', marginTop: '4px' }}>
-                Miesięcznie brutto (art. 30a)
+              <div style={{ fontSize: '0.72rem', color: '#64748B', marginTop: '2px' }}>
+                Miesięcznie przez cały urlop
               </div>
             </div>
 
             <div className="zus-stat-item">
               <div className="zus-stat-label">Wariant zmienny 100%</div>
-              <div className="zus-stat-value">{estimatedMonthly100 > 0 ? `${estimatedMonthly100.toLocaleString('pl-PL')} zł` : '—'}</div>
-              <div style={{ fontSize: '0.72rem', color: '#6B7280', marginTop: '4px' }}>
-                Początkowa stawka (następnie 70%)
+              <div className="zus-stat-value" style={{ color: '#0F172A' }}>{estimatedMonthly100 > 0 ? `${estimatedMonthly100.toLocaleString('pl-PL')} zł` : '—'}</div>
+              <div style={{ fontSize: '0.72rem', color: '#64748B', marginTop: '2px' }}>
+                Macierzyński 100%, potem 70%
               </div>
             </div>
 
             <div className="zus-stat-item">
-              <div className="zus-stat-label">Łączny wymiar urlopów</div>
-              <div className="zus-stat-value" style={{ color: '#00441c' }}>
+              <div className="zus-stat-label">Łączny wymiar opieki</div>
+              <div className="zus-stat-value" style={{ color: '#0F172A' }}>
                 {input.zaZyciem ? '85 tyg.' : (input.role === 'father' ? '9 tyg. + 14 dni' : '61 tyg.')}
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#6B7280', marginTop: '4px' }}>
-                Płatnych ze środków FUS
+              <div style={{ fontSize: '0.72rem', color: '#64748B', marginTop: '2px' }}>
+                Zasiłek wypłacany z ZUS (FUS)
               </div>
             </div>
           </div>
 
-          {/* Ważna wskazówka: Zasada 21 dni */}
-          <div className="zus-notice-box" style={{ marginBottom: '16px' }}>
-            <div style={{ fontWeight: 700, color: '#00441c', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <ShieldCheck className="size-4 text-[#007834]" />
-              <span>Gwarancja stawki 81,5% (Zasada 21 dni):</span>
-            </div>
-            <div style={{ fontSize: '0.84rem', marginTop: '6px', color: '#1A1A1A', lineHeight: 1.5 }}>
-              Złożenie tzw. długiego wniosku (art. 30a Ustawy zasiłkowej) nie później niż <strong>21 dni po porodzie</strong> gwarantuje wypłatę równego świadczenia <strong>81,5% podstawy</strong> przez cały okres macierzyńskiego i rodzicielskiego.
-            </div>
-          </div>
-
-          {/* Podstawa prawna */}
+          {/* Wskazówka i zapowiedź Kroku 2 */}
           <div style={{
             padding: '12px 14px',
             backgroundColor: '#F8FAFC',
             border: '1px solid #E2E8F0',
             borderRadius: '6px',
-            fontSize: '0.8rem',
-            color: '#4A4A4A',
+            fontSize: '0.82rem',
+            color: '#334155',
             lineHeight: 1.5,
           }}>
-            <div style={{ fontWeight: 700, color: '#1A1A1A', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Info className="size-3.5 text-[#007834]" />
-              <span>Podstawa prawna wyliczeń:</span>
+            <div style={{ fontWeight: 600, color: '#1E293B', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Info className="size-4 text-[#475569]" />
+              <span>Co sprawdzisz w Kroku 2:</span>
             </div>
-            Ustawa z dn. 25.06.1999 r. o świadczeniach pieniężnych z ubezpieczenia społecznego w razie choroby i macierzyństwa (Dz.U. z 2026 r. poz. 854) oraz Kodeks pracy (Dz.U. z 2026 r. poz. 1245).
+            Otrzymasz harmonogram wypłat z dokładnymi datami, terminy złożenia wniosków (m.in. wniosek w 21 dni) oraz symulację podziału urlopu między oboje rodziców.
           </div>
         </div>
       </div>

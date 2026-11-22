@@ -116,8 +116,19 @@ class IntegratedCalculatorInput(BaseModel):
     is_adoption: bool = False
     adoption_child_age_years: int = Field(default=3, ge=0, le=18)
 
+    insurance_duration_days: int = Field(default=365, ge=0, description="Dni nieprzerwanego ubezpieczenia chorobowego")
+    insured_days: int = Field(default=365, ge=0, description="Dni ubezpieczenia")
+    sickness_insurance: bool = Field(default=True, description="Aktywne ubezpieczenie chorobowe")
+
     work_combination: IntegratedWorkCombination = Field(default_factory=IntegratedWorkCombination)
     parental_sharing: IntegratedParentalSharing = Field(default_factory=IntegratedParentalSharing)
+
+
+class RiskAlertItem(BaseModel):
+    id: str
+    title: str
+    description: str
+    severity: str = "warning"
 
 
 class IntegratedCalculatorResult(BaseModel):
@@ -144,3 +155,18 @@ class IntegratedCalculatorResult(BaseModel):
     summary_notes: list[str] = Field(default_factory=list)
     required_documents: list[str] = Field(default_factory=list)
     legal_basis: list[str] = Field(default_factory=list)
+    risk_alerts: list[RiskAlertItem] = Field(default_factory=list)
+
+
+class RiskAnalysisRequest(BaseModel):
+    role: str = "mother"
+    employment_type: MaternityEmploymentType = MaternityEmploymentType.EMPLOYMENT_CONTRACT
+    gross_monthly_income: float = Field(default=7000.0, ge=0.0)
+    insured_days: int = Field(default=365, ge=0)
+    has_sickness_insurance: bool = True
+
+
+class RiskAnalysisResponse(BaseModel):
+    status: str
+    risk_count: int
+    alerts: list[RiskAlertItem]

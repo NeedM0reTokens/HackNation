@@ -3,6 +3,8 @@ import { fallbackExplanation, glossary } from "@/lib/mock/glossary";
 import type {
   IntegratedCalculatorInput,
   IntegratedCalculatorResult,
+  RiskAnalysisRequest,
+  RiskAnalysisResponse,
 } from "@/types/calculator";
 import type {
   PaternityLeaveInput,
@@ -389,6 +391,23 @@ export async function calculateIntegratedParental(
     return await res.json();
   } catch (err: any) {
     throw new BackendOfflineError("POST /api/calculator/parental", err);
+  }
+}
+
+// 6b. Analiza ryzyk i czerwonych flag ZUS z backendu
+export async function analyzeRisksApi(
+  payload: RiskAnalysisRequest,
+): Promise<RiskAnalysisResponse> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/calculator/risks`, {
+      method: "POST",
+      headers: getHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err: any) {
+    throw new BackendOfflineError("POST /api/calculator/risks", err);
   }
 }
 
