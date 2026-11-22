@@ -41,9 +41,6 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="zus-brand-app-name">
               Zasiłkowy Przewodnik Przyszłego Rodzica
             </span>
-            <span className="zus-brand-institution">
-              Zakład Ubezpieczeń Społecznych
-            </span>
           </div>
         </a>
 
@@ -109,7 +106,16 @@ export const Header: React.FC<HeaderProps> = ({
               title="Zaloguj się bezpiecznie profilem mObywatel (Wybierz tożsamość)"
             >
               <span className="mobywatel-icon-wrapper">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <rect x="5" y="2" width="14" height="20" rx="3" ry="3" />
                   <path d="M12 18h.01" />
                   <path d="m9 10 2 2 4-4" />
@@ -118,7 +124,17 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="mobywatel-btn-text">
                 Zaloguj przez <strong>mObywatel</strong>
               </span>
-              <svg className="mobywatel-btn-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                className="mobywatel-btn-chevron"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="9 18 15 12 9 6"></polyline>
               </svg>
             </button>

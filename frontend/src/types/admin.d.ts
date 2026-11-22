@@ -22,6 +22,27 @@ export interface BenefitRates {
   rehabilitation_benefit_rate_remaining: number;
   /** % rehabilitation benefit during pregnancy (default: 100%) */
   rehabilitation_benefit_rate_pregnancy: number;
+  /** % employee social security deduction from gross base (default: 13.71%) */
+  social_contributions_rate: number;
+}
+
+export interface BenefitAmounts {
+  /** Statutory minimum gross monthly wage in 2026 (4806.00 PLN) */
+  min_wage_2026: number;
+  /** Permissible ZUS debt limit as % of minimum wage (1.0%) */
+  zus_debt_limit_percentage: number;
+  /** Maximum ZUS debt threshold not blocking benefits in PLN (48.06 PLN) */
+  zus_debt_limit: number;
+  /** One-time 'Za życiem' grant in PLN (4000.00 PLN) */
+  za_zyciem_one_time_grant: number;
+  /** Standard funeral grant from ZUS in PLN (4000.00 PLN) */
+  death_grant_zus: number;
+  /** Special case funeral allowance in PLN (7000.00 PLN) */
+  funeral_allowance_special: number;
+  /** Maximum monthly base for voluntary sickness insurance in PLN (23550.00 PLN) */
+  max_voluntary_sickness_base: number;
+  /** Minimum benefit base for employment contract after 13.71% deduction in PLN (4147.10 PLN) */
+  min_benefit_base_uop: number;
 }
 
 export interface LeaveDurations {
@@ -41,12 +62,18 @@ export interface LeaveDurations {
   parental_weeks_standard: number;
   /** Parental leave weeks for multiple birth (43) */
   parental_weeks_multiple_birth: number;
+  /** Parental leave weeks for 'Za życiem' single child (65) */
+  parental_weeks_za_zyciem_single: number;
+  /** Parental leave weeks for 'Za życiem' multiple birth (67) */
+  parental_weeks_za_zyciem_multiple: number;
   /** Non-transferable parental weeks for the second parent under EU WLB Directive (9) */
   non_transferable_parental_weeks: number;
   /** Paternity leave days (14) */
   paternity_leave_days: number;
   /** Maximum parts of parental leave (5) */
   max_parental_leave_parts: number;
+  /** Maternity leave weeks in case of stillbirth (8) */
+  stillbirth_maternity_weeks: number;
 }
 
 export interface PeriodsAndLimits {
@@ -70,6 +97,24 @@ export interface PeriodsAndLimits {
   max_child_age_paternity_adoption_years: number;
   /** Deadline for 81.5% long application in days from birth (21) */
   long_application_deadline_days: number;
+  /** Minimum weeks mother must take before transfer in special hospital cases (8) */
+  min_mother_weeks_before_transfer_special: number;
+  /** Gestational week threshold for extreme prematurity (28) */
+  premature_extreme_week_threshold: number;
+  /** Birth weight threshold in grams for extreme prematurity (1000) */
+  premature_extreme_weight_grams: number;
+  /** Maximum supplementary leave weeks for extreme prematurity (15) */
+  premature_extreme_max_supplementary_weeks: number;
+  /** Gestational week threshold for moderate prematurity (36) */
+  premature_moderate_week_threshold: number;
+  /** Maximum supplementary leave weeks for standard prematurity (8) */
+  premature_standard_max_supplementary_weeks: number;
+  /** Standard upper age limit for adopted child eligibility (7) */
+  adoption_child_standard_age_limit: number;
+  /** Upper age limit for adopted child with deferred schooling (10) */
+  adoption_child_deferred_school_age_limit: number;
+  /** Minimum guaranteed maternity weeks for older adopted child (9) */
+  adoption_min_guaranteed_maternity_weeks: number;
   /** Statutory minimum gross monthly wage in 2026 (4806.00 PLN) */
   min_wage_2026: number;
   /** Social contributions deduction percentage (13.71%) */
@@ -81,6 +126,7 @@ export interface PeriodsAndLimits {
 /** Full configuration object returned by GET /api/admin/config */
 export interface AdminConfig {
   benefit_rates: BenefitRates;
+  benefit_amounts: BenefitAmounts;
   leave_durations: LeaveDurations;
   periods_and_limits: PeriodsAndLimits;
 }
@@ -88,6 +134,7 @@ export interface AdminConfig {
 /** Partial update payload for PUT /api/admin/config */
 export interface AdminConfigUpdate {
   benefit_rates?: Partial<BenefitRates>;
+  benefit_amounts?: Partial<BenefitAmounts>;
   leave_durations?: Partial<LeaveDurations>;
   periods_and_limits?: Partial<PeriodsAndLimits>;
 }
