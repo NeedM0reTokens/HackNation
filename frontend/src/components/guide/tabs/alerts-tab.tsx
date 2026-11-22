@@ -3,7 +3,14 @@ import { CheckCircle2, AlertTriangle, ShieldCheck, ShieldOff, Info } from 'lucid
 import type { RiskAlert } from '@/lib/guide';
 import { DifficultSituationsDialog } from '../difficult-situations-dialog';
 
-export function AlertsTab({ alerts, shielded }: { alerts: RiskAlert[]; shielded: boolean }) {
+export function AlertsTab({
+  alerts,
+  shielded,
+}: {
+  alerts: RiskAlert[];
+  shielded: boolean;
+  isBackendVerified?: boolean;
+}) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* 1. SEKCJA: CZERWONE FLAGI I WERYFIKACJA RYZYK */}

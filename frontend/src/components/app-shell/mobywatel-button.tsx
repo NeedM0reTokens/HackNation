@@ -15,7 +15,7 @@ export function MObywatelButton() {
       <Button
         onClick={openMockSelector}
         disabled={isLoggingIn}
-        className="h-9 gap-2 px-3"
+        className="h-10 gap-2 rounded-full bg-[#BB0A30] px-4 font-semibold text-white shadow-sm hover:bg-[#9F0828] focus-visible:outline-[#ffbf00]"
       >
         {isLoggingIn ? (
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -23,11 +23,14 @@ export function MObywatelButton() {
           <Smartphone className="size-4" aria-hidden="true" />
         )}
         <span className="hidden sm:inline">
-          {isLoggingIn ? "Łączenie z mObywatelem…" : "Zaloguj przez mObywatel"}
+          {isLoggingIn ? 'Łączenie z mObywatelem…' : <>Zaloguj przez <strong>mObywatel</strong></>}
         </span>
-        <span className="sm:hidden">
-          {isLoggingIn ? "Łączenie…" : "Zaloguj"}
-        </span>
+        <span className="sm:hidden">{isLoggingIn ? 'Łączenie…' : 'Zaloguj'}</span>
+        {!isLoggingIn && (
+          <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        )}
       </Button>
     );
   }

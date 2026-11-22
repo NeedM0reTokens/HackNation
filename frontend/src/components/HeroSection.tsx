@@ -259,10 +259,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     className="zus-btn-sidebar-login"
                     onClick={onLoginToggle}
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+                    <span className="mobywatel-icon-wrapper">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="5" y="2" width="14" height="20" rx="3" ry="3" />
+                        <path d="M12 18h.01" />
+                        <path d="m9 10 2 2 4-4" />
+                      </svg>
+                    </span>
+                    <span className="mobywatel-btn-text">
+                      Zaloguj przez <strong>mObywatel</strong>
+                    </span>
+                    <svg className="mobywatel-btn-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
-                    <span>Zaloguj przez mObywatel &gt;</span>
                   </button>
 
                   <button

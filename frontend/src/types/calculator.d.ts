@@ -98,6 +98,9 @@ export interface IntegratedCalculatorInput {
   adoption_child_age_years?: number;
   work_combination?: IntegratedWorkCombination;
   parental_sharing?: IntegratedParentalSharing;
+  insurance_duration_days?: number;
+  insured_days?: number;
+  sickness_insurance?: boolean;
 }
 
 export interface IntegratedCalculatorResult {
@@ -124,4 +127,19 @@ export interface IntegratedCalculatorResult {
   summary_notes: string[];
   required_documents: string[];
   legal_basis: string[];
+  risk_alerts?: { id: string; title: string; description: string; severity?: string }[];
+}
+
+export interface RiskAnalysisRequest {
+  role?: string;
+  employment_type: string;
+  gross_monthly_income: number;
+  insured_days: number;
+  has_sickness_insurance: boolean;
+}
+
+export interface RiskAnalysisResponse {
+  status: string;
+  risk_count: number;
+  alerts: { id: string; title: string; description: string; severity?: string }[];
 }
