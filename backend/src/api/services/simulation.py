@@ -16,17 +16,19 @@ from ..models.simulation import (
     MonthlyContribution,
     UserProfileResponse,
 )
-
-MINIMAL_WAGE_DEBT_LIMIT = 48.06
+from .admin import config_service
 
 
 def _generate_monthly_contributions(gross_amount: float) -> list[MonthlyContribution]:
     """
     Generates 12 monthly contribution records preceding current month.
-    Each contribution deducts employee social security portion: 13.71%.
+    Each contribution deducts employee social security portion dynamically from config.
     """
     if gross_amount <= 0:
         return []
+
+    cfg = config_service.get_config()
+    social_rate = cfg.benefit_rates.social_contributions_rate
 
     contributions: list[MonthlyContribution] = []
     months = [
@@ -44,7 +46,7 @@ def _generate_monthly_contributions(gross_amount: float) -> list[MonthlyContribu
         "2026-04",
     ]
 
-    social_deducted = round(gross_amount * 0.1371, 2)
+    social_deducted = round(gross_amount * (social_rate / 100.0), 2)
     net_base = round(gross_amount - social_deducted, 2)
 
     for m in months:
@@ -100,8 +102,11 @@ def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
     Returns simulated ZUS insurance profile for a person by their PESEL.
     If the PESEL is recognized in the predefined scenarios, returns specific data.
     If an unknown PESEL is given, generates a realistic, legally compliant default profile.
+    Statutory limits and thresholds are loaded dynamically from JSON config.
     """
     clean_pesel = pesel.strip()
+    cfg = config_service.get_config()
+    statutory_debt_limit = cfg.benefit_amounts.zus_debt_limit
 
     if clean_pesel in PREDEFINED_PROFILES:
         raw = dict(PREDEFINED_PROFILES[clean_pesel])
@@ -112,6 +117,9 @@ def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
         for ez in raw.get("active_ezla", []):
             if isinstance(ez, dict):
                 active_ezla_list.append(ActiveEzlaInfo.model_validate(ez))
+
+        overdue_amt = float(raw["overdue_amount"])
+        overdue_blocks = overdue_amt > statutory_debt_limit
 
         return UserProfileResponse(
             pesel=str(raw["pesel"]),
@@ -138,8 +146,8 @@ def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
             payer_nip=raw.get("payer_nip") or None,
             is_large_payer=bool(raw["is_large_payer"]),
             has_overdue_contributions=bool(raw["has_overdue_contributions"]),
-            overdue_amount=float(raw["overdue_amount"]),
-            overdue_blocks_benefits=bool(raw["overdue_blocks_benefits"]),
+            overdue_amount=overdue_amt,
+            overdue_blocks_benefits=overdue_blocks,
             has_active_ezla=bool(raw["has_active_ezla"]),
             active_ezla=active_ezla_list,
             sickness_days_used_in_year=int(raw["sickness_days_used_in_year"]),
@@ -151,9 +159,9 @@ def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
     first_name = "Katarzyna" if gender == "Kobieta" else "Jan"
     last_name = "Kowalski"
 
-    # Standard default in 2026: full-time employment contract, 6000 PLN gross
     gross = 6000.0
-    social_deducted = round(gross * 0.1371, 2)
+    social_rate = cfg.benefit_rates.social_contributions_rate
+    social_deducted = round(gross * (social_rate / 100.0), 2)
     net_base = round(gross - social_deducted, 2)
     contributions = _generate_monthly_contributions(gross)
 
@@ -173,7 +181,7 @@ def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
         sickness_insurance_type="MANDATORY",
         insurance_start_date="2024-01-01",
         insurance_duration_days=450,
-        waiting_period_days_required=30,
+        waiting_period_days_required=cfg.periods_and_limits.mandatory_waiting_period_days,
         waiting_period_satisfied=True,
         average_monthly_gross=gross,
         calculation_base_net=net_base,
@@ -187,7 +195,7 @@ def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
         has_active_ezla=False,
         active_ezla=[],
         sickness_days_used_in_year=0,
-        max_sickness_days=182,
+        max_sickness_days=cfg.periods_and_limits.max_standard_sick_leave_days,
     )
 
 
@@ -197,6 +205,7 @@ def get_citizen_ezla_service(pesel: str) -> EzlaCitizenResponse:
     Simulates retrieval of e-ZLA incapacity certificates from the ZUS medical registry.
     """
     clean_pesel = pesel.strip()
+    cfg = config_service.get_config()
 
     if clean_pesel in PREDEFINED_PROFILES:
         raw_profile = dict(PREDEFINED_PROFILES[clean_pesel])
@@ -217,7 +226,11 @@ def get_citizen_ezla_service(pesel: str) -> EzlaCitizenResponse:
             total_certificates_count=len(certificates),
             active_certificates_count=active_count,
             sickness_days_used_in_year=int(raw_profile.get("sickness_days_used_in_year", 0)),
-            max_sickness_days=int(raw_profile.get("max_sickness_days", 182)),
+            max_sickness_days=int(
+                raw_profile.get(
+                    "max_sickness_days", cfg.periods_and_limits.max_standard_sick_leave_days
+                )
+            ),
             certificates=certificates,
         )
 
@@ -237,7 +250,7 @@ def get_citizen_ezla_service(pesel: str) -> EzlaCitizenResponse:
         total_certificates_count=0,
         active_certificates_count=0,
         sickness_days_used_in_year=0,
-        max_sickness_days=182,
+        max_sickness_days=cfg.periods_and_limits.max_standard_sick_leave_days,
         certificates=[],
     )
 
@@ -261,10 +274,12 @@ def get_citizen_debt_certificate_service(
     """
     Simulates retrieval of contribution debt status and issuance of a ZUS certificate
     (RD-3) as of the date entitlement to benefits arose (Art. 2a of Sickness Benefits Act).
-    Crucial for self-employed individuals (JDG/B2B) where arrears > 1% minimum wage (48.06 PLN)
-    suspend right to benefits.
+    Crucial for self-employed individuals (JDG/B2B) where arrears > 1% minimum wage
+    suspend right to benefits. Threshold is loaded dynamically from JSON config.
     """
     clean_pesel = pesel.strip()
+    cfg = config_service.get_config()
+    statutory_debt_limit = cfg.benefit_amounts.zus_debt_limit
 
     if clean_pesel in PREDEFINED_PROFILES:
         raw = dict(PREDEFINED_PROFILES[clean_pesel])
@@ -304,7 +319,7 @@ def get_citizen_debt_certificate_service(
             entitlement_date.strip() if entitlement_date else date.today().isoformat()
         )
 
-    overdue_blocks = overdue_amount > MINIMAL_WAGE_DEBT_LIMIT
+    overdue_blocks = overdue_amount > statutory_debt_limit
     issue_date = date.today().isoformat()
     date_path = effective_entitlement_date.replace("-", "/")
     certificate_id = f"ZUS/RD-3/{date_path}/{clean_pesel}"
@@ -324,7 +339,7 @@ def get_citizen_debt_certificate_service(
         status_description = (
             f"Na dzień powstania prawa do świadczenia ({effective_entitlement_date}) "
             f"stwierdzono zadłużenie w kwocie {overdue_amount:.2f} PLN. Kwota ta nie przekracza "
-            f"progu 1% minimalnego wynagrodzenia ({MINIMAL_WAGE_DEBT_LIMIT:.2f} PLN). "
+            f"progu 1% minimalnego wynagrodzenia ({statutory_debt_limit:.2f} PLN). "
             "Zadłużenie nie powoduje zawieszenia wypłaty świadczeń."
         )
         debt_items = [
@@ -343,7 +358,7 @@ def get_citizen_debt_certificate_service(
             f"Na dzień powstania prawa do świadczenia ({effective_entitlement_date}) "
             f"stwierdzono zadłużenie z tytułu składek w łącznej wysokości {overdue_amount:.2f} "
             f"PLN, przekraczające próg 1% minimalnego wynagrodzenia "
-            f"({MINIMAL_WAGE_DEBT_LIMIT:.2f} PLN). Na podstawie art. 2a ust. 1 ustawy zasiłkowej "
+            f"({statutory_debt_limit:.2f} PLN). Na podstawie art. 2a ust. 1 ustawy zasiłkowej "
             "wypłata świadczeń zostaje wstrzymana do czasu całkowitej spłaty zadłużenia."
         )
         principal = round(overdue_amount * 0.914, 2)
@@ -363,7 +378,7 @@ def get_citizen_debt_certificate_service(
         "z ubezpieczenia społecznego w razie choroby i macierzyństwa, świadczenia nie przysługują "
         "osobom prowadzącym pozarolniczą działalność i osobom z nimi współpracującym, jeżeli w "
         "dniu powstania prawa do świadczenia występuje zadłużenie z tytułu składek na kwotę "
-        f"przekraczającą 1% minimalnego wynagrodzenia za pracę ({MINIMAL_WAGE_DEBT_LIMIT:.2f} zł), "
+        f"przekraczającą 1% minimalnego wynagrodzenia za pracę ({statutory_debt_limit:.2f} zł), "
         "do czasu spłaty całości zadłużenia. Zgodnie z art. 2a ust. 2, prawo do świadczenia "
         "przedawnia się, jeżeli zadłużenie nie zostanie spłacone w ciągu 6 miesięcy od dnia "
         "powstania prawa do świadczenia. W razie spłaty całości zadłużenia w terminie 6 miesięcy, "
@@ -385,7 +400,7 @@ def get_citizen_debt_certificate_service(
         insurance_title=insurance_title,
         has_overdue_contributions=has_overdue,
         overdue_amount=overdue_amount,
-        statutory_debt_limit=MINIMAL_WAGE_DEBT_LIMIT,
+        statutory_debt_limit=statutory_debt_limit,
         overdue_blocks_benefits=overdue_blocks,
         payment_status=payment_status,
         status_description=status_description,

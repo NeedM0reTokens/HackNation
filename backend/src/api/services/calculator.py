@@ -1,30 +1,6 @@
 from collections import defaultdict
 from datetime import date, timedelta
 
-from ...constants import (
-    ADOPTION_CHILD_STANDARD_AGE_LIMIT,
-    ADOPTION_MIN_GUARANTEED_MATERNITY_WEEKS,
-    FULL_MATERNITY_RATE,
-    MANDATORY_MOTHER_MATERNITY_WEEKS,
-    MATERNITY_WEEKS_BY_CHILD_COUNT,
-    MIN_WAGE_2026,
-    NON_TRANSFERABLE_PARENTAL_WEEKS,
-    PARENTAL_MAX_WORK_FRACTION,
-    PARENTAL_WEEKS_MULTIPLE_BIRTH,
-    PARENTAL_WEEKS_STANDARD,
-    PARENTAL_WEEKS_ZA_ZYCIEM_MULTIPLE,
-    PARENTAL_WEEKS_ZA_ZYCIEM_SINGLE,
-    PATERNITY_BENEFIT_RATE,
-    PATERNITY_LEAVE_DAYS,
-    PREGNANCY_SICK_LEAVE_RATE,
-    PREMATURE_EXTREME_MAX_SUPPLEMENTARY_WEEKS,
-    PREMATURE_EXTREME_WEEK_THRESHOLD,
-    PREMATURE_STANDARD_MAX_SUPPLEMENTARY_WEEKS,
-    SOCIAL_CONTRIBUTIONS_RATE,
-    STANDARD_PARENTAL_RATE,
-    STILLBIRTH_MATERNITY_WEEKS,
-    UNIFIED_BENEFIT_RATE,
-)
 from ..models.calculator import (
     AllowanceRatesResponse,
     CalculatorPreset,
@@ -35,6 +11,7 @@ from ..models.calculator import (
     TimelinePeriod,
 )
 from ..models.maternity import BenefitPaymentVariant, MaternityEmploymentType
+from .admin import config_service
 
 
 def _add_years(d: date, years: int) -> date:
@@ -45,13 +22,14 @@ def _add_years(d: date, years: int) -> date:
 
 
 def get_allowance_rates_service() -> AllowanceRatesResponse:
+    cfg = config_service.get_config()
     return AllowanceRatesResponse(
-        maternity_parental_option_uniform=UNIFIED_BENEFIT_RATE,
-        maternity_standard=FULL_MATERNITY_RATE,
-        parental_standard=STANDARD_PARENTAL_RATE,
-        pregnancy_sick_leave=PREGNANCY_SICK_LEAVE_RATE,
-        father_paternity_days=PATERNITY_LEAVE_DAYS,
-        non_transferable_parental_weeks=NON_TRANSFERABLE_PARENTAL_WEEKS,
+        maternity_parental_option_uniform=cfg.benefit_rates.unified_benefit_rate,
+        maternity_standard=cfg.benefit_rates.full_maternity_rate,
+        parental_standard=cfg.benefit_rates.standard_parental_rate,
+        pregnancy_sick_leave=cfg.benefit_rates.pregnancy_sick_leave_rate,
+        father_paternity_days=cfg.leave_durations.paternity_leave_days,
+        non_transferable_parental_weeks=cfg.leave_durations.non_transferable_parental_weeks,
     )
 
 
@@ -260,14 +238,17 @@ def get_preset_by_key_service(key: str) -> CalculatorPreset | None:
 def calculate_integrated_parental_service(
     data: IntegratedCalculatorInput,
 ) -> IntegratedCalculatorResult:
-    mother_net_base = round(
-        data.mother_gross_monthly_income * (1.0 - SOCIAL_CONTRIBUTIONS_RATE / 100.0), 2
-    )
-    father_net_base = round(
-        data.father_gross_monthly_income * (1.0 - SOCIAL_CONTRIBUTIONS_RATE / 100.0), 2
-    )
+    cfg = config_service.get_config()
+    rates = cfg.benefit_rates
+    amounts = cfg.benefit_amounts
+    durations = cfg.leave_durations
+    limits = cfg.periods_and_limits
 
-    min_wage_net = round(MIN_WAGE_2026 * (1.0 - SOCIAL_CONTRIBUTIONS_RATE / 100.0), 2)
+    social_rate = rates.social_contributions_rate
+    mother_net_base = round(data.mother_gross_monthly_income * (1.0 - social_rate / 100.0), 2)
+    father_net_base = round(data.father_gross_monthly_income * (1.0 - social_rate / 100.0), 2)
+
+    min_wage_net = amounts.min_benefit_base_uop
     if (
         data.is_mother_insured
         and data.mother_employment_type == MaternityEmploymentType.EMPLOYMENT_CONTRACT
@@ -288,68 +269,75 @@ def calculate_integrated_parental_service(
     is_unified = (
         data.chosen_variant == BenefitPaymentVariant.UNIFIED_81_5 and data.applied_within_21_days
     )
-    maternity_rate = UNIFIED_BENEFIT_RATE if is_unified else FULL_MATERNITY_RATE
-    parental_rate = UNIFIED_BENEFIT_RATE if is_unified else STANDARD_PARENTAL_RATE
+    maternity_rate = rates.unified_benefit_rate if is_unified else rates.full_maternity_rate
+    parental_rate = rates.unified_benefit_rate if is_unified else rates.standard_parental_rate
 
     is_adoption = data.is_adoption or data.special_case_type == "ADOPTION"
     is_stillbirth = data.special_case_type == "STILLBIRTH_OR_DEATH"
     is_premature = data.special_case_type == "PREMATURE"
     has_za_zyciem = data.has_za_zyciem_certificate or data.special_case_type == "ZA_ZYCIEM"
 
+    maternity_weeks_map = {
+        1: durations.maternity_weeks_single_child,
+        2: durations.maternity_weeks_twins,
+        3: durations.maternity_weeks_triplets,
+        4: durations.maternity_weeks_quadruplets,
+    }
+
     if is_stillbirth:
-        maternity_weeks = STILLBIRTH_MATERNITY_WEEKS
+        maternity_weeks = durations.stillbirth_maternity_weeks
         parental_pool_weeks = 0
     elif is_adoption:
-        standard_mat = MATERNITY_WEEKS_BY_CHILD_COUNT.get(
-            data.children_count, MATERNITY_WEEKS_BY_CHILD_COUNT[5]
+        standard_mat = maternity_weeks_map.get(
+            data.children_count, durations.maternity_weeks_quintuplets_plus
         )
         child_years = data.adoption_child_age_years
-        if child_years >= ADOPTION_CHILD_STANDARD_AGE_LIMIT:
-            maternity_weeks = ADOPTION_MIN_GUARANTEED_MATERNITY_WEEKS
+        if child_years >= limits.adoption_child_standard_age_limit:
+            maternity_weeks = limits.adoption_min_guaranteed_maternity_weeks
         else:
             maternity_weeks = standard_mat
         parental_pool_weeks = (
-            PARENTAL_WEEKS_ZA_ZYCIEM_SINGLE
+            durations.parental_weeks_za_zyciem_single
             if (has_za_zyciem and data.children_count == 1)
             else (
-                PARENTAL_WEEKS_ZA_ZYCIEM_MULTIPLE
+                durations.parental_weeks_za_zyciem_multiple
                 if has_za_zyciem
                 else (
-                    PARENTAL_WEEKS_STANDARD
+                    durations.parental_weeks_standard
                     if data.children_count == 1
-                    else PARENTAL_WEEKS_MULTIPLE_BIRTH
+                    else durations.parental_weeks_multiple_birth
                 )
             )
         )
     else:
-        maternity_weeks = MATERNITY_WEEKS_BY_CHILD_COUNT.get(
-            data.children_count, MATERNITY_WEEKS_BY_CHILD_COUNT[5]
+        maternity_weeks = maternity_weeks_map.get(
+            data.children_count, durations.maternity_weeks_quintuplets_plus
         )
         if has_za_zyciem:
             parental_pool_weeks = (
-                PARENTAL_WEEKS_ZA_ZYCIEM_SINGLE
+                durations.parental_weeks_za_zyciem_single
                 if data.children_count == 1
-                else PARENTAL_WEEKS_ZA_ZYCIEM_MULTIPLE
+                else durations.parental_weeks_za_zyciem_multiple
             )
         else:
             parental_pool_weeks = (
-                PARENTAL_WEEKS_STANDARD
+                durations.parental_weeks_standard
                 if data.children_count == 1
-                else PARENTAL_WEEKS_MULTIPLE_BIRTH
+                else durations.parental_weeks_multiple_birth
             )
 
     supplementary_maternity_weeks = 0
     if is_premature:
         birth_wk = data.premature_birth_week or 27
-        if birth_wk <= PREMATURE_EXTREME_WEEK_THRESHOLD:
-            max_sup = PREMATURE_EXTREME_MAX_SUPPLEMENTARY_WEEKS
+        if birth_wk <= limits.premature_extreme_week_threshold:
+            max_sup = limits.premature_extreme_max_supplementary_weeks
         else:
-            max_sup = PREMATURE_STANDARD_MAX_SUPPLEMENTARY_WEEKS
+            max_sup = limits.premature_standard_max_supplementary_weeks
         supplementary_maternity_weeks = min(data.hospitalization_weeks, max_sup)
 
     mother_maternity_weeks = maternity_weeks
-    mother_parental_weeks = parental_pool_weeks - NON_TRANSFERABLE_PARENTAL_WEEKS
-    father_parental_weeks = NON_TRANSFERABLE_PARENTAL_WEEKS
+    mother_parental_weeks = parental_pool_weeks - durations.non_transferable_parental_weeks
+    father_parental_weeks = durations.non_transferable_parental_weeks
 
     if data.parental_sharing.enabled:
         mother_parental_weeks = data.parental_sharing.mother_weeks
@@ -362,7 +350,7 @@ def calculate_integrated_parental_service(
         sick_days = data.pregnancy_sick_leave_days
         sick_start = current_date - timedelta(days=sick_days)
         sick_end = current_date - timedelta(days=1)
-        sick_daily = round(mother_daily_100 * (PREGNANCY_SICK_LEAVE_RATE / 100.0), 2)
+        sick_daily = round(mother_daily_100 * (rates.pregnancy_sick_leave_rate / 100.0), 2)
         sick_total = round(sick_daily * sick_days, 2)
         timeline_periods.append(
             TimelinePeriod(
@@ -373,7 +361,7 @@ def calculate_integrated_parental_service(
                 end_date=sick_end,
                 weeks=sick_days // 7,
                 days=sick_days,
-                rate_percentage=PREGNANCY_SICK_LEAVE_RATE,
+                rate_percentage=rates.pregnancy_sick_leave_rate,
                 daily_benefit_net=sick_daily,
                 monthly_benefit_net=round(sick_daily * 30.0, 2),
                 total_benefit_net=sick_total,
@@ -412,7 +400,8 @@ def calculate_integrated_parental_service(
             payer="ZUS",
             description=(
                 f"Urlop macierzynski ({mother_maternity_weeks} tyg.). "
-                f"Pierwsze 14 tyg. jest obowiazkowe dla matki."
+                f"Pierwsze {durations.mandatory_mother_maternity_weeks} tyg. "
+                "jest obowiazkowe dla matki."
             ),
         )
     )
@@ -422,7 +411,7 @@ def calculate_integrated_parental_service(
         sup_days = supplementary_maternity_weeks * 7
         sup_start = current_date
         sup_end = sup_start + timedelta(days=sup_days - 1)
-        sup_daily = round(mother_daily_100 * (FULL_MATERNITY_RATE / 100.0), 2)
+        sup_daily = round(mother_daily_100 * (rates.full_maternity_rate / 100.0), 2)
         sup_total = round(sup_daily * sup_days, 2)
         timeline_periods.append(
             TimelinePeriod(
@@ -433,7 +422,7 @@ def calculate_integrated_parental_service(
                 end_date=sup_end,
                 weeks=supplementary_maternity_weeks,
                 days=sup_days,
-                rate_percentage=FULL_MATERNITY_RATE,
+                rate_percentage=rates.full_maternity_rate,
                 daily_benefit_net=sup_daily,
                 monthly_benefit_net=round(sup_daily * 30.0, 2),
                 total_benefit_net=sup_total,
@@ -450,7 +439,7 @@ def calculate_integrated_parental_service(
     work_comb = data.work_combination
     if mother_parental_weeks > 0:
         if work_comb.enabled and work_comb.parent_working == "mother":
-            wf = min(work_comb.work_fraction, PARENTAL_MAX_WORK_FRACTION)
+            wf = min(work_comb.work_fraction, 0.5)
             base_p_weeks = mother_parental_weeks
             if work_comb.work_during_extended_period:
                 total_p_weeks = int(base_p_weeks / (1.0 - wf))
@@ -526,7 +515,10 @@ def calculate_integrated_parental_service(
         timeline_periods.append(
             TimelinePeriod(
                 id="p3_parental_father",
-                name="Nieprzenoszalna czesc urlopu rodzicielskiego ojca (9 tyg.)",
+                name=(
+                    f"Nieprzenoszalna czesc urlopu rodzicielskiego ojca "
+                    f"({durations.non_transferable_parental_weeks} tyg.)"
+                ),
                 person="father",
                 start_date=f_start,
                 end_date=f_end,
@@ -542,8 +534,8 @@ def calculate_integrated_parental_service(
                 combined_period_income=f_total,
                 payer="ZUS",
                 description=(
-                    "Indywidualne prawo ojca do 9 tygodni urlopu rodzicielskiego "
-                    "(Dyrektywa Work-Life Balance)."
+                    f"Indywidualne prawo ojca do {durations.non_transferable_parental_weeks} "
+                    "tygodni urlopu rodzicielskiego (Dyrektywa Work-Life Balance)."
                 ),
             )
         )
@@ -551,19 +543,19 @@ def calculate_integrated_parental_service(
 
     if data.include_paternity_leave and data.is_father_insured:
         pat_start = data.child_birth_date + timedelta(days=data.paternity_start_offset_days)
-        pat_end = pat_start + timedelta(days=PATERNITY_LEAVE_DAYS - 1)
-        pat_daily = round(father_daily_100 * (PATERNITY_BENEFIT_RATE / 100.0), 2)
-        pat_total = round(pat_daily * PATERNITY_LEAVE_DAYS, 2)
+        pat_end = pat_start + timedelta(days=durations.paternity_leave_days - 1)
+        pat_daily = round(father_daily_100 * (rates.paternity_benefit_rate / 100.0), 2)
+        pat_total = round(pat_daily * durations.paternity_leave_days, 2)
         timeline_periods.append(
             TimelinePeriod(
                 id="p4_paternity_leave",
-                name="Urlop ojcowski (14 dni)",
+                name=f"Urlop ojcowski ({durations.paternity_leave_days} dni)",
                 person="father",
                 start_date=pat_start,
                 end_date=pat_end,
                 weeks=2,
-                days=PATERNITY_LEAVE_DAYS,
-                rate_percentage=PATERNITY_BENEFIT_RATE,
+                days=durations.paternity_leave_days,
+                rate_percentage=rates.paternity_benefit_rate,
                 daily_benefit_net=pat_daily,
                 monthly_benefit_net=round(pat_daily * 30.0, 2),
                 total_benefit_net=pat_total,
@@ -573,8 +565,9 @@ def calculate_integrated_parental_service(
                 combined_period_income=pat_total,
                 payer="ZUS",
                 description=(
-                    "14 dni kalendarzowych urlopu ojcowskiego platne 100% "
-                    "do 12. miesiaca zycia dziecka."
+                    f"{durations.paternity_leave_days} dni kalendarzowych urlopu ojcowskiego "
+                    f"platne {rates.paternity_benefit_rate:.0f}% do "
+                    f"{limits.max_child_age_paternity_months}. miesiaca zycia dziecka."
                 ),
             )
         )
@@ -600,15 +593,15 @@ def calculate_integrated_parental_service(
             action_required="Zgloszenie urodzenia w USC, powiadomienie pracodawcy.",
         ),
         TimelineMilestone(
-            milestone_date=b_date + timedelta(days=21),
-            title="Termin 21 dni na wniosek o zasilek 81,5%",
+            milestone_date=b_date + timedelta(days=limits.long_application_deadline_days),
+            title=f"Termin {limits.long_application_deadline_days} dni na wniosek o zasilek",
             importance="CRITICAL",
             legal_basis="Art. 30a Ustawy zasilkowej",
             action_required="Zlozenie wniosku o caly okres macierzynskiego i rodzicielskiego.",
         ),
         TimelineMilestone(
-            milestone_date=b_date + timedelta(weeks=MANDATORY_MOTHER_MATERNITY_WEEKS),
-            title="Koniec 14 tyg. obowiazkowego urlopu matki",
+            milestone_date=b_date + timedelta(weeks=durations.mandatory_mother_maternity_weeks),
+            title=f"Koniec {durations.mandatory_mother_maternity_weeks} tyg. urlopu matki",
             importance="INFO",
             legal_basis="Art. 180 § 4 Kodeksu Pracy",
             action_required="Mozliwosc rezygnacji i przekazania reszty macierzynskiego ojcu.",
@@ -663,19 +656,19 @@ def calculate_integrated_parental_service(
         )
 
     base_mat_days = mother_maternity_weeks * 7
-    base_par_days = (parental_pool_weeks - NON_TRANSFERABLE_PARENTAL_WEEKS) * 7
-    fat_par_days = NON_TRANSFERABLE_PARENTAL_WEEKS * 7
+    base_par_days = (parental_pool_weeks - durations.non_transferable_parental_weeks) * 7
+    fat_par_days = durations.non_transferable_parental_weeks * 7
 
     uni_total = round(
-        (mother_daily_100 * 0.815 * base_mat_days)
-        + (mother_daily_100 * 0.815 * base_par_days)
-        + (father_daily_100 * 0.70 * fat_par_days),
+        (mother_daily_100 * (rates.unified_benefit_rate / 100.0) * base_mat_days)
+        + (mother_daily_100 * (rates.unified_benefit_rate / 100.0) * base_par_days)
+        + (father_daily_100 * (rates.standard_parental_rate / 100.0) * fat_par_days),
         2,
     )
     var_total = round(
-        (mother_daily_100 * 1.00 * base_mat_days)
-        + (mother_daily_100 * 0.70 * base_par_days)
-        + (father_daily_100 * 0.70 * fat_par_days),
+        (mother_daily_100 * (rates.full_maternity_rate / 100.0) * base_mat_days)
+        + (mother_daily_100 * (rates.standard_parental_rate / 100.0) * base_par_days)
+        + (father_daily_100 * (rates.standard_parental_rate / 100.0) * fat_par_days),
         2,
     )
 

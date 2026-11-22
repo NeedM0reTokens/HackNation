@@ -5,6 +5,7 @@ from typing import Any
 DATA_DIR: Path = Path(__file__).resolve().parent
 CITIZENS_FILE: Path = DATA_DIR / "citizens.json"
 ROLES_FILE: Path = DATA_DIR / "roles.json"
+STATUTORY_PARAMETERS_FILE: Path = DATA_DIR / "statutory_parameters.json"
 
 
 def load_citizens_raw() -> list[dict[str, Any]]:
@@ -66,6 +67,7 @@ __all__ = [
     "PREDEFINED_EZLA_BY_DOC",
     "PREDEFINED_PROFILES",
     "ROLES_FILE",
+    "STATUTORY_PARAMETERS_FILE",
     "load_citizens_raw",
     "load_mock_data",
 ]
