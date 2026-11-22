@@ -11,6 +11,7 @@ import { MobileBottomNav } from "./components/MobileBottomNav";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { AppStateProvider, useAppState } from "./components/app-state";
 import { AssistantPanel } from "./components/assistant/assistant-panel";
+import { AssistantFab } from "./components/assistant/assistant-fab";
 import { GuideFlow } from "./components/guide/guide-flow";
 import { BenefitsCatalogSection } from "./components/benefits/BenefitsCatalogSection";
 
@@ -345,6 +346,7 @@ const AppContent: React.FC = () => {
       />
 
       {/* ASYSTENT AI */}
+      <AssistantFab />
       <AssistantPanel />
 
       {/* MOBILNA NAWIGACJA NA DOLE EKRANU */}

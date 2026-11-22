@@ -1,4 +1,5 @@
 import { AssistantPanel } from '@/components/assistant/assistant-panel'
+import { AssistantFab } from '@/components/assistant/assistant-fab'
 import { TopBar } from './top-bar'
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -8,6 +9,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main id="main" className="flex-1 px-4 pb-28 pt-8 sm:px-6 lg:px-8 lg:pb-16">
         {children}
       </main>
+      <AssistantFab />
       <AssistantPanel />
     </div>
   )
