@@ -2,9 +2,8 @@ import io
 import unittest
 
 from pypdf import PdfReader
-
-from ..api.api import app
-from ..api.models.applications import (
+from src.api.api import app
+from src.api.models.applications import (
     ApplicantData,
     ApplicationCategory,
     ApplicationCreateRequest,
@@ -15,7 +14,7 @@ from ..api.models.applications import (
     LeavePeriodData,
     SubmissionRequest,
 )
-from ..api.services.applications import (
+from src.api.services.applications import (
     _render_pdf_with_pure_python,
     create_application_service,
     generate_application_pdf_service,

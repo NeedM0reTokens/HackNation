@@ -2,14 +2,13 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from fastapi import HTTPException
-
-from ..api.models.pdf import DocumentType, InsuranceStatusBadge
-from ..api.services.ocr import (
+from src.api.models.pdf import DocumentType, InsuranceStatusBadge
+from src.api.services.ocr import (
     get_gemini_api_key,
     is_gemini_ocr_available,
     ocr_pdf_with_gemini,
 )
-from ..api.services.pdf import (
+from src.api.services.pdf import (
     _assess_eligibility,
     _classify_document,
     _extract_claim_data,

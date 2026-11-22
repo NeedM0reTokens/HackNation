@@ -4,9 +4,9 @@ import unittest
 from pathlib import Path
 from typing import Any
 
-from ..api.api import app
-from ..api.models.pdf import InsuranceStatusBadge
-from ..api.services.cases import (
+from src.api.api import app
+from src.api.models.pdf import InsuranceStatusBadge
+from src.api.services.cases import (
     evaluate_all_cases_service,
     evaluate_case_service,
     get_case_pdf_path,
@@ -14,7 +14,7 @@ from ..api.services.cases import (
     get_cases_pdf_directory,
     list_cases_service,
 )
-from ..api.services.pdf import parse_and_validate_pdf
+from src.api.services.pdf import parse_and_validate_pdf
 
 
 def _call_api(

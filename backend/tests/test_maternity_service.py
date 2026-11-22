@@ -1,11 +1,11 @@
 import unittest
 
-from ..api.models.maternity import (
+from src.api.models.maternity import (
     BenefitPaymentVariant,
     MaternityEmploymentType,
     MaternityParentalInput,
 )
-from ..api.services.maternity import (
+from src.api.services.maternity import (
     calculate_maternity_parental_benefit,
     get_maternity_weeks,
     get_parental_weeks,

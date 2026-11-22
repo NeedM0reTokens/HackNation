@@ -1,17 +1,17 @@
 import unittest
 
-from ..api.models.adoption import (
+from src.api.models.adoption import (
     AdoptionLeaveInput,
     CaregiverType,
 )
-from ..api.models.pregnancy import (
+from src.api.models.pregnancy import (
     EmploymentType,
     PayerSize,
     PayerType,
     PregnancyBenefitInput,
 )
-from ..api.services.adoption import calculate_adoption_leave
-from ..api.services.pregnancy import calculate_pregnancy_benefit
+from src.api.services.adoption import calculate_adoption_leave
+from src.api.services.pregnancy import calculate_pregnancy_benefit
 
 
 class TestPregnancyAdoptionServices(unittest.TestCase):

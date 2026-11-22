@@ -1,7 +1,7 @@
 import unittest
 
-from ..api.models.maternity import MaternityEmploymentType
-from ..api.models.paternity import (
+from src.api.models.maternity import MaternityEmploymentType
+from src.api.models.paternity import (
     MaternityTransferInput,
     MaternityTransferReason,
     ParentalSharingInput,
@@ -9,7 +9,7 @@ from ..api.models.paternity import (
     PaternityLeavePart,
     SharingMode,
 )
-from ..api.services.paternity import (
+from src.api.services.paternity import (
     calculate_maternity_transfer,
     calculate_parental_sharing,
     calculate_paternity_leave,
