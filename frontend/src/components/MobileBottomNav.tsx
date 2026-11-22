@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Home,
   Calculator,
-  HeartPulse,
-  Baby,
   Menu,
   X,
   FileText,
@@ -46,6 +44,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   }, [isMoreMenuOpen, setAssistantOpen]);
 
   const isMoreActive = ['wnioski', 'trudne-sytuacje', 'admin', 'strefa-pdf'].includes(activeTab);
+  const isCalcActive = ['kalkulator', 'chorobowy', 'macierzynski'].includes(activeTab);
 
   const handleTabClick = (tabId: string) => {
     onSelectTab(tabId);
@@ -199,43 +198,19 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             <span className="zus-mobile-nav-label">Start</span>
           </button>
 
-          {/* 2. KALKULATOR */}
+          {/* 2. CENTRUM KALKULACJI */}
           <button
             type="button"
-            className={`zus-mobile-nav-btn ${activeTab === 'kalkulator' ? 'active' : ''}`}
+            className={`zus-mobile-nav-btn ${isCalcActive ? 'active' : ''}`}
             onClick={() => handleTabClick('kalkulator')}
           >
             <div className="zus-mobile-nav-icon">
               <Calculator size={20} />
             </div>
-            <span className="zus-mobile-nav-label">Kalkulator</span>
+            <span className="zus-mobile-nav-label">Centrum</span>
           </button>
 
-          {/* 3. CHOROBOWY */}
-          <button
-            type="button"
-            className={`zus-mobile-nav-btn ${activeTab === 'chorobowy' ? 'active' : ''}`}
-            onClick={() => handleTabClick('chorobowy')}
-          >
-            <div className="zus-mobile-nav-icon">
-              <HeartPulse size={20} />
-            </div>
-            <span className="zus-mobile-nav-label">Chorobowy</span>
-          </button>
-
-          {/* 4. MACIERZYŃSKI / RODZICIELSKI */}
-          <button
-            type="button"
-            className={`zus-mobile-nav-btn ${activeTab === 'macierzynski' ? 'active' : ''}`}
-            onClick={() => handleTabClick('macierzynski')}
-          >
-            <div className="zus-mobile-nav-icon">
-              <Baby size={20} />
-            </div>
-            <span className="zus-mobile-nav-label">Rodzicielski</span>
-          </button>
-
-          {/* 5. WIĘCEJ (MENU) */}
+          {/* 3. WIĘCEJ (MENU) */}
           <button
             type="button"
             className={`zus-mobile-nav-btn ${isMoreActive || isMoreMenuOpen ? 'active' : ''}`}
