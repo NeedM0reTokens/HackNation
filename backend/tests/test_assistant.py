@@ -74,6 +74,101 @@ class TestAssistantEndpoints(unittest.TestCase):
         self.assertIn("Zasiłkow", data["title"])
         self.assertIn("summary", data)
 
+    def test_ask_with_tab_context(self) -> None:
+        resp = self.client.post(
+            "/api/assistant/ask",
+            json={
+                "message": "Jakie mam uprawnienia w tej sprawie?",
+                "user_context": {
+                    "active_tab": "chorobowy",
+                    "tab_name": "Zasiłek chorobowy w ciąży (kod B)",
+                },
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("kod", data["title"].lower())
+
+    def test_ask_off_topic_query(self) -> None:
+        resp = self.client.post(
+            "/api/assistant/ask",
+            json={"message": "Jak ugotować rosół na niedzielny obiad?"},
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("zakres pomocy", data["title"].lower())
+        self.assertIn("nie mogę pomóc", data["summary"].lower())
+
+    def test_ask_off_topic_with_tab_context(self) -> None:
+        resp = self.client.post(
+            "/api/assistant/ask",
+            json={
+                "message": "Jaka jest dziś pogoda w Warszawie?",
+                "user_context": {
+                    "active_tab": "chorobowy",
+                    "tab_name": "Zasiłek chorobowy w ciąży (kod B)",
+                },
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("zakres pomocy", data["title"].lower())
+        self.assertIn("nie mogę pomóc", data["summary"].lower())
+
+    def test_ask_empty_trimmed_query(self) -> None:
+        resp = self.client.post(
+            "/api/assistant/ask",
+            json={"message": "    "},
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("puste zapytanie", data["title"].lower())
+
+    def test_ask_courtesy_gratitude(self) -> None:
+        resp = self.client.post(
+            "/api/assistant/ask",
+            json={"message": "Dziękuję bardzo za pomoc!"},
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("pomóc", data["title"].lower())
+
+    def test_ask_courtesy_farewell(self) -> None:
+        resp = self.client.post(
+            "/api/assistant/ask",
+            json={"message": "Do widzenia, miłego dnia!"},
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("widzenia", data["title"].lower())
+
+    def test_ask_unaccented_polish_query(self) -> None:
+        resp = self.client.post(
+            "/api/assistant/ask",
+            json={"message": "ile tygodni urlopu przysluguje tacie"},
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("tacie", data["title"].lower())
+
+    def test_ask_contact_infoline(self) -> None:
+        resp = self.client.post(
+            "/api/assistant/ask",
+            json={"message": "Jaki jest numer telefonu do ZUS?"},
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("infolinia", data["title"].lower())
+
+    def test_ask_800_plus(self) -> None:
+        resp = self.client.post(
+            "/api/assistant/ask",
+            json={"message": "Jak złożyć wniosek o 800+?"},
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("800+", data["title"])
+
 
 if __name__ == "__main__":
     unittest.main()
