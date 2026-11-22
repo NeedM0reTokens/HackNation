@@ -598,7 +598,7 @@ export const moreKnowledge: { id: string; title: string; body: string }[] = [
   {
     id: 'minimum',
     title: 'Minimalna kwota zasiłku',
-    body: `Zasiłek macierzyński nie może być niższy niż ${MIN_BENEFIT} zł miesięcznie (ustawowe podwyższenie do kwoty świadczenia rodzicielskiego, tzw. kosiniakowego).`,
+    body: `Zasiłek macierzyński nie może być niższy niż ${MIN_BENEFIT} zł miesięcznie (ustawowe podwyższenie do kwoty świadczenia rodzicielskiego).`,
   },
 ]
 

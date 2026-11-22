@@ -77,12 +77,12 @@ const PERSONA_METADATA: Record<string, PersonaDetails> = {
   },
   '99010155555': {
     scenarioTitle: 'Obywatelka bez Ubezpieczenia',
-    badgeText: 'BRAK UBEZP. • KOSINIAKOWE',
+    badgeText: 'BRAK UBEZP. • ŚWIADCZENIE RODZICIELSKIE',
     employmentLabel: 'Brak aktywnego tytułu do ubezpieczeń',
     benefitStatus: 'Brak prawa do zasiłku z FUS/ZUS',
     specialCase: 'Alternatywa: Świadczenie rodzicielskie (1000 zł)',
     description:
-      'Scenariusz negatywny: osoba nieubezpieczona — system diagnozuje brak prawa do zasiłków ze składek ZUS i automatycznie rekomenduje świadczenie rodzicielskie z MOPS/GOPS (Kosiniakowe).',
+      'Scenariusz negatywny: osoba nieubezpieczona — system diagnozuje brak prawa do zasiłków ze składek ZUS i automatycznie rekomenduje świadczenie rodzicielskie z MOPS/GOPS.',
   },
   '80051209876': {
     scenarioTitle: 'Inspektor ZUS — Administrator Systemu',

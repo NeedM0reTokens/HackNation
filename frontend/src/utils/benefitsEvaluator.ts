@@ -291,9 +291,9 @@ export const ALL_BENEFITS: BenefitItem[] = [
     category: 'Opiekuńcze',
   },
   {
-    id: 'b16-swiadczenie-rodzicielskie-kosiniakowe',
+    id: 'b16-swiadczenie-rodzicielskie',
     order: 16,
-    title: 'Świadczenie rodzicielskie („Kosiniakowe” / uposażenie)',
+    title: 'Świadczenie rodzicielskie',
     shortDescription: 'Świadczenie dla rodziców, którzy nie są objęci ubezpieczeniem chorobowym i nie mają prawa do zasiłku macierzyńskiego z ZUS.',
     rate: '1 000 zł netto miesięcznie (nieopodatkowane)',
     duration: '52 tygodnie (jedno dziecko) do 71 tygodni (ciąża mnoga)',
@@ -604,8 +604,8 @@ export function evaluateBenefits(input: CitizenEvaluationInput): BenefitEvaluati
         break;
       }
 
-      // 16. Świadczenie rodzicielskie („Kosiniakowe”)
-      case 'b16-swiadczenie-rodzicielskie-kosiniakowe': {
+      // 16. Świadczenie rodzicielskie
+      case 'b16-swiadczenie-rodzicielskie': {
         if (employment === null) {
           isEligible = false;
           reason = 'Wybierz formę zatrudnienia lub zaznacz brak ubezpieczenia, aby sprawdzić prawo do świadczenia.';
@@ -614,7 +614,7 @@ export function evaluateBenefits(input: CitizenEvaluationInput): BenefitEvaluati
           reason = 'Podlegasz ubezpieczeniu chorobowemu i masz prawo do zasiłku macierzyńskiego, co wyklucza świadczenie rodzicielskie.';
         } else {
           isEligible = true;
-          reason = 'Kwalifikujesz się – tzw. „kosiniakowe” wynosi 1 000 zł miesięcznie netto przez 52 tygodnie dla osób bez zasiłku z ZUS.';
+          reason = 'Kwalifikujesz się – świadczenie rodzicielskie wynosi 1 000 zł miesięcznie netto przez 52 tygodnie dla osób bez zasiłku z ZUS.';
         }
         break;
       }
