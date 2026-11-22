@@ -123,7 +123,6 @@ def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
 
         return UserProfileResponse(
             pesel=str(raw["pesel"]),
-            user_id=normalized_id,
             first_name=str(raw["first_name"]),
             last_name=str(raw["last_name"]),
             date_of_birth=str(raw["date_of_birth"]),
