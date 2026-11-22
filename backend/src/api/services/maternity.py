@@ -86,7 +86,7 @@ def calculate_maternity_parental_benefit(
                 + "nabycie prawa do zasiłku macierzyńskiego."
             ],
             required_documents=[
-                "Wniosek o świadczenie rodzicielskie (1000 zł miesięcznie) do MOPS/GOPS"
+                "Wniosek o świadczenie rodzicielskie (tzw. kosiniakowe, 1000 zł miesięcznie) do MOPS/GOPS"
             ],
             legal_notes=[
                 "Osobie nieubezpieczonej przysługuje świadczenie rodzicielskie "

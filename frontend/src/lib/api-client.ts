@@ -40,7 +40,11 @@ import type {
   SubmissionConfirmation,
 } from "@/types/applications";
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
+export const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (typeof window !== "undefined" && window.location.hostname
+    ? `${window.location.protocol}//${window.location.hostname}:8000`
+    : "http://127.0.0.1:8000");
 
 /**
  * Dedykowany błąd rzucany w przypadku braku połączenia z backendem ZUS.
@@ -227,6 +231,141 @@ export async function getMobywatelIdentities(): Promise<MobywatelIdentity[]> {
   ];
 }
 
+const FALLBACK_SIMULATION_DATA: Record<string, any> = {
+  "92011501234": {
+    pesel: "92011501234",
+    first_name: "Anna",
+    last_name: "Kowalska",
+    gender: "Kobieta",
+    has_insurance: true,
+    insurance_title: "Umowa o pracę (pracownik)",
+    insurance_type: "UoP",
+    employment_type: "EMPLOYMENT_CONTRACT",
+    has_sickness_insurance: true,
+    sickness_insurance_type: "MANDATORY",
+    insurance_duration_days: 780,
+    waiting_period_satisfied: true,
+    payer_name: "TechPol Sp. z o.o.",
+    has_overdue_contributions: false,
+    overdue_amount: 0.0,
+    has_active_ezla: true,
+    active_ezla: [
+      {
+        document_id: "EZLA/2026/04/11092",
+        medical_code: "B",
+        start_date: "2026-04-01",
+        end_date: "2026-04-30",
+        days_count: 30,
+        doctor_name: "dr n. med. Ewa Wiśniewska",
+      },
+    ],
+  },
+  "89032005678": {
+    pesel: "89032005678",
+    first_name: "Piotr",
+    last_name: "Zieliński",
+    gender: "Mężczyzna",
+    has_insurance: true,
+    insurance_title: "Umowa o pracę (pracownik)",
+    insurance_type: "UoP",
+    employment_type: "EMPLOYMENT_CONTRACT",
+    has_sickness_insurance: true,
+    sickness_insurance_type: "MANDATORY",
+    insurance_duration_days: 1150,
+    waiting_period_satisfied: true,
+    payer_name: "Bud-Rem S.A.",
+    has_overdue_contributions: false,
+    overdue_amount: 0.0,
+    has_active_ezla: false,
+    active_ezla: [],
+  },
+  "95081012345": {
+    pesel: "95081012345",
+    first_name: "Karolina",
+    last_name: "Wiśniewska",
+    gender: "Kobieta",
+    has_insurance: true,
+    insurance_title: "Umowa zlecenie (dobrowolne chorobowe)",
+    insurance_type: "Zlecenie",
+    employment_type: "MANDATE_CONTRACT",
+    has_sickness_insurance: true,
+    sickness_insurance_type: "VOLUNTARY",
+    insurance_duration_days: 140,
+    waiting_period_satisfied: true,
+    payer_name: "Media Pro Sp. z o.o.",
+    has_overdue_contributions: false,
+    overdue_amount: 0.0,
+    has_active_ezla: false,
+    active_ezla: [],
+  },
+  "85040398765": {
+    pesel: "85040398765",
+    first_name: "Tomasz",
+    last_name: "Lewandowski",
+    gender: "Mężczyzna",
+    has_insurance: true,
+    insurance_title: "Jednoosobowa działalność gospodarcza (JDG)",
+    insurance_type: "JDG",
+    employment_type: "B2B",
+    has_sickness_insurance: true,
+    sickness_insurance_type: "VOLUNTARY",
+    insurance_duration_days: 1800,
+    waiting_period_satisfied: true,
+    payer_name: "Tomasz Lewandowski Usługi IT",
+    has_overdue_contributions: true,
+    overdue_amount: 350.0,
+    has_active_ezla: true,
+    active_ezla: [
+      {
+        document_id: "EZLA/2026/05/01144",
+        medical_code: null,
+        start_date: "2026-05-01",
+        end_date: "2026-05-14",
+        days_count: 14,
+        doctor_name: "dr n. med. Marek Kamiński",
+      },
+    ],
+  },
+  "99010155555": {
+    pesel: "99010155555",
+    first_name: "Julia",
+    last_name: "Dąbrowska",
+    gender: "Kobieta",
+    has_insurance: false,
+    insurance_title: "Brak tytułu do ubezpieczeń",
+    insurance_type: "Brak",
+    employment_type: "NONE",
+    has_sickness_insurance: false,
+    sickness_insurance_type: "NONE",
+    insurance_duration_days: 0,
+    waiting_period_satisfied: false,
+    payer_name: "Brak płatnika",
+    has_overdue_contributions: false,
+    overdue_amount: 0.0,
+    has_active_ezla: false,
+    active_ezla: [],
+  },
+  "80051209876": {
+    pesel: "80051209876",
+    first_name: "Marek",
+    last_name: "Nowak",
+    gender: "Mężczyzna",
+    has_insurance: true,
+    insurance_title: "Inspektor ZUS (Umowa o pracę)",
+    insurance_type: "UoP",
+    employment_type: "EMPLOYMENT_CONTRACT",
+    has_sickness_insurance: true,
+    sickness_insurance_type: "MANDATORY",
+    insurance_duration_days: 3700,
+    waiting_period_satisfied: true,
+    payer_name: "Zakład Ubezpieczeń Społecznych",
+    has_overdue_contributions: false,
+    overdue_amount: 0.0,
+    has_active_ezla: false,
+    active_ezla: [],
+  },
+};
+
 // 3. Logowanie przez mObywatel
 export async function loginWithMObywatel(pesel: string = "92011501234"): Promise<{
   user: InsuredUser;
@@ -245,10 +384,11 @@ export async function loginWithMObywatel(pesel: string = "92011501234"): Promise
       setAuthToken(tokenData.access_token);
     }
 
+    const cleanPesel = pesel.replace(/\D/g, "");
     let simData: any = null;
     try {
       const res = await fetch(
-        `${API_BASE_URL}/api/simulation/profile/${encodeURIComponent(pesel)}`,
+        `${API_BASE_URL}/api/zus/insurance/${encodeURIComponent(pesel)}`,
         {
           method: "GET",
           headers: getHeaders(),
@@ -261,9 +401,12 @@ export async function loginWithMObywatel(pesel: string = "92011501234"): Promise
       // Ignorujemy brak profilu w symulacji
     }
 
+    if (!simData && FALLBACK_SIMULATION_DATA[cleanPesel]) {
+      simData = FALLBACK_SIMULATION_DATA[cleanPesel];
+    }
+
     const firstName = simData?.first_name || tokenData.user?.first_name || "Obywatel";
     const lastName = simData?.last_name || tokenData.user?.last_name || "";
-    const cleanPesel = pesel.replace(/\D/g, "");
     const masked =
       cleanPesel.length === 11
         ? `${cleanPesel.slice(0, 2)}•••••••${cleanPesel.slice(-2)}`
@@ -707,15 +850,30 @@ export async function parsePdfDocument(file: File) {
 }
 
 // 15. Panel Administratora (GET / PUT /api/admin/config, POST /api/admin/config/reset)
+async function handleAdminResponse(res: Response): Promise<any> {
+  if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      let detail = res.status === 403 ? "Brak uprawnień administratora" : "Wymagane uwierzytelnienie";
+      try {
+        const body = await res.json();
+        if (body?.detail) detail = body.detail;
+      } catch {}
+      throw new Error(`Brak uprawnień (${res.status}): ${detail}. Zaloguj się kontem o uprawnieniach administratora.`);
+    }
+    throw new Error(`HTTP ${res.status}`);
+  }
+  return await res.json();
+}
+
 export async function getAdminConfig(): Promise<AdminConfig> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/admin/config`, {
       method: "GET",
       headers: getHeaders(),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
+    return await handleAdminResponse(res);
   } catch (err: any) {
+    if (err.message?.includes("Brak uprawnień")) throw err;
     throw new BackendOfflineError("GET /api/admin/config", err);
   }
 }
@@ -727,9 +885,9 @@ export async function updateAdminConfig(payload: AdminConfigUpdate): Promise<Adm
       headers: getHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
+    return await handleAdminResponse(res);
   } catch (err: any) {
+    if (err.message?.includes("Brak uprawnień")) throw err;
     throw new BackendOfflineError("PUT /api/admin/config", err);
   }
 }
@@ -740,9 +898,9 @@ export async function resetAdminConfig(): Promise<AdminConfig> {
       method: "POST",
       headers: getHeaders({ "Content-Type": "application/json" }),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
+    return await handleAdminResponse(res);
   } catch (err: any) {
+    if (err.message?.includes("Brak uprawnień")) throw err;
     throw new BackendOfflineError("POST /api/admin/config/reset", err);
   }
 }
@@ -800,6 +958,45 @@ export async function askAssistantApi(
       legalBasis: data.legal_basis || undefined,
     };
   } catch (err: any) {
+    // 1. Sprawdzenie czy kontekst lub treść pytania wskazuje konkretne zagadnienie
+    let topicKey = userContext?.requested_topic;
+    if (!topicKey) {
+      const match = message.match(/\(kod:\s*([a-z0-9_-]+)\)/i);
+      if (match) {
+        topicKey = match[1];
+      }
+    }
+
+    if (topicKey && glossary[topicKey]) {
+      const local = glossary[topicKey];
+      return {
+        id: `fallback-${Date.now()}`,
+        title: userContext?.requested_title || local.title,
+        summary: userContext?.topic_summary || local.summary,
+        details:
+          userContext?.topic_rules && userContext.topic_rules.length > 0
+            ? [...local.details, ...userContext.topic_rules.filter((r: string) => !local.details.includes(r))]
+            : local.details,
+        legalBasis: userContext?.topic_legal_basis || local.legalBasis,
+      };
+    }
+
+    // 2. Wyszukanie w lokalnym leksykonie po słowach kluczowych
+    const msgLower = message.toLowerCase();
+    for (const [key, item] of Object.entries(glossary)) {
+      if (
+        msgLower.includes(key.toLowerCase()) ||
+        (item.title && msgLower.includes(item.title.toLowerCase()))
+      ) {
+        return {
+          id: `fallback-${Date.now()}`,
+          title: item.title,
+          summary: item.summary,
+          details: item.details,
+          legalBasis: item.legalBasis,
+        };
+      }
+    }
     throw new BackendOfflineError("POST /api/assistant/ask", err);
   }
 }

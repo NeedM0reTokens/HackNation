@@ -165,9 +165,10 @@ button, input, select, textarea {
 }
 
 .zus-logo-svg {
-  height: 38px;
+  height: 44px;
   width: auto;
   display: block;
+  object-fit: contain;
 }
 
 .zus-brand-divider {
@@ -3978,4 +3979,24 @@ body:has(.zus-mobile-menu.open) .zus-assistant-drawer {
   color: var(--zus-text-muted, #6B7280);
   text-align: center;
   line-height: 1.3;
+}
+
+
+/* ============================
+   Centrum Kalkulacji – Hub Tabs (responsive labels)
+   ============================ */
+.zus-hub-label-mobile {
+  display: none !important;
+}
+.zus-hub-label-desktop {
+  display: inline !important;
+}
+
+@media (max-width: 640px) {
+  .zus-hub-label-mobile {
+    display: inline !important;
+  }
+  .zus-hub-label-desktop {
+    display: none !important;
+  }
 }

@@ -9,6 +9,8 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - DEV_AUTH_BYPASS=true
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GEMINI_MODEL=${GEMINI_MODEL:-}
     volumes:
       # Live-reload during development
       - ./backend/src:/app/backend/src

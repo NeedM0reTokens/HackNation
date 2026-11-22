@@ -2,6 +2,7 @@ import React from 'react';
 import { CheckCircle2, AlertTriangle, ShieldCheck, ShieldOff, Info } from 'lucide-react';
 import type { RiskAlert } from '@/lib/guide';
 import { DifficultSituationsDialog } from '../difficult-situations-dialog';
+import { AiFieldExplainer } from '@/components/ai/AiFieldExplainer';
 
 export function AlertsTab({
   alerts,
@@ -24,19 +25,22 @@ export function AlertsTab({
               Automatyczna analiza ciągłości ubezpieczenia, pozorności umów oraz okresów karencji.
             </p>
           </div>
-          <span
-            style={{
-              fontSize: '0.74rem',
-              fontWeight: 800,
-              padding: '3px 8px',
-              borderRadius: '4px',
-              backgroundColor: alerts.length === 0 ? '#E6F4EC' : '#FEE2E2',
-              color: alerts.length === 0 ? '#007834' : '#DC2626',
-              border: `1px solid ${alerts.length === 0 ? '#99D2AF' : '#FCA5A5'}`,
-            }}
-          >
-            {alerts.length === 0 ? 'STATUS: BEZPIECZNY' : `WYKRYTE RYZYKA: ${alerts.length}`}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <AiFieldExplainer topicId="ryzyko-pozornosc-umowy" label="Pozorność zatrudnienia" buttonText="Kontrola ZUS" />
+            <span
+              style={{
+                fontSize: '0.74rem',
+                fontWeight: 800,
+                padding: '3px 8px',
+                borderRadius: '4px',
+                backgroundColor: alerts.length === 0 ? '#E6F4EC' : '#FEE2E2',
+                color: alerts.length === 0 ? '#007834' : '#DC2626',
+                border: `1px solid ${alerts.length === 0 ? '#99D2AF' : '#FCA5A5'}`,
+              }}
+            >
+              {alerts.length === 0 ? 'STATUS: BEZPIECZNY' : `WYKRYTE RYZYKA: ${alerts.length}`}
+            </span>
+          </div>
         </div>
 
         {alerts.length === 0 ? (

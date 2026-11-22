@@ -32,6 +32,22 @@ class TestAssistantEndpoints(unittest.TestCase):
         self.assertTrue(len(data["details"]) > 0)
         self.assertIn("Art.", data["legal_basis"])
 
+    def test_explain_active_insurance_is_not_overstated(self) -> None:
+        resp = self.client.get("/api/assistant/explain/status-ubezpieczenia-aktywny")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        combined = " ".join([data["summary"], *data["details"]])
+        self.assertIn("pozostałych warunków", combined)
+        self.assertIn("art. 2a", combined)
+
+    def test_explain_za_zyciem_separates_leave_and_grant(self) -> None:
+        resp = self.client.get("/api/assistant/explain/pole-ustawa-za-zyciem")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        combined = " ".join([data["title"], data["summary"], *data["details"]])
+        self.assertIn("65 tygodni", combined)
+        self.assertIn("odrębnym wniosku", combined)
+
     def test_explain_unknown_topic(self) -> None:
         resp = self.client.get("/api/assistant/explain/nonexistent-topic")
         self.assertEqual(resp.status_code, 200)

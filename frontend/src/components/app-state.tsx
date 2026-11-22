@@ -18,7 +18,15 @@ type AppState = {
   setAssistantOpen: (open: boolean) => void
   messages: AssistantMessage[]
   assistantPending: boolean
-  explainTopic: (topicId: string, title: string) => Promise<void>
+  explainTopic: (
+    topicId: string,
+    title: string,
+    topicContext?: {
+      summary?: string
+      details?: string[]
+      legalBasis?: string
+    },
+  ) => Promise<void>
   sendMessage: (text: string, contextOverride?: Record<string, any>) => Promise<void>
   calmMode: boolean
   setCalmMode: (calm: boolean) => void
@@ -101,11 +109,6 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const explainTopic = useCallback(
-    (topicId: string, title: string) => runAssistant(`Wyjaśnij po ludzku: ${title}`, () => getExplanation(topicId)),
-    [runAssistant],
-  )
-
   const sendMessage = useCallback(
     (text: string, contextOverride?: Record<string, any>) => {
       const history = messages.slice(-6).map((m) => ({ role: m.role, content: m.content }))
@@ -129,6 +132,48 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       return runAssistant(text, () => askAssistantApi(text, history, userContext))
     },
     [runAssistant, messages, activeTab, user],
+  )
+
+  const explainTopic = useCallback(
+    (
+      topicId: string,
+      title: string,
+      topicContext?: {
+        summary?: string
+        details?: string[]
+        legalBasis?: string
+      },
+    ) => {
+      const legalRef = topicContext?.legalBasis ? `\nPodstawa prawna: ${topicContext.legalBasis}` : ''
+      const summaryRef = topicContext?.summary ? `\nWstępne ustalenia: ${topicContext.summary}` : ''
+      const rulesRef = topicContext?.details?.length
+        ? `\nKluczowe wymogi i zasady:\n• ${topicContext.details.join('\n• ')}`
+        : ''
+
+      const prompt = `Dopytuję o zagadnienie ZUS: "${title}" (kod: ${topicId}).${legalRef}${summaryRef}${rulesRef}
+
+Proszę o kompleksowe wyjaśnienie w kontekście przepisów ZUS 2026:
+1. Jak w praktyce ZUS i pracodawca rozliczają to świadczenie lub weryfikują to uprawnienie?
+2. Jakie bezwzględne terminy, procedury i dokumenty (np. Z-3, Z-3a, ZAM, oświadczenia) obowiązują wnioskodawcę?
+3. Jakie są potencjalne pułapki prawne, ryzyka kontroli i jak się przed nimi zabezpieczyć?`
+
+      return sendMessage(prompt, {
+        requested_topic: topicId,
+        requested_title: title,
+        topic_legal_basis: topicContext?.legalBasis || null,
+        topic_summary: topicContext?.summary || null,
+        topic_rules: topicContext?.details || [],
+        user_status: user
+          ? {
+              pesel: user.pesel || user.peselMasked,
+              name: `${user.firstName} ${user.lastName}`,
+              role: user.role,
+              simulation: user.simulation,
+            }
+          : null,
+      })
+    },
+    [sendMessage, user],
   )
 
   const value = useMemo<AppState>(

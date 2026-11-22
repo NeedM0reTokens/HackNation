@@ -649,3 +649,46 @@ export const MOCK_LOGGED_IN_PROFILE: CitizenEvaluationInput = {
   },
   isLoggedIn: true,
 };
+
+/**
+ * Dynamiczne generowanie profilu do ewaluacji uprawnień na podstawie zalogowanego obywatela.
+ */
+export function getUserEvaluationProfile(user: any): CitizenEvaluationInput {
+  if (!user) return MOCK_LOGGED_IN_PROFILE;
+
+  const sim = user.simulation;
+  const gender = sim?.gender;
+  const isFather =
+    gender === "Mężczyzna" ||
+    user.pesel === "89032005678" ||
+    user.firstName?.toLowerCase() === "piotr" ||
+    user.firstName?.toLowerCase() === "tomasz" ||
+    user.firstName?.toLowerCase() === "marek";
+
+  const role: UserRole = isFather ? "father" : "mother_pregnancy";
+
+  let employment: EmploymentType = "uop";
+  const insType = sim?.insurance_type;
+  if (insType === "JDG") employment = "jdg";
+  else if (insType === "Zlecenie") employment = "zlecenie";
+  else if (insType === "Brak" || sim?.has_insurance === false) employment = "none";
+
+  const hasEZlaCodeB = Boolean(
+    sim?.active_ezla?.some((c: any) => c.medical_code === "B")
+  );
+
+  return {
+    role,
+    employment,
+    conditions: {
+      hasSicknessInsurance: Boolean(sim ? sim.has_sickness_insurance : true),
+      waitingPeriodPassed: Boolean(sim ? sim.waiting_period_satisfied : true),
+      hasEZlaCodeB,
+      hasZusDebt: Boolean(sim ? sim.has_overdue_contributions : false),
+      isHospitalizedPremature: false,
+      hasZaZyciemCertificate: false,
+      jobLostBankruptcyOrEmployerFault: false,
+    },
+    isLoggedIn: true,
+  };
+}

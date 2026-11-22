@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 
 from ..models.admin import (
     AdminConfig,
@@ -11,6 +11,7 @@ from ..models.admin import (
     PeriodsAndLimitsUpdate,
     SingleParameterUpdate,
 )
+from ..security import Permission, authorization_manager
 from ..services.admin import (
     config_service,
     get_admin_config_service,
@@ -36,6 +37,12 @@ class AdminRouter(APIRouter):
             self.get_admin_config,
             methods=["GET"],
             response_model=AdminConfig,
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.admin_config_read],
+                )
+            ],
             summary="Pobierz aktualne parametry prawne i konfiguracyjne z bazy JSON",
             description=(
                 "Zwraca zestaw aktualnie obowiązujących wskaźników prawnych z bazy JSON DB: "
@@ -49,6 +56,12 @@ class AdminRouter(APIRouter):
             self.update_admin_config,
             methods=["PUT"],
             response_model=AdminConfig,
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.admin_config_update],
+                )
+            ],
             summary="Zaktualizuj konfigurację ustawową w bazie JSON",
             description=(
                 "Umożliwia dynamiczną aktualizację pełnej konfiguracji prawnej lub jej sekcji "
@@ -63,6 +76,12 @@ class AdminRouter(APIRouter):
             self.update_benefit_rates,
             methods=["PUT", "PATCH"],
             response_model=AdminConfig,
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.admin_config_update],
+                )
+            ],
             summary="Edycja stóp procentowych zasiłków w bazie JSON",
             description=(
                 "Umożliwia aktualizację stóp procentowych: zasiłek chorobowy w ciąży (kod B), "
@@ -77,6 +96,12 @@ class AdminRouter(APIRouter):
             self.update_benefit_amounts,
             methods=["PUT", "PATCH"],
             response_model=AdminConfig,
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.admin_config_update],
+                )
+            ],
             summary="Edycja kwot zasiłków, płacy minimalnej i limitów finansowych w bazie JSON",
             description=(
                 "Umożliwia aktualizację parametrów kwotowych: minimalne wynagrodzenie (4806 zł), "
@@ -92,6 +117,12 @@ class AdminRouter(APIRouter):
             self.update_leave_durations,
             methods=["PUT", "PATCH"],
             response_model=AdminConfig,
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.admin_config_update],
+                )
+            ],
             summary="Edycja wymiarów urlopów macierzyńskich i rodzicielskich w bazie JSON",
             description=(
                 "Umożliwia aktualizację wymiarów urlopów (tygodnie): macierzyński pojedynczy (20), "
@@ -106,6 +137,12 @@ class AdminRouter(APIRouter):
             self.update_periods_and_limits,
             methods=["PUT", "PATCH"],
             response_model=AdminConfig,
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.admin_config_update],
+                )
+            ],
             summary="Edycja okresów wyczekiwania, terminów i limitów wiekowych w bazie JSON",
             description=(
                 "Umożliwia aktualizację okresów wyczekiwania (30/90 dni), limitu chorobowego "
@@ -119,6 +156,12 @@ class AdminRouter(APIRouter):
             self.update_single_parameter,
             methods=["POST", "PATCH"],
             response_model=AdminConfig,
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.admin_config_update],
+                )
+            ],
             summary="Edycja pojedynczego parametru ustawowego po nazwie klucza w bazie JSON",
             description=(
                 "Przyjmuje nazwę dowolnego parametru ustawowego (np. 'min_wage_2026', "
@@ -132,6 +175,12 @@ class AdminRouter(APIRouter):
             self.reset_admin_config,
             methods=["POST"],
             response_model=AdminConfig,
+            dependencies=[
+                Security(
+                    authorization_manager.require,
+                    scopes=[Permission.admin_config_update],
+                )
+            ],
             summary="Przywrócenie domyślnych wartości ustawowych w bazie JSON",
             description="Przywraca fabryczne wartości parametrów ustawowych w pliku bazy JSON.",
         )

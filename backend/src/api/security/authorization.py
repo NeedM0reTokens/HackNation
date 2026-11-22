@@ -17,13 +17,6 @@ class AuthorizationManager:
     def __init__(self, auth_manager: AuthenticationManager | None = None) -> None:
         self.auth_manager: AuthenticationManager = auth_manager or authentication_manager
 
-    @property
-    def require(self) -> Callable[..., AuthContext]:
-        """
-        FastAPI dependency that validates whether the authenticated user has all
-        required scopes.
-        """
-
         def _dependency(
             security_scopes: SecurityScopes,
             auth_context: Annotated[AuthContext, Depends(self.auth_manager.get_auth_context)],
@@ -36,7 +29,15 @@ class AuthorizationManager:
                     )
             return auth_context
 
-        return _dependency
+        self._dependency: Callable[..., AuthContext] = _dependency
+
+    @property
+    def require(self) -> Callable[..., AuthContext]:
+        """
+        FastAPI dependency that validates whether the authenticated user has all
+        required scopes.
+        """
+        return self._dependency
 
 
 # Singleton authorization manager instance

@@ -13,7 +13,9 @@ import {
   FileUp,
 } from "lucide-react";
 import { waitingPeriodDays, qualify, type GuideInput } from "@/lib/guide";
+import { SampleCasesMenu } from "./sample-cases-menu";
 import { parsePdfDocument } from "@/lib/api-client";
+import { AiFieldExplainer } from "@/components/ai/AiFieldExplainer";
 
 export function SetupStep({
   initialInput,
@@ -29,6 +31,16 @@ export function SetupStep({
 
   const update = <K extends keyof GuideInput>(key: K, value: GuideInput[K]) =>
     setInput((current) => ({ ...current, [key]: value }));
+
+  const handleSelectSample = (sample: GuideInput) => {
+    setInput(sample);
+    if (sample.insuredDays !== undefined) {
+      setDaysStr(String(sample.insuredDays));
+    }
+    if (sample.grossSalary !== undefined) {
+      setSalaryStr(String(sample.grossSalary));
+    }
+  };
 
   const [daysStr, setDaysStr] = useState<string>(
     initialInput.insuredDays ? String(initialInput.insuredDays) : "",
@@ -157,7 +169,7 @@ export function SetupStep({
         <div className="zus-card-header">
           <div className="zus-card-header-title">
             <ClipboardList className="size-5 text-[var(--zus-green)]" />
-            <span>Dane do kalkulacji uprawnień</span>
+            <span>Dane do kalkulacji</span>
           </div>
 
           <div
@@ -168,6 +180,9 @@ export function SetupStep({
               flexWrap: "wrap",
             }}
           >
+            {/* Załaduj przykładową sprawę ZUS - identycznie jak w Kroku 2 */}
+            <SampleCasesMenu onSelect={handleSelectSample} />
+
             {/* Opcja wgrania PDF */}
             <button
               type="button"
@@ -265,8 +280,13 @@ export function SetupStep({
                       ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.role === "mother" ? "var(--zus-green-light)" : "#FFFFFF",
-                  color: input.role === "mother" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
+                    input.role === "mother"
+                      ? "var(--zus-green-light)"
+                      : "#FFFFFF",
+                  color:
+                    input.role === "mother"
+                      ? "var(--zus-green-dark)"
+                      : "var(--zus-text-main)",
                   fontWeight: input.role === "mother" ? 700 : 500,
                   fontSize: "0.94rem",
                   textAlign: "center",
@@ -296,8 +316,13 @@ export function SetupStep({
                       ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.role === "father" ? "var(--zus-green-light)" : "#FFFFFF",
-                  color: input.role === "father" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
+                    input.role === "father"
+                      ? "var(--zus-green-light)"
+                      : "#FFFFFF",
+                  color:
+                    input.role === "father"
+                      ? "var(--zus-green-dark)"
+                      : "var(--zus-text-main)",
                   fontWeight: input.role === "father" ? 700 : 500,
                   fontSize: "0.94rem",
                   textAlign: "center",
@@ -327,8 +352,13 @@ export function SetupStep({
                       ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.role === "guardian" ? "var(--zus-green-light)" : "#FFFFFF",
-                  color: input.role === "guardian" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
+                    input.role === "guardian"
+                      ? "var(--zus-green-light)"
+                      : "#FFFFFF",
+                  color:
+                    input.role === "guardian"
+                      ? "var(--zus-green-dark)"
+                      : "var(--zus-text-main)",
                   fontWeight: input.role === "guardian" ? 700 : 500,
                   fontSize: "0.94rem",
                   textAlign: "center",
@@ -357,6 +387,11 @@ export function SetupStep({
             >
               <CreditCard className="size-4 text-[var(--zus-green)]" />
               <span>Forma zatrudnienia (Tytuł ubezpieczenia społecznego)</span>
+              <AiFieldExplainer
+                topicId="pole-forma-zatrudnienia"
+                label="Forma zatrudnienia"
+                buttonText="Różnice umów"
+              />
             </label>
             <div
               style={{
@@ -379,8 +414,13 @@ export function SetupStep({
                       ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.employment === "uop" ? "var(--zus-green-light)" : "#FFFFFF",
-                  color: input.employment === "uop" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
+                    input.employment === "uop"
+                      ? "var(--zus-green-light)"
+                      : "#FFFFFF",
+                  color:
+                    input.employment === "uop"
+                      ? "var(--zus-green-dark)"
+                      : "var(--zus-text-main)",
                   fontWeight: input.employment === "uop" ? 700 : 500,
                   fontSize: "0.9rem",
                   cursor: "pointer",
@@ -413,9 +453,13 @@ export function SetupStep({
                       ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.employment === "zlecenie" ? "var(--zus-green-light)" : "#FFFFFF",
+                    input.employment === "zlecenie"
+                      ? "var(--zus-green-light)"
+                      : "#FFFFFF",
                   color:
-                    input.employment === "zlecenie" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
+                    input.employment === "zlecenie"
+                      ? "var(--zus-green-dark)"
+                      : "var(--zus-text-main)",
                   fontWeight: input.employment === "zlecenie" ? 700 : 500,
                   fontSize: "0.9rem",
                   cursor: "pointer",
@@ -448,8 +492,13 @@ export function SetupStep({
                       ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.employment === "jdg" ? "var(--zus-green-light)" : "#FFFFFF",
-                  color: input.employment === "jdg" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
+                    input.employment === "jdg"
+                      ? "var(--zus-green-light)"
+                      : "#FFFFFF",
+                  color:
+                    input.employment === "jdg"
+                      ? "var(--zus-green-dark)"
+                      : "var(--zus-text-main)",
                   fontWeight: input.employment === "jdg" ? 700 : 500,
                   fontSize: "0.9rem",
                   cursor: "pointer",
@@ -564,6 +613,11 @@ export function SetupStep({
               >
                 <Calendar className="size-4 text-[var(--zus-green)]" />
                 <span>Staż ubezpieczenia w dniach</span>
+                <AiFieldExplainer
+                  topicId="pole-staz-ubezpieczenia"
+                  label="Staż ubezpieczenia"
+                  variant="compact"
+                />
               </label>
               <input
                 id="insured-days"
@@ -687,7 +741,7 @@ export function SetupStep({
                 id="gross-salary"
                 type="number"
                 min="0"
-                step="50"
+                step="any"
                 required
                 className={`zus-input ${isSalaryNegative ? "is-invalid" : ""}`}
                 style={{
@@ -746,6 +800,64 @@ export function SetupStep({
             )}
           </div>
 
+          {/* Opcja uwzględnienia drugiego rodzica */}
+          <div style={{
+            padding: '10px 14px',
+            backgroundColor: '#F8FAFC',
+            border: '1px solid #E2E8F0',
+            borderRadius: '6px',
+          }}>
+            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', gap: '12px' }}>
+              <span style={{ fontSize: '0.86rem', fontWeight: 600, color: '#1E293B' }}>
+                Uwzględnij dochód drugiego rodzica (do kalkulacji 9 tyg. ojca / urlopu ojcowskiego)
+              </span>
+              <input
+                type="checkbox"
+                checked={input.includePartner}
+                onChange={(e) => update('includePartner', e.target.checked)}
+                style={{ width: '16px', height: '16px', accentColor: '#334155', cursor: 'pointer' }}
+              />
+            </label>
+            {input.includePartner && (
+              <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #E2E8F0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <label style={{ fontSize: '0.8rem', color: '#475569', margin: 0 }}>
+                    Średnie miesięczne wynagrodzenie brutto drugiego rodzica (PLN):
+                  </label>
+                  <AiFieldExplainer
+                    topicId="pole-dochod-drugiego-rodzica"
+                    label="Dochód partnera"
+                    buttonText="9 tyg. ojca"
+                  />
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="number"
+                    min="0"
+                    step="50"
+                    className="zus-input"
+                    value={input.partnerGrossSalary || ''}
+                    onChange={(e) => update('partnerGrossSalary', Math.max(0, Number(e.target.value) || 0))}
+                    placeholder="np. 6000"
+                    style={{ paddingRight: '45px' }}
+                  />
+                  <span style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    fontWeight: 600,
+                    color: '#64748B',
+                    fontSize: '0.88rem',
+                    pointerEvents: 'none',
+                  }}>
+                    zł
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* 5. Sytuacje szczególne (opcjonalnie) */}
           <div
             style={{
@@ -773,6 +885,88 @@ export function SetupStep({
             </div>
 
             {input.role === "mother" && (
+              <>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      cursor: "pointer",
+                      fontSize: "0.84rem",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={input.pregnancySickLeave}
+                      onChange={(e) => update("pregnancySickLeave", e.target.checked)}
+                      style={{
+                        accentColor: "var(--zus-green)",
+                        width: "16px",
+                        height: "16px",
+                      }}
+                    />
+                    <span style={{ color: "#1E293B" }}>
+                      Przebywam na zwolnieniu lekarskim w ciąży (L4 z kodem B, 100% płatne przed porodem)
+                    </span>
+                  </label>
+                  <AiFieldExplainer
+                    topicId="pole-l4-ciaza"
+                    label="L4 z kodem B"
+                    variant="compact"
+                  />
+                </div>
+
+                {input.pregnancySickLeave && (
+                  <div style={{ marginLeft: "24px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "0.8rem", color: "#64748B" }}>Liczba dni L4 przed porodem:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="270"
+                      className="zus-input"
+                      style={{ width: "80px", padding: "4px 8px", height: "32px" }}
+                      value={input.pregnancySickLeaveDays || 30}
+                      onChange={(e) => update("pregnancySickLeaveDays", Math.max(1, Number(e.target.value) || 30))}
+                    />
+                  </div>
+                )}
+
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      cursor: "pointer",
+                      fontSize: "0.84rem",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={input.premature}
+                      onChange={(e) => update("premature", e.target.checked)}
+                      style={{
+                        accentColor: "var(--zus-green)",
+                        width: "16px",
+                        height: "16px",
+                      }}
+                    />
+                    <span style={{ color: "#1E293B" }}>
+                      Wcześniak lub hospitalizacja noworodka (+ do 15 tyg. urlopu
+                      uzupełniającego 100%)
+                    </span>
+                  </label>
+                  <AiFieldExplainer
+                    topicId="pole-wczesniak-hospitalizacja"
+                    label="Wcześniak i hospitalizacja"
+                    variant="compact"
+                  />
+                </div>
+              </>
+            )}
+
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
               <label
                 style={{
                   display: "flex",
@@ -784,8 +978,8 @@ export function SetupStep({
               >
                 <input
                   type="checkbox"
-                  checked={input.premature}
-                  onChange={(e) => update("premature", e.target.checked)}
+                  checked={input.zaZyciem}
+                  onChange={(e) => update("zaZyciem", e.target.checked)}
                   style={{
                     accentColor: "var(--zus-green)",
                     width: "16px",
@@ -793,36 +987,16 @@ export function SetupStep({
                   }}
                 />
                 <span style={{ color: "#1E293B" }}>
-                  Wcześniak lub hospitalizacja noworodka (+ do 15 tyg. urlopu
-                  uzupełniającego 100%)
+                  Zaświadczenie z Ustawy „Za życiem” (wydłuża urlop rodzicielski;
+                  świadczenie 4 000 zł jest wypłacane oddzielnie)
                 </span>
               </label>
-            )}
-
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                cursor: "pointer",
-                fontSize: "0.84rem",
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={input.zaZyciem}
-                onChange={(e) => update("zaZyciem", e.target.checked)}
-                style={{
-                  accentColor: "var(--zus-green)",
-                  width: "16px",
-                  height: "16px",
-                }}
+              <AiFieldExplainer
+                topicId="pole-ustawa-za-zyciem"
+                label="Ustawa Za życiem"
+                variant="compact"
               />
-              <span style={{ color: "#1E293B" }}>
-                Zaświadczenie z Ustawy „Za życiem” (+24 tyg. rodzicielskiego i
-                jednorazowe 4 000 zł)
-              </span>
-            </label>
+            </div>
           </div>
         </div>
       </div>

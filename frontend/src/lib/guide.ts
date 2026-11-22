@@ -13,6 +13,10 @@ export type GuideInput = {
   grossSalary: number
   premature: boolean
   zaZyciem: boolean
+  includePartner?: boolean
+  partnerGrossSalary?: number
+  pregnancySickLeave?: boolean
+  pregnancySickLeaveDays?: number
 }
 
 export type ResultOptions = {
@@ -33,6 +37,10 @@ export const defaultGuideInput: GuideInput = {
   grossSalary: 0,
   premature: false,
   zaZyciem: false,
+  includePartner: false,
+  partnerGrossSalary: 0,
+  pregnancySickLeave: false,
+  pregnancySickLeaveDays: 30,
 }
 
 export const defaultResultOptions: ResultOptions = { variant: 'standard', partTime: false }
@@ -334,110 +342,339 @@ export function buildMilestones(input: GuideInput, calc: Calculation): Milestone
   return milestones
 }
 
+export type DocumentStage =
+  | 'before_birth'
+  | 'after_birth_usc'
+  | 'benefit_claim'
+  | 'special_case'
+  | 'family_benefit'
+
 export type DocumentItem = {
   id: string
   code?: string
   title: string
   description: string
   owner: string
-}
-
-const birthCertificate: DocumentItem = {
-  id: 'birth-certificate',
-  title: 'Skrócony odpis aktu urodzenia',
-  description: 'Wydaje Urząd Stanu Cywilnego. Potwierdza urodzenie dziecka.',
-  owner: 'USC',
-}
-
-const ezlaB: DocumentItem = {
-  id: 'ezla-b',
-  code: 'e-ZLA (kod B)',
-  title: 'Zwolnienie lekarskie w ciąży',
-  description: 'Kod B oznacza zasiłek chorobowy w wysokości 100% podstawy.',
-  owner: 'Lekarz',
-}
-
-const payerCertificate: Record<Employment, DocumentItem> = {
-  uop: {
-    id: 'z3',
-    code: 'Z-3',
-    title: 'Zaświadczenie płatnika składek',
-    description: 'Wystawia pracodawca, gdy zasiłek wypłaca ZUS (np. w firmie do 20 osób).',
-    owner: 'Pracodawca',
-  },
-  zlecenie: {
-    id: 'z3a',
-    code: 'Z-3a',
-    title: 'Zaświadczenie płatnika – zleceniodawca',
-    description: 'Potwierdza Twoje przychody i opłacone ubezpieczenie chorobowe.',
-    owner: 'Zleceniodawca',
-  },
-  jdg: {
-    id: 'z3b',
-    code: 'Z-3b',
-    title: 'Zaświadczenie płatnika – własna firma',
-    description: 'Jako przedsiębiorca wypełniasz je sam(a) dla siebie.',
-    owner: 'Ty (płatnik)',
-  },
-}
-
-const zas53: DocumentItem = {
-  id: 'zas53',
-  code: 'ZAS-53',
-  title: 'Wniosek o zasiłek macierzyński',
-  description: 'Złóż przez eZUS (PUE). Zaznacz od razu, za jaki okres wnioskujesz.',
-  owner: 'Ty',
+  destination?: string
+  deadline?: string
+  stage?: DocumentStage
+  isOptional?: boolean
 }
 
 export function buildDocuments(input: GuideInput): DocumentItem[] {
   const isEmployee = input.employment === 'uop'
+  const isInsured = hasSicknessInsurance(input)
   const docs: DocumentItem[] = []
 
-  if (input.role === 'mother') docs.push(ezlaB)
+  // 1. SCENARIUSZ: BRAK UBEZPIECZENIA CHOROBOWEGO (np. JDG bez chorobowego, zlecenie bez chorobowego)
+  // Zasiłek macierzyński z ZUS NIE przysługuje. Przysługuje świadczenie rodzicielskie (Kosiniakowe) 1000 zł/mies.
+  if (!isInsured) {
+    if (input.role === 'guardian') {
+      docs.push({
+        id: 'court',
+        code: 'Sąd / PCPR',
+        title: 'Postanowienie sądu lub umowa o rodzinę zastępczą',
+        description:
+          'Dokument potwierdzający przyjęcie dziecka na wychowanie w celu przysposobienia lub sprawowania pieczy zastępczej.',
+        owner: 'Sąd / PCPR',
+        destination: 'Urząd Gminy / MOPS / GOPS',
+        stage: 'after_birth_usc',
+      })
+    } else {
+      docs.push({
+        id: 'birth-certificate',
+        code: 'USC',
+        title: 'Skrócony odpis aktu urodzenia dziecka',
+        description:
+          'Wydaje Urząd Stanu Cywilnego (stacjonarnie lub przez portal gov.pl). Niezbędny do wniosku o świadczenie rodzicielskie.',
+        owner: 'USC / gov.pl',
+        destination: 'Urząd Stanu Cywilnego',
+        deadline: 'Do 21 dni od narodzin',
+        stage: 'after_birth_usc',
+      })
+    }
+
+    docs.push({
+      id: 'kosiniakowe',
+      code: 'ŚR (Kosiniakowe)',
+      title: 'Wniosek o świadczenie rodzicielskie (1000 zł miesięcznie)',
+      description:
+        'Zastępuje zasiłek macierzyński dla osób nieobjętych ubezpieczeniem chorobowym ZUS. Wynosi 1000 zł netto/mies. przez 52 tygodnie.',
+      owner: 'Ty',
+      destination: 'Urząd Miasta / Gminy, MOPS/GOPS lub portal Emp@tia / mZUS',
+      deadline: 'Do 3 miesięcy od dnia porodu (z wyrównaniem od dnia narodzin)',
+      stage: 'benefit_claim',
+    })
+
+    docs.push({
+      id: 'kosiniakowe-statement',
+      code: 'Oświadczenie',
+      title: 'Oświadczenie o niepobieraniu zasiłku macierzyńskiego z ZUS / KRUS',
+      description:
+        'Wymagany załącznik potwierdzający, że ani matka, ani ojciec nie pobierają zasiłku macierzyńskiego z ubezpieczenia społecznego.',
+      owner: 'Ty',
+      destination: 'Dołącz do wniosku o świadczenie rodzicielskie',
+      stage: 'benefit_claim',
+    })
+
+    docs.push({
+      id: 'swr-800',
+      code: 'ZUS SW-R',
+      title: 'Wniosek o świadczenie wychowawcze 800+',
+      description:
+        'Powszechne świadczenie 800 zł miesięcznie na dziecko, niezależne od dochodów i ubezpieczenia chorobowego.',
+      owner: 'Ty',
+      destination: 'ZUS (przez aplikację mZUS, eZUS/PUE lub bankowość elektroniczną)',
+      deadline: 'W ciągu 3 miesięcy od narodzin dziecka',
+      stage: 'family_benefit',
+    })
+
+    if (input.employment === 'jdg') {
+      docs.push({
+        id: 'zus-zua-voluntary',
+        code: 'ZUS ZUA',
+        title: 'Zgłoszenie do dobrowolnego ubezpieczenia chorobowego (opcjonalnie na przyszłość)',
+        description:
+          'Jeśli w przyszłości chcesz korzystać z płatnego L4 lub zasiłku macierzyńskiego przy kolejnym dziecku, zgłoś się do ubezpieczenia chorobowego kodem 05... ze składką 2,45%.',
+        owner: 'Ty (przedsiębiorca)',
+        destination: 'ZUS (portal eZUS / PUE)',
+        stage: 'special_case',
+        isOptional: true,
+      })
+    }
+
+    return docs
+  }
+
+  // 2. SCENARIUSZ: POSIADA UBEZPIECZENIE CHOROBOWE
+  // Etap przed porodem (opcjonalny / warunkowy)
+  if (input.role === 'mother') {
+    docs.push({
+      id: 'ezla-b',
+      code: 'e-ZLA (kod B)',
+      title: 'Zwolnienie lekarskie w ciąży (L4 w ciąży)',
+      description:
+        input.employment === 'uop'
+          ? 'Kod B oznacza zasiłek chorobowy w wysokości 100% podstawy wymiaru. Lekarz wystawia je elektronicznie w razie medycznej niezdolności do pracy przed porodem.'
+          : 'Kod B oznacza zasiłek chorobowy 100%. Pamiętaj: na JDG i zleceniu zasiłek chorobowy wymaga min. 90 dni okresu wyczekiwania (zasiłek macierzyński po porodzie przysługuje od 1. dnia).',
+      owner: 'Lekarz',
+      destination: 'Elektronicznie do ZUS i płatnika składek',
+      deadline: 'W trakcie ciąży przed porodem',
+      stage: 'before_birth',
+      isOptional: !input.pregnancySickLeave,
+    })
+  }
+
+  // Etap po porodzie – Urząd Stanu Cywilnego lub Sąd
   if (input.role === 'guardian') {
     docs.push({
       id: 'court',
+      code: 'Sąd / PCPR',
       title: 'Postanowienie sądu lub umowa o rodzinę zastępczą',
-      description: 'Dokument potwierdzający przyjęcie dziecka na wychowanie.',
-      owner: 'Sąd / PCPR',
+      description:
+        'Dokument potwierdzający przyjęcie dziecka na wychowanie w celu przysposobienia lub sprawowania pieczy zastępczej.',
+      owner: 'Sąd / PCPR / Ośrodek Adopcyjny',
+      destination: 'Pracodawca / ZUS',
+      stage: 'after_birth_usc',
     })
   } else {
-    docs.push(birthCertificate)
+    docs.push({
+      id: 'birth-certificate',
+      code: 'USC',
+      title: 'Skrócony odpis aktu urodzenia dziecka',
+      description:
+        'Wydaje Urząd Stanu Cywilnego (stacjonarnie lub przez portal gov.pl). Niezbędny do formalności urlopowych i zasiłkowych.',
+      owner: 'USC / gov.pl',
+      destination: 'Urząd Stanu Cywilnego',
+      deadline: 'W ciągu 21 dni od narodzin dziecka',
+      stage: 'after_birth_usc',
+    })
   }
 
+  // Etap wniosków o zasiłek / urlop
   if (input.role === 'father') {
-    docs.push(
-      isEmployee
-        ? {
-            id: 'paternity-request',
-            title: 'Wniosek o urlop ojcowski',
-            description: 'Złóż pracodawcy najpóźniej 7 dni przed startem urlopu.',
-            owner: 'Ty → pracodawca',
-          }
-        : { ...zas53, description: 'Złóż przez eZUS za okres urlopu ojcowskiego.' },
-    )
+    // Ojciec – urlop ojcowski (2 tygodnie)
+    if (isEmployee) {
+      docs.push({
+        id: 'paternity-request',
+        code: 'art. 182³ KP',
+        title: 'Pisemny wniosek pracownika o urlop ojcowski (14 dni)',
+        description:
+          'Urlop ojcowski przysługuje w wymiarze 2 tygodni (płatne 100%). Możesz podzielić na maksymalnie 2 części po min. 7 dni do ukończenia przez dziecko 12. miesiąca życia.',
+        owner: 'Ty → Pracodawca',
+        destination: 'Dział kadr u Twojego Pracodawcy',
+        deadline: 'Nie później niż 7 dni przed rozpoczęciem urlopu',
+        stage: 'benefit_claim',
+      })
+    } else {
+      docs.push({
+        id: 'paternity-zas',
+        code: 'ZUS ZAO / ZAS-53',
+        title: 'Wniosek o zasiłek macierzyński za okres urlopu ojcowskiego (ZAO)',
+        description:
+          'Elektroniczny wniosek do ZUS o wypłatę 100% zasiłku za okres urlopu ojcowskiego (14 dni).',
+        owner: 'Ty → ZUS',
+        destination: 'ZUS (portal eZUS / PUE)',
+        deadline: 'Nie później niż 7 dni przed rozpoczęciem urlopu ojcowskiego',
+        stage: 'benefit_claim',
+      })
+    }
+
+    docs.push({
+      id: 'paternity-statement',
+      code: 'Oświadczenie',
+      title: 'Oświadczenie ojca o niekorzystaniu wcześniej z urlopu ojcowskiego',
+      description:
+        'Potwierdzenie, czy i w jakiej części zasiłek macierzyński za okres urlopu ojcowskiego był już wcześniej wykorzystany na dane dziecko.',
+      owner: 'Ty',
+      destination: 'Dołącz do wniosku ojcowskiego (u pracodawcy lub w ZUS)',
+      stage: 'benefit_claim',
+    })
+
+    // Ojciec – 9 tygodni rodzicielskiego (nieprzenoszalne)
     if (isEmployee) {
       docs.push({
         id: 'father-parental-request',
-        title: 'Wniosek o urlop rodzicielski (9 tygodni)',
-        description: 'Złóż pracodawcy najpóźniej 21 dni przed startem urlopu.',
-        owner: 'Ty → pracodawca',
+        code: 'art. 182¹ᵃ KP',
+        title: 'Wniosek o urlop rodzicielski dla ojca (9 tygodni)',
+        description:
+          'Wyłączna część urlopu rodzicielskiego dla ojca (płatna 70%). Nie przechodzi na matkę w razie niewykorzystania.',
+        owner: 'Ty → Pracodawca',
+        destination: 'Dział kadr u Twojego Pracodawcy',
+        deadline: 'Nie później niż 21 dni przed rozpoczęciem urlopu',
+        stage: 'benefit_claim',
+      })
+    } else {
+      docs.push({
+        id: 'father-parental-zas',
+        code: 'ZUS ZAM',
+        title: 'Wniosek o zasiłek macierzyński za okres 9 tygodni rodzicielskiego ojca',
+        description:
+          'Wniosek do ZUS o wypłatę zasiłku macierzyńskiego w wysokości 70% za nieprzenoszalną część rodzicielskiego dla taty.',
+        owner: 'Ty → ZUS',
+        destination: 'ZUS (portal eZUS / PUE)',
+        deadline: 'Nie później niż 21 dni przed rozpoczęciem pobierania zasiłku',
+        stage: 'benefit_claim',
       })
     }
   } else {
-    docs.push(
-      isEmployee
-        ? {
-            id: 'leave-request',
-            title: 'Wniosek o urlop macierzyński i rodzicielski',
-            description: 'Złóż pracodawcy do 21 dni po porodzie, jeśli chcesz wariant 81,5%.',
-            owner: 'Ty → pracodawca',
-          }
-        : zas53,
-    )
+    // Matka / Opiekun
+    if (isEmployee) {
+      docs.push({
+        id: 'leave-request-uop',
+        code: 'art. 179¹ KP',
+        title: 'Wniosek pracownicy o pełny urlop macierzyński i rodzicielski (wariant 81,5%)',
+        description:
+          'Złóż pracodawcy do 21 dni po porodzie, aby otrzymać uśredniony zasiłek 81,5% za cały okres 52 tygodni. Złożenie po terminie oznacza 100% za macierzyński i 70% za rodzicielski.',
+        owner: 'Ty → Pracodawca',
+        destination: 'Dział kadr u Twojego Pracodawcy',
+        deadline: 'W terminie do 21 dni od dnia porodu',
+        stage: 'benefit_claim',
+      })
+    } else if (input.employment === 'jdg') {
+      docs.push({
+        id: 'zas53-jdg',
+        code: 'ZUS ZAM / ZAS-53',
+        title: 'Wniosek o zasiłek macierzyński za okres macierzyńskiego i rodzicielskiego',
+        description:
+          'Złóż elektronicznie przez portal eZUS (PUE). Zaznacz od razu wniosek o zasiłek za okres urlopu macierzyńskiego i rodzicielskiego w pełnym wymiarze (stawka 81,5%).',
+        owner: 'Ty',
+        destination: 'ZUS (portal eZUS / PUE)',
+        deadline: 'W terminie do 21 dni od dnia porodu',
+        stage: 'benefit_claim',
+      })
+    } else {
+      docs.push({
+        id: 'zas53-zlecenie',
+        code: 'ZUS ZAM / ZAS-53',
+        title: 'Wniosek o zasiłek macierzyński zleceniobiorcy',
+        description:
+          'Składasz do ZUS przez eZUS (PUE) lub za pośrednictwem zleceniodawcy wraz ze skróconym odpisem aktu urodzenia dziecka.',
+        owner: 'Ty',
+        destination: 'ZUS (portal eZUS / PUE)',
+        deadline: 'W terminie do 21 dni od dnia porodu',
+        stage: 'benefit_claim',
+      })
+    }
   }
 
-  docs.push(payerCertificate[input.employment])
+  // Zaświadczenie płatnika składek
+  if (input.employment === 'uop') {
+    docs.push({
+      id: 'z3',
+      code: 'ZUS Z-3',
+      title: 'Zaświadczenie płatnika składek Z-3',
+      description:
+        'Wystawia i przekazuje do ZUS Twój pracodawca – wyłącznie wtedy, gdy firma zatrudnia do 20 ubezpieczonych (zasiłek płaci ZUS). W większych firmach pracodawca sam wypłaca zasiłek.',
+      owner: 'Pracodawca → ZUS',
+      destination: 'ZUS (PUE/eZUS)',
+      stage: 'benefit_claim',
+    })
+  } else if (input.employment === 'jdg') {
+    docs.push({
+      id: 'z3b',
+      code: 'ZUS Z-3b',
+      title: 'Zaświadczenie płatnika składek Z-3b (własna firma)',
+      description:
+        'Jako przedsiębiorca wypełniasz je samodzielnie dla siebie w eZUS. Wskazujesz numer rachunku bankowego oraz dane o opłacanych składkach.',
+      owner: 'Ty (płatnik dla siebie)',
+      destination: 'ZUS (portal eZUS / PUE)',
+      stage: 'benefit_claim',
+    })
+  } else if (input.employment === 'zlecenie') {
+    docs.push({
+      id: 'z3a',
+      code: 'ZUS Z-3a',
+      title: 'Zaświadczenie płatnika składek – zleceniodawca (Z-3a)',
+      description:
+        'Wypełnia Twój zleceniodawca i przesyła do ZUS. Potwierdza Twoje przychody, zgłoszenie do dobrowolnego ubezpieczenia chorobowego i okres zlecenia.',
+      owner: 'Zleceniodawca → ZUS',
+      destination: 'ZUS (portal eZUS / PUE)',
+      stage: 'benefit_claim',
+    })
+  }
+
+  // Przypadki specjalne
+  if (input.premature) {
+    docs.push({
+      id: 'premature-cert',
+      code: 'art. 180¹ KP',
+      title: 'Zaświadczenie szpitala i wniosek o uzupełniający urlop macierzyński (wcześniak)',
+      description:
+        'Zaświadczenie lekarskie ze szpitala potwierdzające tydzień urodzenia i okres hospitalizacji noworodka. Daje prawo do od 8 do 15 tygodni uzupełniającego urlopu macierzyńskiego (100% zasiłku).',
+      owner: 'Szpital → Ty → Pracodawca / ZUS',
+      destination: 'Pracodawca lub ZUS',
+      deadline: 'Co najmniej 21 dni przed końcem urlopu macierzyńskiego',
+      stage: 'special_case',
+    })
+  }
+
+  if (input.zaZyciem) {
+    docs.push({
+      id: 'za-zyciem-cert',
+      code: 'Ustawa „Za życiem”',
+      title: 'Zaświadczenie lekarskie z ustawy „Za życiem”',
+      description:
+        'Zaświadczenie od lekarza specjalisty potwierdzające ciężkie i nieodwracalne upośledzenie noworodka. Wydłuża urlop rodzicielski o dodatkowe 24 tygodnie (do 65 tyg.).',
+      owner: 'Lekarz specjalista → Pracodawca / ZUS',
+      destination: 'Pracodawca lub ZUS',
+      stage: 'special_case',
+    })
+  }
+
+  // Powszechne świadczenie rodzinne
+  docs.push({
+    id: 'swr-800',
+    code: 'ZUS SW-R',
+    title: 'Wniosek o świadczenie wychowawcze 800+',
+    description:
+      'Powszechne świadczenie 800 zł miesięcznie na dziecko. Składane elektronicznie przez aplikację mZUS, portal eZUS lub bankowość.',
+    owner: 'Ty',
+    destination: 'ZUS (mZUS / eZUS)',
+    deadline: 'W ciągu 3 miesięcy od narodzin dziecka',
+    stage: 'family_benefit',
+  })
+
   return docs
 }
 

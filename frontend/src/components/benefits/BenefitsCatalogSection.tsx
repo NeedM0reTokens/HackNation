@@ -1,6 +1,7 @@
 import { ViewHeader } from "../common/ViewHeader";
 import { useAppState } from "../app-state";
 import React, { useState, useMemo, useEffect } from 'react';
+import { AiFieldExplainer } from '../ai/AiFieldExplainer';
 import {
   evaluateBenefits,
   BenefitEvaluationResult,
@@ -8,6 +9,7 @@ import {
   EmploymentType,
   UserConditions,
   MOCK_LOGGED_IN_PROFILE,
+  getUserEvaluationProfile,
 } from '../../utils/benefitsEvaluator';
 
 interface BenefitsCatalogSectionProps {
@@ -56,8 +58,8 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
   // Ewaluacja świadczeń w zależności od trybu
   const evaluatedBenefits = useMemo<BenefitEvaluationResult[]>(() => {
     if (isLoggedIn) {
-      // Tryb zalogowany: profil z mObywatel / ZUS (Anna Kowalska)
-      return evaluateBenefits(MOCK_LOGGED_IN_PROFILE);
+      // Tryb zalogowany: dynamiczny profil na podstawie wybranego obywatela (mObywatel / ZUS)
+      return evaluateBenefits(getUserEvaluationProfile(user));
     }
 
     // Tryb niezalogowany: stan z formularza filtrów ręcznych
@@ -67,7 +69,7 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
       conditions,
       isLoggedIn: false,
     });
-  }, [isLoggedIn, role, employment, conditions]);
+  }, [isLoggedIn, user, role, employment, conditions]);
 
   // Liczniki
   const eligibleCount = useMemo(
@@ -161,29 +163,61 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
               </div>
               <p className="zus-auth-summary-desc">
                 Zalogowano jako: <strong>{user ? `${user.firstName} ${user.lastName}` : "Anna Kowalska"}</strong> (PESEL: {user ? user.peselMasked : "920512•••••"}) • Płatnik składek:{' '}
-                <strong>TechSolutions Sp. z o.o.</strong>
+                <strong>{user?.simulation?.payer_name || "TechPol Sp. z o.o."}</strong>
               </p>
 
               <div className="zus-auth-tags-grid">
                 <div className="zus-auth-param-chip">
                   <span className="zus-param-label">Tytuł ubezpieczenia:</span>
-                  <span className="zus-param-value">Umowa o pracę (UoP)</span>
+                  <span className="zus-param-value">
+                    {user?.simulation?.insurance_title || "Umowa o pracę (pracownik)"}
+                  </span>
                 </div>
-                <div className="zus-auth-param-chip">
+                <div className="zus-auth-param-chip" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <span className="zus-param-label">Ubezpieczenie chorobowe:</span>
-                  <span className="zus-param-value zus-text-success">Aktywne (obowiązkowe)</span>
+                  {user?.simulation?.has_sickness_insurance !== false ? (
+                    <span className="zus-param-value zus-text-success">
+                      Aktywne ({user?.simulation?.sickness_insurance_type === 'VOLUNTARY' ? 'dobrowolne' : 'obowiązkowe'})
+                    </span>
+                  ) : (
+                    <span className="zus-param-value zus-text-muted">Brak ubezpieczenia</span>
+                  )}
+                  <AiFieldExplainer topicId="status-ubezpieczenia-aktywny" label="Status ubezpieczenia" variant="compact" />
                 </div>
                 <div className="zus-auth-param-chip">
                   <span className="zus-param-label">Okres wyczekiwania:</span>
-                  <span className="zus-param-value zus-text-success">Spełniony (&gt; 30 dni)</span>
+                  {user?.simulation?.waiting_period_satisfied !== false ? (
+                    <span className="zus-param-value zus-text-success">
+                      Spełniony ({user?.simulation?.insurance_duration_days ? `> ${user.simulation.insurance_duration_days} dni` : '> 30 dni'})
+                    </span>
+                  ) : (
+                    <span className="zus-param-value zus-text-danger">Niespełniony</span>
+                  )}
                 </div>
                 <div className="zus-auth-param-chip">
                   <span className="zus-param-label">Zwolnienie e-ZLA:</span>
-                  <span className="zus-param-value zus-text-success">Aktywne (Kod B – ciąża)</span>
+                  {(() => {
+                    const activeEzla = user?.simulation?.active_ezla;
+                    const hasCodeB = activeEzla?.some((c: any) => c.medical_code === 'B');
+                    if (hasCodeB) {
+                      return <span className="zus-param-value zus-text-success">Aktywne (Kod B – ciąża)</span>;
+                    }
+                    if (user?.simulation?.has_active_ezla && activeEzla && activeEzla.length > 0) {
+                      const code = activeEzla[0]?.medical_code;
+                      return <span className="zus-param-value zus-text-success">Aktywne ({code ? `Kod ${code}` : 'Choroba ogólna'})</span>;
+                    }
+                    return <span className="zus-param-value zus-text-muted">Brak aktywnego zwolnienia</span>;
+                  })()}
                 </div>
                 <div className="zus-auth-param-chip">
                   <span className="zus-param-label">Stan rozliczeń składek:</span>
-                  <span className="zus-param-value zus-text-success">Brak zaległości (0,00 zł)</span>
+                  {user?.simulation?.has_overdue_contributions ? (
+                    <span className="zus-param-value zus-text-danger">
+                      Zaległość ({user.simulation.overdue_amount ? `${user.simulation.overdue_amount.toFixed(2)} zł` : 'powyżej limitu'})
+                    </span>
+                  ) : (
+                    <span className="zus-param-value zus-text-success">Brak zaległości (0,00 zł)</span>
+                  )}
                 </div>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import { ViewHeader } from "../common/ViewHeader";
 import React, { useState } from 'react';
 import { ApplicationSimulator } from './ApplicationSimulator';
+import { AiFieldExplainer } from '@/components/ai/AiFieldExplainer';
 
 export const DocumentsView: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<'simulator' | 'deadlines' | 'forms' | 'protection' | 'risks'>('simulator');
@@ -209,8 +210,11 @@ export const DocumentsView: React.FC = () => {
           <div className="zus-timeline-list">
             <div className="zus-timeline-item">
               <div className="zus-timeline-badge" style={{ backgroundColor: '#991B1B' }}>RYZYKO 1</div>
-              <div>
-                <strong>Zawarcie umowy o pracę lub rejestracja JDG dla pozoru (art. 83 § 1 KC)</strong>
+              <div style={{ width: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                  <strong>Zawarcie umowy o pracę lub rejestracja JDG dla pozoru (art. 83 § 1 KC)</strong>
+                  <AiFieldExplainer topicId="ryzyko-pozornosc-umowy" label="Pozorność zatrudnienia" buttonText="Kontrola ZUS" />
+                </div>
                 <p>Podjęcie zatrudnienia lub zarejestrowanie działalności gospodarczej wyłącznie w celu uzyskania ochrony ubezpieczeniowej i prawa do wysokich zasiłków bez faktycznego świadczenia pracy skutkuje postępowaniem wyjaśniającym ZUS. W razie uznania pozorności ZUS wydaje decyzję o niepodleganiu ubezpieczeniom społecznym, co oznacza brak prawa do jakichkolwiek zasiłków oraz konieczność zwrotu pobranych kwot.</p>
               </div>
             </div>

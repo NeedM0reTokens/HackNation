@@ -1,5 +1,6 @@
 import { useAppState } from "./app-state";
 import React, { useState } from 'react';
+import { AiFieldExplainer } from './ai/AiFieldExplainer';
 
 export type RoleType = 'mother' | 'father' | 'adoption' | 'difficult';
 
@@ -38,7 +39,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       benefits: [
         {
           title: 'Zasiłek chorobowy w ciąży (100% podstawy)',
-          desc: 'Wystawiany na e-ZLA z kodem „B”. Okres zasiłkowy wynosi aż 270 dni. Brak limitu 182 dni.',
+          desc: 'Wystawiany na e-ZLA z kodem „B”. Maksymalny okres zasiłkowy wynosi 270 dni zamiast standardowych 182 dni.',
         },
         {
           title: 'Urlop macierzyński (20 do 37 tygodni)',
@@ -321,27 +322,84 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
                 {/* 1. Status ubezpieczenia chorobowego */}
                 <div className="zus-data-row">
-                  <span className="zus-data-label">Ubezpieczenie chorobowe</span>
-                  <span className="zus-data-val-primary">Aktywne – Umowa o pracę</span>
-                  <span className="zus-data-val-sub">Płatnik: TechSolutions Sp. z o.o. (duży płatnik &gt;20 osób)</span>
-                  <span className="zus-ezla-badge">Spełniony okres karencji (&gt; 30 dni)</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                    <span className="zus-data-label" style={{ margin: 0 }}>Ubezpieczenie chorobowe</span>
+                    <AiFieldExplainer topicId="status-ubezpieczenia-aktywny" label="Status ubezpieczenia" variant="compact" />
+                  </div>
+                  <span className="zus-data-val-primary">
+                    {user?.simulation?.has_sickness_insurance !== false
+                      ? `Aktywne – ${user?.simulation?.insurance_title || "Umowa o pracę"}`
+                      : "Brak ubezpieczenia chorobowego"}
+                  </span>
+                  <span className="zus-data-val-sub">
+                    Płatnik: {user?.simulation?.payer_name || "TechPol Sp. z o.o."}
+                  </span>
+                  <span className="zus-ezla-badge">
+                    {user?.simulation?.waiting_period_satisfied !== false
+                      ? "Spełniony okres karencji"
+                      : "Niespełniony okres karencji"}
+                  </span>
                 </div>
 
                 {/* 2. Ostatnie e-ZLA */}
                 <div className="zus-data-row">
                   <span className="zus-data-label">Aktywne zwolnienie e-ZLA</span>
-                  <span className="zus-data-val-primary">e-ZLA / 2026-PL-9481 (Kod B)</span>
-                  <span className="zus-data-val-sub">10.11.2026 – 24.11.2026 (15 dni) • Płatne 100%</span>
-                  <span className="zus-data-val-sub">Lekarz: dr n. med. Ewa Wiśniewska</span>
+                  {(() => {
+                    const activeEzla = user?.simulation?.active_ezla;
+                    const hasCodeB = activeEzla?.some((c: any) => c.medical_code === "B");
+                    if (hasCodeB) {
+                      const ezla = activeEzla.find((c: any) => c.medical_code === "B");
+                      return (
+                        <>
+                          <span className="zus-data-val-primary">
+                            {ezla.document_id || "e-ZLA"} (Kod B – ciąża)
+                          </span>
+                          <span className="zus-data-val-sub">
+                            {ezla.start_date} – {ezla.end_date} ({ezla.days_count} dni) • Płatne 100%
+                          </span>
+                          {ezla.doctor_name && (
+                            <span className="zus-data-val-sub">Lekarz: {ezla.doctor_name}</span>
+                          )}
+                        </>
+                      );
+                    }
+                    if (user?.simulation?.has_active_ezla && activeEzla && activeEzla.length > 0) {
+                      const ezla = activeEzla[0];
+                      return (
+                        <>
+                          <span className="zus-data-val-primary">{ezla.document_id || "e-ZLA"}</span>
+                          <span className="zus-data-val-sub">
+                            {ezla.start_date} – {ezla.end_date} ({ezla.days_count} dni)
+                          </span>
+                        </>
+                      );
+                    }
+                    return (
+                      <span className="zus-data-val-primary" style={{ color: "#666" }}>
+                        Brak aktywnego zwolnienia lekarskiego
+                      </span>
+                    );
+                  })()}
                 </div>
 
                 {/* 3. Stan składek */}
                 <div className="zus-data-row">
                   <span className="zus-data-label">Rozliczenia ze składek</span>
-                  <span className="zus-data-val-primary" style={{ color: '#007834' }}>
-                    Brak zadłużenia (0,00 zł)
-                  </span>
-                  <span className="zus-data-val-sub">Wszystkie składki opłacone terminowo</span>
+                  {user?.simulation?.has_overdue_contributions ? (
+                    <>
+                      <span className="zus-data-val-primary" style={{ color: "#d32f2f" }}>
+                        Zaległość: {user.simulation.overdue_amount ? `${user.simulation.overdue_amount.toFixed(2)} zł` : "powyżej limitu"}
+                      </span>
+                      <span className="zus-data-val-sub">Wstrzymanie wypłaty świadczeń (art. 2a)</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="zus-data-val-primary" style={{ color: "#007834" }}>
+                        Brak zadłużenia (0,00 zł)
+                      </span>
+                      <span className="zus-data-val-sub">Wszystkie składki opłacone terminowo</span>
+                    </>
+                  )}
                 </div>
 
                 {/* Przycisk wylogowania */}

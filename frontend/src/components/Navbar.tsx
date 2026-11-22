@@ -26,11 +26,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const navItems = [
     { id: 'start', label: 'Start' },
-    { id: 'kalkulator', label: 'Kalkulator Zasiłkowy' },
-    { id: 'chorobowy', label: 'Zasiłek chorobowy' },
-    { id: 'macierzynski', label: 'Macierzyński i Urlopy' },
+    { id: 'kalkulator', label: 'Centrum Kalkulacji' },
     { id: 'wnioski', label: 'Wnioski i Prawa' },
     { id: 'trudne-sytuacje', label: 'Trudne sytuacje' },
+    { id: 'strefa-pdf', label: 'Strefa PDF' },
     { id: 'admin', label: 'Panel Admina' },
   ];
 

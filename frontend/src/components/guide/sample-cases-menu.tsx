@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, FolderOpen, Sparkles } from 'lucide-react';
+import { ChevronDown, FolderOpen } from 'lucide-react';
 import { sampleCases, type GuideInput } from '@/lib/guide';
 
 export function SampleCasesMenu({ onSelect }: { onSelect: (input: GuideInput) => void }) {
@@ -110,7 +110,7 @@ export function SampleCasesMenu({ onSelect }: { onSelect: (input: GuideInput) =>
               gap: '6px',
             }}
           >
-            <Sparkles className="size-4 text-[#007834]" />
+            <FolderOpen className="size-4 text-[#007834]" />
             <span>Sprawy testowe (z wyzwania ZUS):</span>
           </div>
 
