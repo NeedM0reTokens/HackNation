@@ -227,14 +227,6 @@ const AppContent: React.FC = () => {
         {activeTab === 'macierzynski' && <PaternityView />}
         {activeTab === 'wnioski' && <DocumentsView />}
         {activeTab === 'trudne-sytuacje' && <SpecialCasesView />}
-        {activeTab === 'strefa-pdf' && (
-          <PdfZoneView
-            onNavigateToTab={(tab) => {
-              setActiveTab(tab);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          />
-        )}
         {activeTab === 'admin' && <AdminView />}
       </main>
 
