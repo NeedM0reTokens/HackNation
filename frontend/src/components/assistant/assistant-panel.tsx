@@ -2,115 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Loader2, SendHorizontal, Sparkles } from 'lucide-react';
 import { useAppState } from '@/components/app-state';
 
-interface TabContextInfo {
-  label: string;
-  badge: string;
-  questions: string[];
-}
 
-const TAB_CONTEXTS: Record<string, TabContextInfo> = {
-  start: {
-    label: 'Katalog świadczeń ZUS',
-    badge: 'Strona główna',
-    questions: [
-      'Jakie świadczenia przysługują po narodzinach dziecka?',
-      'Wariant 81,5% stałe czy 100% i 70%?',
-      'Ile tygodni urlopu przysługuje tacie?',
-      'Kiedy złożyć pierwszy wniosek po porodzie?',
-    ],
-  },
-  kalkulator: {
-    label: 'Zintegrowany Kalkulator Zasiłkowy',
-    badge: 'Kalkulator',
-    questions: [
-      'Czym jest podstawa wymiaru zasiłku?',
-      'Wariant 81,5% czy 100% + 70% – co się bardziej opłaca?',
-      'Jak wyliczyć podstawę przy stażu krótszym niż 12 miesięcy?',
-      'Czy premie i nadgodziny wliczają się do podstawy?',
-    ],
-  },
-  chorobowy: {
-    label: 'Zasiłek chorobowy w ciąży (kod B i e-ZLA)',
-    badge: 'Chorobowe / Ciąża',
-    questions: [
-      'Co oznacza kod „B” na zwolnieniu lekarskim?',
-      'Kto wypłaca zasiłek – pracodawca czy ZUS?',
-      'Ile wynosi okres wyczekiwania (karencja) w ciąży?',
-      'Czy zasiłek w ciąży wynosi zawsze 100% podstawy?',
-    ],
-  },
-  macierzynski: {
-    label: 'Urlopy dla ojca i rodzicielskie (Kodeks pracy)',
-    badge: 'Dla Ojca / Urlopy',
-    questions: [
-      'Kiedy i jak wykorzystać 14 dni urlopu ojcowskiego?',
-      'Jak działa 9 tygodni nieprzenoszalnego urlopu dla taty?',
-      'Kiedy ojciec może przejąć urlop po matce (po 14 tyg.)?',
-      'Jak łączyć urlop rodzicielski z pracą na max 1/2 etatu?',
-    ],
-  },
-  wnioski: {
-    label: 'Wnioski, dokumentacja i terminy ZUS',
-    badge: 'Dokumenty',
-    questions: [
-      'Jaki jest nieprzekraczalny termin na wniosek o zasiłek 81,5% (21 dni)?',
-      'Jakie dokumenty i formularze (np. Z-3) składa pracodawca?',
-      'Jak złożyć wniosek o urlop ojcowski do pracodawcy?',
-      'Gdzie w PUE/eZUS sprawdzić status wypłaty zasiłku?',
-    ],
-  },
-  'trudne-sytuacje': {
-    label: 'Przypadki szczególne i pomoc ZUS',
-    badge: 'Trudne sytuacje',
-    questions: [
-      'Jak działa uzupełniający urlop macierzyński na wcześniaka?',
-      'Jakie uprawnienia daje zaświadczenie z ustawy „Za życiem”?',
-      'Prawa rodziców po martwym urodzeniu lub stracie dziecka',
-      'Urlop na warunkach macierzyńskiego przy adopcji dziecka',
-    ],
-  },
-  'strefa-pdf': {
-    label: 'Strefa Testowa PDF (Analiza pism i decyzji)',
-    badge: 'Strefa PDF',
-    questions: [
-      'Jak załadować decyzję lub zaświadczenie ZUS do analizy?',
-      'Jakie formularze ZUS (Z-3, Z-15, e-ZLA) są obsługiwane?',
-      'Gdzie sprawdzić poprawność wyliczenia podstawy w PDF?',
-    ],
-  },
-  admin: {
-    label: 'Panel Administratora ZUS',
-    badge: 'Parametry ZUS',
-    questions: [
-      'Jaka jest minimalna płaca brutto i podstawa wymiaru w 2026 roku?',
-      'Jakie są aktualne stopy procentowe zasiłków w systemie?',
-    ],
-  },
-};
 
 export const AssistantPanel: React.FC = () => {
-  const { assistantOpen, setAssistantOpen, messages, assistantPending, sendMessage, activeTab } =
+  const { assistantOpen, setAssistantOpen, messages, assistantPending, sendMessage } =
     useAppState();
   const [draft, setDraft] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(true);
-  const lastActiveTabRef = useRef(activeTab);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  const currentContext = TAB_CONTEXTS[activeTab] || TAB_CONTEXTS.start;
-
-  // Gdy użytkownik zmienia zakładkę, nowe pytania sugerowane wyświetlają się na dole czatu
-  useEffect(() => {
-    if (activeTab !== lastActiveTabRef.current) {
-      lastActiveTabRef.current = activeTab;
-      setShowSuggestions(true);
-      if (assistantOpen) {
-        setTimeout(() => {
-          endRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-      }
-    }
-  }, [activeTab, assistantOpen]);
 
   // Auto-focus input on open
   useEffect(() => {
@@ -122,12 +21,12 @@ export const AssistantPanel: React.FC = () => {
     }
   }, [assistantOpen]);
 
-  // Scroll to bottom on new messages, pending state or when suggestions appear
+  // Scroll to bottom on new messages or pending state
   useEffect(() => {
     if (assistantOpen) {
       endRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, assistantPending, assistantOpen, showSuggestions]);
+  }, [messages, assistantPending, assistantOpen]);
 
   // Handle ESC key to close
   useEffect(() => {
@@ -146,14 +45,7 @@ export const AssistantPanel: React.FC = () => {
     const text = draft.trim();
     if (!text || assistantPending) return;
     setDraft('');
-    setShowSuggestions(false);
     await sendMessage(text);
-  };
-
-  const handleSuggestionClick = async (question: string) => {
-    if (assistantPending) return;
-    setShowSuggestions(false);
-    await sendMessage(question);
   };
 
   return (
@@ -222,28 +114,7 @@ export const AssistantPanel: React.FC = () => {
           );
         })}
 
-        {/* Sugerowane pytania wyświetlają się na dole scrollowanej historii czatu */}
-        {showSuggestions && currentContext.questions && currentContext.questions.length > 0 && (
-          <div className="zus-assistant-suggestions-section">
-            <div className="zus-assistant-suggestions-title">
-              <Sparkles size={13} color="#007834" />
-              <span>Sugerowane pytania dla tej sprawy:</span>
-            </div>
-            <div className="zus-assistant-chips-wrap">
-              {currentContext.questions.map((question, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  className="zus-assistant-chip-btn"
-                  disabled={assistantPending}
-                  onClick={() => handleSuggestionClick(question)}
-                >
-                  {question}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {assistantPending && (
           <div className="zus-assistant-pending">

@@ -36,6 +36,16 @@ ZUS_ASSISTANT_SYSTEM_INSTRUCTION = (
     "pogoda, sport, programowanie, wiedza ogólna itp.), KATEGORYCZNIE ODMÓW odpowiedzi i "
     "wyjaśnij, że jako wirtualny doradca ZUS pomagasz wyłącznie w sprawach ubezpieczeniowych "
     "i zasiłkach rodzicielskich.\n\n"
+    "BEZWZGLĘDNY ZAKAZ ZGADYWANIA I HALUCYNACJI (ZASADA 'NIE WIEM'):\n"
+    "Jeśli nie posiadasz 100% pewności co do stanu prawnego, jeśli pytanie dotyczy indywidualnego, "
+    "złożonego stanu faktycznego, brakuje danych lub pytanie wykracza poza znane Ci przepisy: "
+    "KATEGORYCZNIE NIE ZGADUJ i NIE TWORZ DOMYSŁÓW! "
+    "W polu 'summary' wprost napisz, że nie posiadasz wystarczających informacji, aby wiążąco "
+    "rozstrzygnąć tę sprawę, i natychmiast odeślij obywatela do oficjalnych kanałów ZUS:\n"
+    "1. Infolinii Centrum Obsługi Telefonicznej ZUS (COT): tel. 22 560 16 00 (pon.-pt. 7:00-18:00),\n"
+    "2. Bezpośredniej rozmowy z pracownikiem ZUS (wizyta osobista lub rezerwacja e-wizyty przez PUE ZUS),\n"
+    "3. Kontaktu przez portal PUE ZUS / eZUS (gdzie pracownik ZUS posiada bezpieczny wgląd w akta i konto płatnika).\n"
+    "W polu 'details' wymień konkretne kroki kontaktu z pracownikiem ZUS lub infolinią.\n\n"
     "ZASADY PRAWNE 2026:\n"
     "1. Płaca minimalna 2026: 4 806,00 zł brutto. Składki finansowane przez pracownika: 13,71%.\n"
     "2. Okres wyczekiwania: 30 dni (umowa o pracę), 90 dni (zlecenie / JDG dobrowolnie).\n"
@@ -1489,18 +1499,17 @@ class GeminiAssistantService:
     def _build_refusal_response(self) -> AssistantAskResponse:
         return AssistantAskResponse(
             id=f"kb-{uuid.uuid4().hex[:8]}",
-            title="Zakres pomocy doradcy ZUS",
+            title="Zakres pomocy doradcy ZUS i kontakt z urzędem",
             summary=(
-                "Przepraszam, ale jestem wirtualnym doradcą ZUS i mogę pomagać wyłącznie "
-                "w sprawach związanych ze świadczeniami, zasiłkami oraz ubezpieczeniami "
-                "społecznymi dla rodziców. Nie mogę pomóc w tematach niezwiązanych z ZUS."
+                "Nie posiadam wystarczających informacji, aby wiążąco odpowiedzieć na to pytanie, "
+                "lub temat wykracza poza automatyczną interpretację przepisów o świadczeniach rodzicielskich. "
+                "W indywidualnych sprawach formalnych niezbędny jest kontakt z pracownikiem ZUS."
             ),
             details=[
-                "Zadaj pytanie dotyczące zasiłku macierzyńskiego, rodzicielskiego, "
-                "ojcowskiego lub chorobowego.",
-                "Pomagam w ustaleniu terminów wniosków (np. 21 dni po porodzie) i wymaganych "
-                "druków (Z-3, Z-15).",
-                "Wyjaśniam zasady wyliczania podstawy wymiaru oraz porównania wariantów zasiłku.",
+                "Infolinia Centrum Obsługi Telefonicznej ZUS (COT): zadzwoń pod numer 22 560 16 00 (pon.-pt. 7:00-18:00).",
+                "Wizyta osobista u pracownika ZUS: zarezerwuj e-wizytę lub udaj się do najbliższego Inspektoratu/Oddziału ZUS.",
+                "Portal PUE ZUS / eZUS: wyślij zapytanie do ZUS po zalogowaniu profilem zaufanym / mObywatelem.",
+                "Wirtualny doradca odpowiada wyłącznie na ogólne pytania dotyczące zasiłków macierzyńskich, rodzicielskich i chorobowych.",
             ],
             legal_basis=(
                 "Ustawa z dnia 13 października 1998 r. o systemie ubezpieczeń społecznych"
