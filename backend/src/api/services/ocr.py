@@ -80,8 +80,18 @@ def ocr_pdf_with_gemini(file_bytes: bytes, filename: str) -> dict[str, Any] | No
             "generationConfig": {
                 "responseMimeType": "application/json",
                 "temperature": 0.1,
+                "topP": 0.9,
+                "topK": 40,
+                "maxOutputTokens": 4096,
+                "mediaResolution": "MEDIA_RESOLUTION_HIGH",
+                "thinkingConfig": {
+                    "thinkingBudget": 4096,
+                },
             },
         }
+        if not model_name.startswith("gemini-2.5"):
+            payload["generationConfig"].pop("mediaResolution", None)
+            payload["generationConfig"].pop("thinkingConfig", None)
 
         try:
             resp = requests.post(url, json=payload, timeout=25)

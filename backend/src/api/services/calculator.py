@@ -714,7 +714,7 @@ def calculate_integrated_parental_service(
     if not is_eligible:
         summary_notes.append(
             "Oboje rodzice nie podlegają ubezpieczeniu chorobowemu ZUS - przysługuje "
-            + "świadczenie rodzicielskie (tzw. kosiniakowe 1000 zł/mc z MOPS/GOPS)."
+            + "świadczenie rodzicielskie w wysokości 1000 zł miesięcznie z MOPS/GOPS."
         )
 
     # Główny ubezpieczony do analizy ryzyk i czerwonych flag

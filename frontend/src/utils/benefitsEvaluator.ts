@@ -135,7 +135,7 @@ export const ALL_BENEFITS: BenefitItem[] = [
     order: 6,
     title: 'Zasiłek macierzyński po porodzie (urlop macierzyński)',
     shortDescription: 'Podstawowe świadczenie pieniężne dla matki po narodzinach dziecka, gwarantujące płatny okres regeneracji i opieki.',
-    rate: '100% lub uśrednione 81,5% (tzw. długi wniosek)',
+    rate: '100% lub ujednolicone 81,5% (wniosek ZAM o wariant ujednolicony)',
     duration: 'Od 20 tygodni (jedno dziecko) do 37 tygodni (pięcioraczki)',
     disbursingEntity: 'ZUS lub pracodawca',
     legalBasis: 'Art. 180 Kodeksu pracy oraz art. 29 i 31 Ustawy zasiłkowej',
@@ -291,9 +291,9 @@ export const ALL_BENEFITS: BenefitItem[] = [
     category: 'Opiekuńcze',
   },
   {
-    id: 'b16-swiadczenie-rodzicielskie-kosiniakowe',
+    id: 'b16-swiadczenie-rodzicielskie',
     order: 16,
-    title: 'Świadczenie rodzicielskie („Kosiniakowe” / uposażenie)',
+    title: 'Świadczenie rodzicielskie',
     shortDescription: 'Świadczenie dla rodziców, którzy nie są objęci ubezpieczeniem chorobowym i nie mają prawa do zasiłku macierzyńskiego z ZUS.',
     rate: '1 000 zł netto miesięcznie (nieopodatkowane)',
     duration: '52 tygodnie (jedno dziecko) do 71 tygodni (ciąża mnoga)',
@@ -604,8 +604,8 @@ export function evaluateBenefits(input: CitizenEvaluationInput): BenefitEvaluati
         break;
       }
 
-      // 16. Świadczenie rodzicielskie („Kosiniakowe”)
-      case 'b16-swiadczenie-rodzicielskie-kosiniakowe': {
+      // 16. Świadczenie rodzicielskie
+      case 'b16-swiadczenie-rodzicielskie': {
         if (employment === null) {
           isEligible = false;
           reason = 'Wybierz formę zatrudnienia lub zaznacz brak ubezpieczenia, aby sprawdzić prawo do świadczenia.';
@@ -614,7 +614,7 @@ export function evaluateBenefits(input: CitizenEvaluationInput): BenefitEvaluati
           reason = 'Podlegasz ubezpieczeniu chorobowemu i masz prawo do zasiłku macierzyńskiego, co wyklucza świadczenie rodzicielskie.';
         } else {
           isEligible = true;
-          reason = 'Kwalifikujesz się – tzw. „kosiniakowe” wynosi 1 000 zł miesięcznie netto przez 52 tygodnie dla osób bez zasiłku z ZUS.';
+          reason = 'Kwalifikujesz się – świadczenie rodzicielskie wynosi 1 000 zł miesięcznie netto przez 52 tygodnie dla osób bez zasiłku z ZUS.';
         }
         break;
       }

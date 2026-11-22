@@ -61,7 +61,7 @@ def calculate_pregnancy_benefit(data: PregnancyBenefitInput) -> PregnancyBenefit
     if data.employment_type == EmploymentType.NONE:
         return _build_ineligible_result(
             reasons=["Brak tytułu do ubezpieczenia chorobowego."],
-            documents=["Wniosek o świadczenie rodzicielskie (tzw. kosiniakowe) do MOPS/GOPS"],
+            documents=["Wniosek o świadczenie rodzicielskie do MOPS/GOPS"],
             legal_notes=["Osobom nieubezpieczonym przysługuje świadczenie rodzicielskie."],
         )
 

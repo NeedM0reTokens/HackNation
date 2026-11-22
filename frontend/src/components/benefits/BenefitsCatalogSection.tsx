@@ -369,7 +369,7 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
                     />
                     <div className="zus-choice-content">
                       <span className="zus-choice-title">Brak ubezpieczenia</span>
-                      <span className="zus-choice-desc">Student, bezrobotny, dzieło (kosiniakowe)</span>
+                      <span className="zus-choice-desc">Student, bezrobotny, dzieło (świadczenie rodzicielskie)</span>
                     </div>
                   </label>
                 </div>

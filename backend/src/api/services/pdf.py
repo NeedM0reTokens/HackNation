@@ -450,7 +450,7 @@ def _assess_eligibility(
             + "(insurance period ended or no active coverage)."
         )
         followup_docs.append(
-            "Application for Parental Allowance (kosiniakowe) submitted to MOPS/GOPS"
+            "Application for Parental Allowance submitted to MOPS/GOPS"
         )
 
     elif claim.claim_type == "SICKNESS" and insurance.insurance_duration_days < req_waiting_days:

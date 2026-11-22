@@ -36,7 +36,7 @@ const PARAMETERS_METADATA: ParameterMeta[] = [
     key: "unified_benefit_rate",
     category: "benefit_rates",
     categoryLabel: "Stopy procentowe świadczeń (%)",
-    label: "Zasiłek uśredniony – długi wniosek (art. 30a ust. 1)",
+    label: "Zasiłek ujednolicony 81,5% – wniosek ZAM (art. 30a ust. 1)",
     description:
       "Jednolita stawka zasiłku macierzyńskiego i rodzicielskiego przy wniosku złożonym w ciągu 21 dni od porodu.",
     unit: "%",
@@ -470,7 +470,7 @@ const PARAMETERS_METADATA: ParameterMeta[] = [
     key: "long_application_deadline_days",
     category: "periods_and_limits",
     categoryLabel: "Okresy wyczekiwania, terminy i limity",
-    label: "Termin na złożenie długiego wniosku (art. 30a ust. 1)",
+    label: "Termin złożenia wniosku ZAM o wariant ujednolicony (art. 30a ust. 1)",
     description:
       "Nieprzekraczalny termin (21 dni od porodu) na złożenie wniosku o jednolity zasiłek 81,5%.",
     unit: "dni",

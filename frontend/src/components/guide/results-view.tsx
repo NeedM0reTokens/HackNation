@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { BookOpen, Pencil, CheckCircle2 } from 'lucide-react';
+import { BookOpen, Pencil, CheckCircle2, Wallet, CalendarDays, FileText, ShieldAlert } from 'lucide-react';
 import {
   buildAlerts,
   buildDocuments,
@@ -185,63 +185,61 @@ export function ResultsView({
       {/* Układ w czystej, prostej linii (bez bocznych kolumn) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', width: '100%' }}>
         <div style={{ width: '100%' }}>
-          {/* Zakładki szczegółowe wyników */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '8px',
-              borderBottom: '2px solid #E2E8F0',
-              marginBottom: '20px',
-              overflowX: 'auto',
-            }}
-          >
-            <button
-              type="button"
-              className={`zus-tab-btn ${tab === 'summary' ? 'active' : ''}`}
-              onClick={() => setTab('summary')}
-            >
-              Podsumowanie i Kwota
-            </button>
+          {/* Zakładki szczegółowe wyników (Sticky Full-Width) */}
+          <div className="zus-results-tabs-wrapper">
+            <div className="zus-results-tabs-inner">
+              <button
+                type="button"
+                className={`zus-tab-btn ${tab === 'summary' ? 'active' : ''}`}
+                onClick={() => setTab('summary')}
+              >
+                <Wallet className="zus-tab-icon" size={18} />
+                <span className="zus-tab-text-desktop">Podsumowanie i Kwota</span>
+                <span className="zus-tab-text-mobile">Kwota</span>
+              </button>
 
-            <button
-              type="button"
-              className={`zus-tab-btn ${tab === 'timeline' ? 'active' : ''}`}
-              onClick={() => setTab('timeline')}
-            >
-              Oś Czasu i Terminy
-            </button>
+              <button
+                type="button"
+                className={`zus-tab-btn ${tab === 'timeline' ? 'active' : ''}`}
+                onClick={() => setTab('timeline')}
+              >
+                <CalendarDays className="zus-tab-icon" size={18} />
+                <span className="zus-tab-text-desktop">Oś Czasu i Terminy</span>
+                <span className="zus-tab-text-mobile">Terminy</span>
+              </button>
 
-            <button
-              type="button"
-              className={`zus-tab-btn ${tab === 'documents' ? 'active' : ''}`}
-              onClick={() => setTab('documents')}
-            >
-              Dokumenty i Wnioski
-            </button>
+              <button
+                type="button"
+                className={`zus-tab-btn ${tab === 'documents' ? 'active' : ''}`}
+                onClick={() => setTab('documents')}
+              >
+                <FileText className="zus-tab-icon" size={18} />
+                <span className="zus-tab-text-desktop">Dokumenty i Wnioski</span>
+                <span className="zus-tab-text-mobile">Wnioski</span>
+              </button>
 
-            <button
-              type="button"
-              className={`zus-tab-btn ${tab === 'alerts' ? 'active' : ''}`}
-              onClick={() => setTab('alerts')}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-            >
-              <span>Alerty i Ochrona</span>
-              {alerts.length > 0 && (
-                <span
-                  style={{
-                    backgroundColor: '#DC2626',
-                    color: '#FFFFFF',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    borderRadius: '9999px',
-                    padding: '2px 7px',
-                    lineHeight: 1,
-                  }}
-                >
-                  {alerts.length}
-                </span>
-              )}
-            </button>
+              <button
+                type="button"
+                className={`zus-tab-btn ${tab === 'alerts' ? 'active' : ''}`}
+                onClick={() => setTab('alerts')}
+              >
+                <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                  <ShieldAlert className="zus-tab-icon" size={18} />
+                  {alerts.length > 0 && (
+                    <span className="zus-tab-badge-mobile">
+                      {alerts.length}
+                    </span>
+                  )}
+                </div>
+                <span className="zus-tab-text-desktop">Alerty i Ochrona</span>
+                <span className="zus-tab-text-mobile">Alerty</span>
+                {alerts.length > 0 && (
+                  <span className="zus-tab-badge-desktop">
+                    {alerts.length}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Zawartość wybranej zakładki */}

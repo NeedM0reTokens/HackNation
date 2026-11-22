@@ -146,7 +146,7 @@ class AdminRouter(APIRouter):
             summary="Edycja okresów wyczekiwania, terminów i limitów wiekowych w bazie JSON",
             description=(
                 "Umożliwia aktualizację okresów wyczekiwania (30/90 dni), limitu chorobowego "
-                "(270/182 dni), terminu na długi wniosek (21 dni) oraz dni pracodawcy (33/14)."
+                "(270/182 dni), terminu złożenia wniosku ZAM o wariant ujednolicony 81,5% (21 dni) oraz dni pracodawcy (33/14)."
             ),
         )
 

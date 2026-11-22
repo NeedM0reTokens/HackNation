@@ -15,8 +15,11 @@ from ..models.assistant import (
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_GEMINI_MODEL = "gemini-3.5-flash-light"
-FALLBACK_GEMINI_MODEL = "gemini-2.0-flash"
+DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
+FALLBACK_GEMINI_MODELS = (
+    "gemini-3.1-flash-lite",
+    "gemini-3.5-flash-lite",
+)
 GEMINI_ENDPOINT_TEMPLATE = (
     "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
 )
@@ -43,15 +46,15 @@ ZUS_ASSISTANT_SYSTEM_INSTRUCTION = (
     "   14 tyg. obowiązkowo dla matki; po 14 tyg. resztę może przejąć ojciec.\n"
     "5. Urlop rodzicielski: 41 tyg. (1 dziecko), 43 tyg. (bliźnięta).\n"
     "   W tym 9 tygodni nieprzenoszalnych wyłącznie dla drugiego rodzica (art. 182(1a) § 4 KP).\n"
-    "6. Warianty zasiłku: 81,5% stałe (długi wniosek w 21 dni) LUB 100% macierzyński i 70% "
-    "rodzicielski. 9 tyg. ojca zawsze 70%.\n"
+    "6. Warianty zasiłku: 81,5% ujednolicone (wniosek ZAM o wariant ujednolicony "
+    "w 21 dni) LUB 100% macierzyński i 70% rodzicielski. 9 tyg. ojca zawsze 70%.\n"
     "7. Urlop ojcowski: 14 dni, 100% podstawy, do 12 mies. życia dziecka (art. 182(3) KP).\n"
     "8. Zaświadczenie 'Za życiem': wydłużony urlop rodzicielski do 65/67 tyg. i 4 000 zł.\n"
     "9. Wcześniak / hospitalizacja noworodka: uzupełniający urlop macierzyński 100% (do 15 tyg.).\n"
     "10. Łączenie rodzicielskiego z pracą: max 1/2 etatu, proporcjonalne wydłużenie urlopu.\n"
     "11. Adopcja: urlop na warunkach macierzyńskiego do 7 lat (10/14 lat), min. 9 tyg.\n\n"
-    "Zwróć odpowiedź WYŁĄCZNIE jako JSON: {\"title\": \"...\", \"summary\": \"...\", "
-    "\"details\": [\"...\"], \"legal_basis\": \"...\"}"
+    'Zwróć odpowiedź WYŁĄCZNIE jako JSON: {"title": "...", "summary": "...", '
+    '"details": ["..."], "legal_basis": "..."}'
 )
 
 def _normalize_text(text: str) -> str:
@@ -140,7 +143,8 @@ STATUTORY_GLOSSARY: dict[str, dict[str, Any]] = {
             "Suma wypłaconych świadczeń w obu opcjach jest zbliżona."
         ),
         "details": [
-            "Wniosek o stawkę 81,5% należy złożyć w ciągu 21 dni po porodzie (długi wniosek).",
+            "Wniosek o stawkę 81,5% należy złożyć w ciągu 21 dni po porodzie ",
+            "(wniosek ZAM o wariant ujednolicony).",
             "Zapewnia stałe, równe wpływy na konto przez cały rok opieki nad dzieckiem.",
             "9 tygodni urlopu nieprzenoszalnego dla drugiego rodzica jest zawsze płatne 70%.",
         ],
@@ -319,7 +323,7 @@ STATUTORY_GLOSSARY: dict[str, dict[str, Any]] = {
                 "Zlecenie i JDG: ubezpieczenie jest dobrowolne; opłacona składka daje "
                 "prawo do zasiłku."
             ),
-            "Umowa o dzieło: brak ubezpieczeń, przysługuje kosiniakowe 1000 zł netto z MOPS/GOPS.",
+            "Umowa o dzieło: brak ubezpieczeń, przysługuje świadczenie rodzicielskie 1000 zł netto z MOPS/GOPS.",
             "Zleceniobiorcy i przedsiębiorcy wnioski składają bezpośrednio do ZUS.",
         ],
         "legal_basis": "Art. 6, 11 i 29 ustawy o systemie ubezpieczeń społecznych",
@@ -531,9 +535,9 @@ STATUTORY_GLOSSARY: dict[str, dict[str, Any]] = {
         ],
         "legal_basis": "Art. 15b ustawy o świadczeniach rodzinnych",
     },
-    "kosiniakowe": {
-        "id": "kosiniakowe",
-        "title": "Świadczenie rodzicielskie (tzw. Kosiniakowe)",
+    "swiadczenie-rodzicielskie": {
+        "id": "swiadczenie-rodzicielskie",
+        "title": "Świadczenie rodzicielskie z MOPS/GOPS",
         "summary": (
             "Świadczenie rodzicielskie przysługuje rodzicom, którzy nie mają prawa do zasiłku "
             "macierzyńskiego (np. studentom, osobom bezrobotnym, pracującym na umowę o dzieło)."
@@ -684,7 +688,7 @@ KEYWORD_PATTERNS: list[tuple[list[str], str]] = [
             "świadczenie rodzicielskie dla bezrobotnych",
             "swiadczenie rodzicielskie",
         ],
-        "kosiniakowe",
+        "swiadczenie-rodzicielskie",
     ),
     (
         [
@@ -854,7 +858,7 @@ KEYWORD_PATTERNS: list[tuple[list[str], str]] = [
             "100% i 70%",
             "100% + 70%",
             "100 i 70%",
-            "długi wniosek",
+            "wniosek ZAM o wariant ujednolicony",
             "dlugi wniosek",
             "wariant",
             "stałe czy 100%",
@@ -1263,7 +1267,6 @@ class GeminiAssistantService:
         self, request: AssistantAskRequest, api_key: str
     ) -> AssistantAskResponse | None:
         prompt_content = self._build_gemini_prompt(request)
-        url = GEMINI_ENDPOINT_TEMPLATE.format(model=self.active_model, key=api_key)
 
         request_body = {
             "contents": [
@@ -1277,37 +1280,58 @@ class GeminiAssistantService:
             },
             "generationConfig": {
                 "temperature": 0.2,
-                "maxOutputTokens": 1024,
+                "topP": 0.9,
+                "topK": 40,
+                "maxOutputTokens": 2048,
                 "responseMimeType": "application/json",
+                "thinkingConfig": {
+                    "thinkingBudget": 2048,
+                },
             },
         }
 
+        models_to_try = (self.active_model, *FALLBACK_GEMINI_MODELS)
+        # Nie powtarzamy tego samego modelu, np. gdy jest już ustawiony jako pierwszy fallback.
+        models_to_try = tuple(dict.fromkeys(models_to_try))
+
         async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.post(url, json=request_body)
+            for model_name in models_to_try:
+                model_url = GEMINI_ENDPOINT_TEMPLATE.format(model=model_name, key=api_key)
+                model_body = json.loads(json.dumps(request_body))
 
-            if resp.status_code == 404 and self.active_model != FALLBACK_GEMINI_MODEL:
-                fallback_url = GEMINI_ENDPOINT_TEMPLATE.format(
-                    model=FALLBACK_GEMINI_MODEL, key=api_key
-                )
-                resp = await client.post(fallback_url, json=request_body)
+                if model_name.startswith(("gemini-3", "gemini-4")):
+                    model_body["generationConfig"]["thinkingConfig"] = {
+                        "thinkingLevel": "LOW"
+                    }
+                elif model_name.startswith("gemini-2.5"):
+                    model_body["generationConfig"]["thinkingConfig"] = {
+                        "thinkingBudget": 512
+                    }
+                else:
+                    model_body["generationConfig"].pop("thinkingConfig", None)
 
-            if resp.status_code != 200:
-                logger.warning(
-                    f"Gemini API returned error {resp.status_code}: {resp.text[:200]}"
-                )
-                return None
+                resp = await client.post(model_url, json=model_body)
 
-            data = resp.json()
-            candidates = data.get("candidates", [])
-            if not candidates:
-                return None
+                if resp.status_code != 200:
+                    logger.warning(
+                        f"Gemini model {model_name} returned {resp.status_code}: "
+                        f"{resp.text[:200]}"
+                    )
+                    continue
 
-            parts = candidates[0].get("content", {}).get("parts", [])
-            if not parts:
-                return None
+                data = resp.json()
+                candidates = data.get("candidates", [])
+                if not candidates:
+                    continue
 
-            text = parts[0].get("text", "")
-            return self._parse_gemini_json_response(text, self.active_model)
+                parts = candidates[0].get("content", {}).get("parts", [])
+                if not parts:
+                    continue
+
+                text = parts[0].get("text", "")
+                return self._parse_gemini_json_response(text, model_name)
+
+        return None
 
     def _build_gemini_prompt(self, request: AssistantAskRequest) -> str:
         prompt_parts: list[str] = []

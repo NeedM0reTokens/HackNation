@@ -166,8 +166,8 @@ class MainAPI(FastAPI):
         self.paternity_router = PaternityRouter()
         self.parental_work_router = ParentalWorkRouter()
         self.adoption_router = AdoptionRouter()
-        self.applications_router = ApplicationsRouter()
         self.assistant_router = AssistantRouter()
+        self.applications_router = ApplicationsRouter()
 
         self.include_router(self.auth_router, prefix="/api")
         self.include_router(self.health_router)
@@ -184,8 +184,9 @@ class MainAPI(FastAPI):
         self.include_router(self.paternity_router, prefix="/api")
         self.include_router(self.parental_work_router, prefix="/api")
         self.include_router(self.adoption_router, prefix="/api")
-        self.include_router(self.applications_router, prefix="/api")
         self.include_router(self.assistant_router, prefix="/api")
+        self.include_router(self.applications_router, prefix="/api")
+
 
 
 app = MainAPI()
