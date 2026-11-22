@@ -30,7 +30,7 @@ from src.api.services.applications import (
 class TestApplicationsModule(unittest.TestCase):
     def test_list_templates_and_category_filtering(self) -> None:
         all_templates = list_application_templates_service()
-        self.assertGreaterEqual(len(all_templates), 9)
+        self.assertEqual(len(all_templates), 11)
 
         employer_templates = list_application_templates_service(ApplicationCategory.EMPLOYER_LEAVE)
         self.assertEqual(len(employer_templates), 5)
@@ -46,6 +46,13 @@ class TestApplicationsModule(unittest.TestCase):
             self.assertFalse(t.is_custom_designed)
             self.assertEqual(t.recipient_type, "ZUS")
             self.assertIsNotNone(t.official_form_number)
+
+        usc_templates = list_application_templates_service(ApplicationCategory.USC_CIVIL_ACT)
+        self.assertEqual(len(usc_templates), 2)
+        for t in usc_templates:
+            self.assertEqual(t.category, ApplicationCategory.USC_CIVIL_ACT)
+            self.assertEqual(t.recipient_type, "USC")
+            self.assertIn("USC-RSC-", t.official_form_number or "")
 
     def test_get_template_details(self) -> None:
         template = get_application_template_service(ApplicationType.UNIFIED_MATERNITY_PARENTAL_81_5)
@@ -336,6 +343,62 @@ class TestApplicationsModule(unittest.TestCase):
 
         updated_app = get_application_service(app_obj.id)
         self.assertEqual(updated_app.status, "SUBMITTED_TO_ZUS")
+
+    def test_prefill_usc_birth_certificate_short(self) -> None:
+        req = ApplicationPrefillRequest(
+            application_type=ApplicationType.USC_BIRTH_CERTIFICATE_SHORT,
+            pesel_or_user_id="anna-kowalska",
+            child_birth_date="2026-05-15",
+        )
+        prefill = prefill_application_service(req)
+        self.assertEqual(prefill.leave_period.weeks_count, 0)
+        self.assertEqual(prefill.leave_period.days_count, 0)
+        self.assertEqual(prefill.leave_period.selected_rate_variant, "USC_EXEMPT_0_PLN")
+        self.assertTrue(any("0 zł" in note for note in prefill.advisory_notes))
+        self.assertTrue(any("Rejestru Stanu Cywilnego" in note for note in prefill.advisory_notes))
+
+    def test_submission_to_usc(self) -> None:
+        create_req = ApplicationCreateRequest(
+            application_type=ApplicationType.USC_BIRTH_CERTIFICATE_SHORT,
+            applicant=ApplicantData(
+                first_name="Anna",
+                last_name="Kowalska",
+                pesel="92011501234",
+            ),
+            child=ChildData(
+                first_name="Jan",
+                last_name="Kowalski",
+                date_of_birth="2026-05-15",
+                birth_certificate_number="AU/2026/09812",
+                usc_city="USC Warszawa-Śródmieście",
+            ),
+            leave_period=LeavePeriodData(
+                start_date="2026-05-15",
+                end_date="2026-05-15",
+                weeks_count=0,
+                days_count=0,
+            ),
+        )
+        app_obj = create_application_service(create_req)
+        sub_req = SubmissionRequest(
+            delivery_channel="PORTAL_GOV_PL_EPUAP",
+            destination="USC",
+        )
+        confirm = submit_application_service(app_obj.id, sub_req)
+
+        self.assertEqual(confirm.status, "SUBMITTED_TO_USC")
+        self.assertTrue(confirm.case_number.startswith("USC.5353.AU."))
+        self.assertTrue(confirm.upo_reference_code.startswith("UPO-EPUAP-RSC-"))
+        self.assertIn("Rejestr Stanu Cywilnego", confirm.recipient_name)
+        self.assertTrue(any("pieczęcią cyfrową" in step for step in confirm.next_steps))
+
+        updated_app = get_application_service(app_obj.id)
+        self.assertEqual(updated_app.status, "SUBMITTED_TO_USC")
+
+        # Verify PDF generates exactly 1 page
+        pdf_bytes = generate_application_pdf_service(app_obj.id)
+        reader = PdfReader(io.BytesIO(pdf_bytes))
+        self.assertEqual(len(reader.pages), 1)
 
     def test_router_integration_via_app(self) -> None:
         router = app.applications_router

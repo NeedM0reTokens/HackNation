@@ -15,6 +15,7 @@ import {
   Baby,
   RefreshCw,
   Eye,
+  ExternalLink,
 } from 'lucide-react';
 import type {
   ApplicationCategory,
@@ -190,15 +191,24 @@ export const ApplicationSimulator: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (destination: 'EMPLOYER' | 'ZUS') => {
+  const handleSubmit = async (destination: 'EMPLOYER' | 'ZUS' | 'USC') => {
     if (!createdApplication) return;
     setIsSubmitting(true);
     try {
+      const channel =
+        destination === 'EMPLOYER'
+          ? 'PORTAL_PRACOWNICZY'
+          : destination === 'USC'
+          ? 'PORTAL_GOV_PL_EPUAP'
+          : 'PUE_EZUS';
       const result = await submitApplication(createdApplication.id, {
         destination,
-        delivery_channel: destination === 'EMPLOYER' ? 'PORTAL_PRACOWNICZY' : 'PUE_EZUS',
-        delivery_method: destination === 'EMPLOYER' ? 'PORTAL_PRACOWNICZY' : 'PUE_EZUS',
-        notes: 'Wniosek złożony w terminie ustawowym przez Symulator Rodzica.',
+        delivery_channel: channel,
+        delivery_method: channel,
+        notes:
+          destination === 'USC'
+            ? 'Wniosek o odpis z Rejestru Stanu Cywilnego (gov.pl / ePUAP) - zwolnienie z opłaty 0 zł.'
+            : 'Wniosek złożony w terminie ustawowym przez Symulator Rodzica.',
         confirm_truthfulness: true,
       });
       setSubmissionResult(result);
@@ -337,7 +347,7 @@ export const ApplicationSimulator: React.FC = () => {
                 Wnioski o urlopy pracownicze wymagają autorskiego układu (MRPiPS 2025), a wnioski do ZUS mają sztywne druki (www.zus.pl).
               </p>
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               <button
                 type="button"
                 className={`zus-btn ${selectedCategory === 'EMPLOYER_LEAVE' ? 'zus-btn-primary' : 'zus-btn-outline'}`}
@@ -356,8 +366,137 @@ export const ApplicationSimulator: React.FC = () => {
                 <Landmark size={16} />
                 Do ZUS (Zasiłki)
               </button>
+              <button
+                type="button"
+                className={`zus-btn ${selectedCategory === 'USC_CIVIL_ACT' ? 'zus-btn-primary' : 'zus-btn-outline'}`}
+                onClick={() => handleCategoryChange('USC_CIVIL_ACT')}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <FileText size={16} />
+                Do USC / gov.pl (Rejestr Stanu Cywilnego)
+              </button>
             </div>
           </div>
+
+          {/* Sekcja informacyjna: Co możesz wygenerować w tym kreatorze */}
+          <div style={{
+            padding: '16px 20px',
+            backgroundColor: '#F8FAFC',
+            borderRadius: '8px',
+            border: '1px solid #E2E8F0',
+            marginBottom: '20px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <FileText size={18} color="#003B6F" />
+              <h3 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 700, color: '#003B6F' }}>
+                Tu wygenerujesz, uzupełnisz i pobierzesz oficjalne wnioski:
+              </h3>
+            </div>
+            <p style={{ margin: '0 0 12px 0', fontSize: '0.86rem', color: '#334155', lineHeight: 1.5 }}>
+              Kreator umożliwia kompleksowe przygotowanie dokumentów rodzicielskich zgodnych ze standardami 2025/2026, z opcją automatycznego zaciągnięcia danych (mObywatel/ZUS), podglądu czarno-białego druku urzędowego PDF oraz elektronicznej symulacji wysyłki:
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
+              <div style={{
+                backgroundColor: '#FFFFFF',
+                padding: '12px 14px',
+                borderRadius: '6px',
+                border: '1px solid #E2E8F0',
+                borderLeft: '4px solid #003B6F',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.86rem', color: '#003B6F', marginBottom: '6px' }}>
+                  <Building2 size={16} /> Wnioski do Pracodawcy (Urlopy)
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#475569', lineHeight: 1.45 }}>
+                  • <strong>Urlop macierzyński i rodzicielski</strong> (stawka 81,5% przy wniosku w 21 dni)<br />
+                  • <strong>Urlop ojcowski</strong> (14 dni, 100% zasiłku do 12 m.ż. dziecka)<br />
+                  • <strong>Urlop dla rodziców wcześniaków</strong> (art. 180¹ KP – hospitalizacja noworodka)<br />
+                  • <strong>Łączenie rodzicielskiego z pracą</strong> na część etatu (maks. 1/2 wymiaru)
+                </div>
+              </div>
+
+              <div style={{
+                backgroundColor: '#FFFFFF',
+                padding: '12px 14px',
+                borderRadius: '6px',
+                border: '1px solid #E2E8F0',
+                borderLeft: '4px solid #007834',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.86rem', color: '#007834', marginBottom: '6px' }}>
+                  <Landmark size={16} /> Wnioski do ZUS (Zasiłki i zaświadczenia)
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#475569', lineHeight: 1.45 }}>
+                  • <strong>Druk ZUS ZAM</strong> – jednolity wniosek o wypłatę zasiłku macierzyńskiego<br />
+                  • <strong>Druk ZUS ZAS-53</strong> – wniosek o zasiłek macierzyński / ojcowski płatny przez ZUS<br />
+                  • <strong>Zaświadczenie Z-3 / Z-3a</strong> – formularz płatnika składek z podstawą wymiaru
+                </div>
+              </div>
+
+              <div style={{
+                backgroundColor: '#FFFFFF',
+                padding: '12px 14px',
+                borderRadius: '6px',
+                border: '1px solid #E2E8F0',
+                borderLeft: '4px solid #0284C7',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.86rem', color: '#0284C7', marginBottom: '6px' }}>
+                  <ShieldCheck size={16} /> Wnioski do USC / gov.pl (Akty urodzenia)
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#475569', lineHeight: 1.45 }}>
+                  • <strong>Odpis skrócony aktu urodzenia</strong> – podstawowy dokument do rejestracji w ZUS<br />
+                  • <strong>Odpis zupełny aktu urodzenia</strong> – pełne dane rodziców i adnotacje urzędowe<br />
+                  • <strong>Ustawowe zwolnienie 0 zł</strong> z opłaty skarbowej na cele zasiłkowe + UPO
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {selectedCategory === 'USC_CIVIL_ACT' && (
+            <div style={{
+              padding: '14px 18px',
+              backgroundColor: '#F0F9FF',
+              border: '1px solid #BAE6FD',
+              borderRadius: '8px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '12px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <ShieldCheck size={22} color="#0284C7" />
+                <div>
+                  <strong style={{ fontSize: '0.9rem', color: '#0369A1' }}>
+                    Centralny Rejestr Stanu Cywilnego (RSC) • Portal Rzeczypospolitej Polskiej gov.pl
+                  </strong>
+                  <div style={{ fontSize: '0.82rem', color: '#0C4A6E', marginTop: '2px' }}>
+                    Złóż wniosek o wydanie odpisu aktu urodzenia dziecka przez ePUAP (art. 44–45 ustawy Prawo o aktach stanu cywilnego).
+                    Odpis na cele zasiłku macierzyńskiego w ZUS jest <strong>ustawowo zwolniony z opłaty skarbowej (0 zł)</strong> na mocy art. 2 ust. 1 pkt 1 lit. c ustawy o opłacie skarbowej.
+                  </div>
+                </div>
+              </div>
+              <a
+                href="https://www.gov.pl/web/cyfryzacja/rejestr-stanu-cywilnego"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontSize: '0.82rem',
+                  color: '#0284C7',
+                  textDecoration: 'none',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  backgroundColor: '#FFFFFF',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #BAE6FD',
+                }}
+              >
+                gov.pl/web/cyfryzacja/rejestr-stanu-cywilnego <ExternalLink size={14} />
+              </a>
+            </div>
+          )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
             {templates
@@ -468,7 +607,11 @@ export const ApplicationSimulator: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px', borderBottom: '1px solid #E2E8F0', paddingBottom: '16px' }}>
             <div>
               <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#007834', textTransform: 'uppercase' }}>
-                {selectedCategory === 'EMPLOYER_LEAVE' ? 'Wniosek do Pracodawcy' : 'Wniosek do ZUS'}
+                {selectedCategory === 'EMPLOYER_LEAVE'
+                  ? 'Wniosek do Pracodawcy'
+                  : selectedCategory === 'USC_CIVIL_ACT'
+                  ? 'Wniosek do Urzędu Stanu Cywilnego (gov.pl / RSC)'
+                  : 'Wniosek do ZUS'}
               </span>
               <h2 className="zus-card-header-title" style={{ marginTop: '4px' }}>
                 {currentTemplate?.title || 'Wypełnienie wniosku'}
@@ -551,54 +694,94 @@ export const ApplicationSimulator: React.FC = () => {
               </div>
             </div>
 
-            {/* Dane pracodawcy */}
-            <div style={{ padding: '16px', border: '1px solid #E2E8F0', borderRadius: '8px', backgroundColor: '#FAFAFA' }}>
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#003B6F', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                <Building2 size={18} />
-                2. Dane Pracodawcy / Płatnika składek
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div>
-                  <label className="zus-label">Pełna nazwa firmy</label>
-                  <input
-                    type="text"
-                    className="zus-input"
-                    value={employer.company_name}
-                    onChange={(e) => setEmployer({ ...employer, company_name: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="zus-label">NIP Płatnika</label>
-                  <input
-                    type="text"
-                    className="zus-input"
-                    value={employer.nip || ''}
-                    onChange={(e) => setEmployer({ ...employer, nip: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="zus-label">Wielkość płatnika</label>
-                  <select
-                    className="zus-select"
-                    value={employer.payer_size || 'ABOVE_20'}
-                    onChange={(e) => setEmployer({ ...employer, payer_size: e.target.value })}
-                  >
-                    <option value="ABOVE_20">Powyżej 20 ubezpieczonych (sam wypłaca zasiłek)</option>
-                    <option value="UP_TO_20">Do 20 ubezpieczonych (wypłaca ZUS po Z-3)</option>
-                  </select>
+            {/* Dane pracodawcy lub właściwego USC */}
+            {selectedCategory === 'USC_CIVIL_ACT' ? (
+              <div style={{ padding: '16px', border: '1px solid #E2E8F0', borderRadius: '8px', backgroundColor: '#FAFAFA' }}>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#003B6F', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <Landmark size={18} />
+                  2. Właściwy Urząd Stanu Cywilnego (USC)
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div>
+                    <label className="zus-label">Właściwy Urząd Stanu Cywilnego</label>
+                    <input
+                      type="text"
+                      className="zus-input"
+                      value={child.usc_city || 'USC Warszawa-Śródmieście'}
+                      onChange={(e) => setChild({ ...child, usc_city: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="zus-label">Rejestr państwowy</label>
+                    <input
+                      type="text"
+                      className="zus-input"
+                      readOnly
+                      value="Centralny Rejestr Stanu Cywilnego (gov.pl / RSC)"
+                      style={{ backgroundColor: '#F1F5F9' }}
+                    />
+                  </div>
+                  <div>
+                    <label className="zus-label">Forma i kanał doręczenia</label>
+                    <input
+                      type="text"
+                      className="zus-input"
+                      readOnly
+                      value="Postać elektroniczna (ePUAP / mObywatel)"
+                      style={{ backgroundColor: '#F1F5F9' }}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div style={{ padding: '16px', border: '1px solid #E2E8F0', borderRadius: '8px', backgroundColor: '#FAFAFA' }}>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#003B6F', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <Building2 size={18} />
+                  2. Dane Pracodawcy / Płatnika składek
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div>
+                    <label className="zus-label">Pełna nazwa firmy</label>
+                    <input
+                      type="text"
+                      className="zus-input"
+                      value={employer.company_name}
+                      onChange={(e) => setEmployer({ ...employer, company_name: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="zus-label">NIP Płatnika</label>
+                    <input
+                      type="text"
+                      className="zus-input"
+                      value={employer.nip || ''}
+                      onChange={(e) => setEmployer({ ...employer, nip: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="zus-label">Wielkość płatnika</label>
+                    <select
+                      className="zus-select"
+                      value={employer.payer_size || 'ABOVE_20'}
+                      onChange={(e) => setEmployer({ ...employer, payer_size: e.target.value })}
+                    >
+                      <option value="ABOVE_20">Powyżej 20 ubezpieczonych (sam wypłaca zasiłek)</option>
+                      <option value="UP_TO_20">Do 20 ubezpieczonych (wypłaca ZUS po Z-3)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Dane dziecka */}
             <div style={{ padding: '16px', border: '1px solid #E2E8F0', borderRadius: '8px', backgroundColor: '#FAFAFA' }}>
               <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#003B6F', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                 <Baby size={18} />
-                3. Dane Dziecka
+                3. Dane Dziecka (Akt Urodzenia)
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div>
-                  <label className="zus-label">Imię dziecka</label>
+                  <label className="zus-label">Imię i nazwisko dziecka</label>
                   <input
                     type="text"
                     className="zus-input"
@@ -616,73 +799,134 @@ export const ApplicationSimulator: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="zus-label">Nr odpisu aktu urodzenia z USC</label>
+                  <label className="zus-label">
+                    {selectedCategory === 'USC_CIVIL_ACT'
+                      ? 'Oznaczenie aktu w RSC (jeśli znane)'
+                      : 'Nr odpisu aktu urodzenia z USC'}
+                  </label>
                   <input
                     type="text"
                     className="zus-input"
                     value={child.birth_certificate_number || ''}
+                    placeholder="np. AU/2026/09812"
                     onChange={(e) => setChild({ ...child, birth_certificate_number: e.target.value })}
                   />
                 </div>
               </div>
             </div>
 
-            {/* Parametry urlopu */}
-            <div style={{ padding: '16px', border: '1px solid #E2E8F0', borderRadius: '8px', backgroundColor: '#FAFAFA' }}>
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#003B6F', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                <Clock size={18} />
-                4. Okres i Wariant Zasiłku
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            {/* Parametry urlopu lub parametry odpisu USC */}
+            {selectedCategory === 'USC_CIVIL_ACT' ? (
+              <div style={{ padding: '16px', border: '1px solid #E2E8F0', borderRadius: '8px', backgroundColor: '#FAFAFA' }}>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#003B6F', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <Clock size={18} />
+                  4. Parametry Odpisu i Zwolnienie 0 zł
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div>
-                    <label className="zus-label">Początek urlopu</label>
+                    <label className="zus-label">Rodzaj odpisu</label>
+                    <select
+                      className="zus-select"
+                      value={selectedType}
+                      onChange={(e) => {
+                        const newType = e.target.value as ApplicationType;
+                        setSelectedType(newType);
+                        handleAutoPrefill(newType);
+                      }}
+                    >
+                      <option value="USC_BIRTH_CERTIFICATE_SHORT">
+                        Odpis skrócony (podstawa do wniosku ZAM w ZUS)
+                      </option>
+                      <option value="USC_BIRTH_CERTIFICATE_FULL">
+                        Odpis zupełny (pełna treść ze wzmiankami marginesowymi)
+                      </option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="zus-label">Cel wydania dokumentu</label>
                     <input
-                      type="date"
+                      type="text"
                       className="zus-input"
-                      value={leavePeriod.start_date}
-                      onChange={(e) => setLeavePeriod({ ...leavePeriod, start_date: e.target.value })}
+                      readOnly
+                      value="Zasiłek macierzyński ZUS / urlop rodzicielski"
+                      style={{ backgroundColor: '#F1F5F9' }}
                     />
                   </div>
                   <div>
-                    <label className="zus-label">Koniec urlopu</label>
-                    <input
-                      type="date"
-                      className="zus-input"
-                      value={leavePeriod.end_date}
-                      onChange={(e) => setLeavePeriod({ ...leavePeriod, end_date: e.target.value })}
-                    />
+                    <label className="zus-label">Opłata skarbowa</label>
+                    <div style={{
+                      padding: '8px 12px',
+                      backgroundColor: '#DCFCE7',
+                      border: '1px solid #86EFAC',
+                      borderRadius: '6px',
+                      color: '#166534',
+                      fontWeight: 700,
+                      fontSize: '0.88rem'
+                    }}>
+                      0,00 PLN (ustawowe zwolnienie art. 2 ust. 1 pkt 1 lit. c)
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <label className="zus-label">Wymiar urlopu</label>
-                  <input
-                    type="text"
-                    className="zus-input"
-                    readOnly
-                    value={`${leavePeriod.weeks_count} tygodni (${leavePeriod.days_count} dni)`}
-                  />
-                </div>
-                <div>
-                  <label className="zus-label">Wariant stawki zasiłku</label>
-                  <select
-                    className="zus-select"
-                    value={leavePeriod.selected_rate_variant || 'UNIFIED_81_5'}
-                    onChange={(e) => setLeavePeriod({ ...leavePeriod, selected_rate_variant: e.target.value })}
-                  >
-                    <option value="UNIFIED_81_5">81,5% za cały okres (art. 30a - wniosek do 21 dni)</option>
-                    <option value="STANDARD_100_70">100% macierzyński / 70% rodzicielski</option>
-                  </select>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div style={{ padding: '16px', border: '1px solid #E2E8F0', borderRadius: '8px', backgroundColor: '#FAFAFA' }}>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#003B6F', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <Clock size={18} />
+                  4. Okres i Wariant Zasiłku
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <div>
+                      <label className="zus-label">Początek urlopu</label>
+                      <input
+                        type="date"
+                        className="zus-input"
+                        value={leavePeriod.start_date}
+                        onChange={(e) => setLeavePeriod({ ...leavePeriod, start_date: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="zus-label">Koniec urlopu</label>
+                      <input
+                        type="date"
+                        className="zus-input"
+                        value={leavePeriod.end_date}
+                        onChange={(e) => setLeavePeriod({ ...leavePeriod, end_date: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="zus-label">Wymiar urlopu</label>
+                    <input
+                      type="text"
+                      className="zus-input"
+                      readOnly
+                      value={`${leavePeriod.weeks_count} tygodni (${leavePeriod.days_count} dni)`}
+                    />
+                  </div>
+                  <div>
+                    <label className="zus-label">Wariant stawki zasiłku</label>
+                    <select
+                      className="zus-select"
+                      value={leavePeriod.selected_rate_variant || 'UNIFIED_81_5'}
+                      onChange={(e) => setLeavePeriod({ ...leavePeriod, selected_rate_variant: e.target.value })}
+                    >
+                      <option value="UNIFIED_81_5">81,5% za cały okres (art. 30a - wniosek do 21 dni)</option>
+                      <option value="STANDARD_100_70">100% macierzyński / 70% rodzicielski</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Lista załączników */}
           <div style={{ marginBottom: '24px', padding: '16px', border: '1px solid #CBD5E1', borderRadius: '8px', backgroundColor: '#FFFFFF' }}>
             <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0F172A', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <FileText size={18} color="#007834" />
-              Wymagane załączniki formalne (zgodnie z rozporządzeniem MRPiPS z 11 marca 2025 r.):
+              {selectedCategory === 'USC_CIVIL_ACT'
+                ? 'Wymagane załączniki i oświadczenia (ustawa Prawo o aktach stanu cywilnego):'
+                : 'Wymagane załączniki formalne (zgodnie z rozporządzeniem MRPiPS z 11 marca 2025 r.):'}
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {currentTemplate?.required_attachments.map((att) => (
@@ -793,6 +1037,8 @@ export const ApplicationSimulator: React.FC = () => {
               <p style={{ margin: 0, color: '#15803D', fontSize: '0.85rem' }}>
                 {createdApplication.category === 'EMPLOYER_LEAVE'
                   ? 'Wniosek zostanie skierowany do Działu Kadr pracodawcy (rejestracja i ochrona z art. 177 K.p.).'
+                  : createdApplication.category === 'USC_CIVIL_ACT'
+                  ? 'Wniosek zostanie skierowany do Rejestru Stanu Cywilnego przez portal gov.pl / ePUAP (doręczenie odpisu na skrzynkę ePUAP).'
                   : 'Wniosek zostanie skierowany do Elektronicznej Skrzynki Podawczej ZUS (rejestracja w PUE/eZUS).'}
               </p>
             </div>
@@ -807,6 +1053,17 @@ export const ApplicationSimulator: React.FC = () => {
                 >
                   <Send size={18} />
                   {isSubmitting ? 'Wysyłanie...' : 'Wyślij do Pracodawcy (symulacja)'}
+                </button>
+              ) : createdApplication.category === 'USC_CIVIL_ACT' ? (
+                <button
+                  type="button"
+                  className="zus-btn zus-btn-primary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '0.95rem', backgroundColor: '#0284C7' }}
+                  onClick={() => handleSubmit('USC')}
+                  disabled={isSubmitting}
+                >
+                  <Send size={18} />
+                  {isSubmitting ? 'Wysyłanie...' : 'Wyślij przez ePUAP / gov.pl (symulacja)'}
                 </button>
               ) : (
                 <button
@@ -869,6 +1126,72 @@ export const ApplicationSimulator: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Karta wydanego odpisu z Rejestru Stanu Cywilnego jeśli złożono wniosek do USC */}
+          {submissionResult.status === 'SUBMITTED_TO_USC' && (
+            <div style={{
+              marginBottom: '24px',
+              padding: '20px',
+              backgroundColor: '#F0F9FF',
+              border: '2px solid #38BDF8',
+              borderRadius: '8px',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ShieldCheck size={22} color="#0284C7" />
+                  <span style={{ fontWeight: 700, color: '#0369A1', fontSize: '1rem' }}>
+                    Elektroniczny Odpis Aktu Urodzenia z Rejestru Stanu Cywilnego
+                  </span>
+                </div>
+                <span style={{
+                  fontSize: '0.78rem',
+                  backgroundColor: '#E0F2FE',
+                  color: '#0369A1',
+                  padding: '4px 10px',
+                  borderRadius: '12px',
+                  fontWeight: 600
+                }}>
+                  Kwalifikowana Pieczęć Cyfrowa Ministra Cyfryzacji
+                </span>
+              </div>
+              <p style={{ fontSize: '0.85rem', color: '#0C4A6E', margin: '0 0 14px 0', lineHeight: 1.5 }}>
+                Dokument został wygenerowany z centralnego Rejestru Stanu Cywilnego (gov.pl) i opatrzony pieczęcią cyfrową zgodnie z art. 45 ust. 4 ustawy Prawo o aktach stanu cywilnego. Odpis posiada moc prawną oryginału i może być bezpośrednio użyty we wniosku ZAM w eZUS.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', backgroundColor: '#FFFFFF', padding: '14px', borderRadius: '6px', border: '1px solid #BAE6FD', marginBottom: '14px' }}>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748B' }}>Dziecko</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0F172A' }}>{child.first_name || 'Jan'} {applicant.last_name || 'Kowalski'}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748B' }}>Oznaczenie aktu w RSC</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0284C7', fontFamily: 'monospace' }}>
+                    {child.birth_certificate_number || 'AU/2026/09812'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748B' }}>Opłata skarbowa</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#16A34A' }}>0,00 PLN (zwolnienie art. 2)</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748B' }}>Kanał doręczenia</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#0F172A' }}>Skrzynka ePUAP / gov.pl</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                <a
+                  href="https://www.gov.pl/web/cyfryzacja/rejestr-stanu-cywilnego"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontSize: '0.82rem', color: '#0284C7', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'underline', fontWeight: 600 }}
+                >
+                  Weryfikuj autentyczność w Rejestrze Stanu Cywilnego na gov.pl <ExternalLink size={14} />
+                </a>
+                <span style={{ fontSize: '0.8rem', color: '#0369A1', fontWeight: 600 }}>
+                  Znak RSC: {submissionResult.case_number}
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Następne kroki */}
           <div style={{ marginBottom: '24px' }}>

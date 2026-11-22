@@ -802,3 +802,399 @@ export async function getExplanation(topicId: string): Promise<Explanation> {
   }
   return glossary[topicId] ?? fallbackExplanation;
 }
+
+// ============================================================================
+// MODUŁ WNIOSKÓW I FORMULARZY (MRPiPS 2025 / ZUS)
+// ============================================================================
+
+export async function fetchApplicationTemplates(
+  category?: ApplicationCategory
+): Promise<ApplicationTemplateInfo[]> {
+  try {
+    const url = category
+      ? `${API_BASE_URL}/api/applications/templates?category=${category}`
+      : `${API_BASE_URL}/api/applications/templates`
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: getHeaders(),
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return await res.json()
+  } catch (err) {
+    console.warn('[Applications API] Błąd pobierania szablonów, używam danych domyślnych', err)
+    return [
+      {
+        type: 'UNIFIED_MATERNITY_PARENTAL_81_5',
+        category: 'EMPLOYER_LEAVE',
+        title: 'Jednolity wniosek o urlop macierzyński i rodzicielski (81,5%)',
+        legal_basis: 'Art. 179[1] Kodeksu pracy i Rozporządzenie MRPiPS z 11 marca 2025 r.',
+        recipient_type: 'EMPLOYER',
+        deadline_description: 'Do 21 dni po porodzie',
+        description: 'Długi wniosek pracownicy składany do pracodawcy gwarantujący stałą stawkę 81,5% za cały okres urlopu.',
+        required_attachments: [
+          {
+            code: 'BIRTH_CERTIFICATE',
+            title: 'Skrócony odpis aktu urodzenia dziecka',
+            description: 'Dokument z USC potwierdzający urodzenie dziecka.',
+            is_mandatory: true,
+            is_provided: true,
+            legal_basis: '§ 18 ust. 1 Rozporządzenia MRPiPS z 11 marca 2025 r.',
+          },
+          {
+            code: 'OTHER_PARENT_DECLARATION',
+            title: 'Oświadczenie drugiego rodzica',
+            description: 'Oświadczenie ojca o braku korzystania z urlopu rodzicielskiego w tym samym okresie.',
+            is_mandatory: true,
+            is_provided: true,
+            legal_basis: '§ 19 ust. 2 pkt 3 Rozporządzenia MRPiPS z 11 marca 2025 r.',
+          },
+        ],
+        is_custom_designed: true,
+      },
+      {
+        type: 'PATERNITY_LEAVE',
+        category: 'EMPLOYER_LEAVE',
+        title: 'Wniosek o urlop ojcowski (14 dni, 100%)',
+        legal_basis: 'Art. 182[3] Kodeksu pracy',
+        recipient_type: 'EMPLOYER',
+        deadline_description: 'Co najmniej 7 dni przed rozpoczęciem urlopu',
+        description: 'Wniosek pracownika-ojca o 14 dni urlopu ojcowskiego płatnego 100%.',
+        required_attachments: [
+          {
+            code: 'BIRTH_CERTIFICATE',
+            title: 'Skrócony odpis aktu urodzenia dziecka',
+            description: 'Dokument z USC potwierdzający pokrewieństwo.',
+            is_mandatory: true,
+            is_provided: true,
+            legal_basis: '§ 21 ust. 1 pkt 1 Rozporządzenia MRPiPS z 11 marca 2025 r.',
+          },
+        ],
+        is_custom_designed: true,
+      },
+      {
+        type: 'SUPPLEMENTARY_MATERNITY_LEAVE',
+        category: 'EMPLOYER_LEAVE',
+        title: 'Wniosek o uzupełniający urlop macierzyński (wcześniaki / hospitalizacja)',
+        legal_basis: 'Art. 180[1] Kodeksu pracy',
+        recipient_type: 'EMPLOYER',
+        deadline_description: 'Co najmniej 21 dni przed zakończeniem urlopu macierzyńskiego',
+        description: 'Dodatkowy urlop macierzyński dla rodziców hospitalizowanych noworodków (do 15 tygodni).',
+        required_attachments: [
+          {
+            code: 'HOSPITAL_CERTIFICATE',
+            title: 'Zaświadczenie szpitala o okresie hospitalizacji',
+            description: 'Karta leczenia szpitalnego potwierdzająca pobyt dziecka.',
+            is_mandatory: true,
+            is_provided: true,
+            legal_basis: 'Art. 180[1] § 5 Kodeksu pracy',
+          },
+        ],
+        is_custom_designed: true,
+      },
+      {
+        type: 'PARENTAL_WORK_COMBINATION',
+        category: 'EMPLOYER_LEAVE',
+        title: 'Wniosek o łączenie urlopu rodzicielskiego z pracą do 1/2 etatu',
+        legal_basis: 'Art. 182[1e] Kodeksu pracy',
+        recipient_type: 'EMPLOYER',
+        deadline_description: 'Co najmniej 21 dni przed planowanym podjęciem pracy',
+        description: 'Wniosek o wykonywanie pracy u dotychczasowego pracodawcy z proporcjonalnym wydłużeniem urlopu rodzicielskiego.',
+        required_attachments: [
+          {
+            code: 'WORK_SCHEDULE_PROPOSAL',
+            title: 'Propozycja rozkładu czasu pracy',
+            description: 'Wskazanie wymiaru (np. 1/2 etatu) i grafiku pracy.',
+            is_mandatory: true,
+            is_provided: true,
+            legal_basis: 'Art. 182[1e] § 2 Kodeksu pracy',
+          },
+        ],
+        is_custom_designed: true,
+      },
+      {
+        type: 'ZUS_ZAM',
+        category: 'ZUS_BENEFIT',
+        title: 'ZAM - Wniosek o zasiłek macierzyński za okres macierzyńskiego i rodzicielskiego',
+        legal_basis: 'Ustawa z dnia 25 czerwca 1999 r. o świadczeniach pieniężnych z ubezpieczenia społecznego',
+        recipient_type: 'ZUS',
+        deadline_description: 'Do 21 dni po porodzie',
+        description: 'Zunifikowany druk ZUS o wypłatę zasiłku macierzyńskiego składany przez PUE/eZUS.',
+        required_attachments: [
+          {
+            code: 'BIRTH_CERTIFICATE',
+            title: 'Skrócony odpis aktu urodzenia',
+            description: 'Dokument z USC potwierdzający urodzenie dziecka.',
+            is_mandatory: true,
+            is_provided: true,
+            legal_basis: 'Rozporządzenie Ministra Rodziny i Polityki Społecznej',
+          },
+        ],
+        is_custom_designed: false,
+        official_form_number: 'ZAM',
+      },
+      {
+        type: 'ZUS_ZAS_53',
+        category: 'ZUS_BENEFIT',
+        title: 'ZAS-53 - Wniosek o zasiłek chorobowy / macierzyński (JDG)',
+        legal_basis: 'Ustawa zasiłkowa z 25 czerwca 1999 r.',
+        recipient_type: 'ZUS',
+        deadline_description: 'W okresie trwania niezdolności do pracy / urlopu',
+        description: 'Druk ZUS składany przez osoby prowadzące pozarolniczą działalność gospodarczą.',
+        required_attachments: [],
+        is_custom_designed: false,
+        official_form_number: 'ZAS-53',
+      },
+      {
+        type: 'USC_BIRTH_CERTIFICATE_SHORT',
+        category: 'USC_CIVIL_ACT',
+        title: 'Wniosek o wydanie odpisu skróconego aktu urodzenia dziecka (Rejestr Stanu Cywilnego)',
+        legal_basis: 'Art. 44 i 45 ustawy z dnia 28 listopada 2014 r. - Prawo o aktach stanu cywilnego w zw. z art. 2 ust. 1 pkt 1 lit. c ustawy o opłacie skarbowej',
+        recipient_type: 'USC',
+        deadline_description: 'W dowolnym momencie po sporządzeniu aktu (kluczowy do wniosku ZAM)',
+        description: 'Elektroniczny wniosek przez portal gov.pl / ePUAP o wydanie odpisu skróconego aktu urodzenia z centralnego Rejestru Stanu Cywilnego. Bezpłatnie (0 zł) na cele zasiłkowe ZUS.',
+        required_attachments: [
+          {
+            code: 'IDENTITY_VERIFICATION',
+            title: 'Elektroniczna weryfikacja tożsamości rodzica (Profil Zaufany / mObywatel)',
+            description: 'Potwierdzenie uprawnienia rodzica do pobrania odpisu (art. 45 PASC).',
+            is_mandatory: true,
+            is_provided: true,
+            legal_basis: 'Art. 45 ustawy - Prawo o aktach stanu cywilnego',
+          },
+          {
+            code: 'FEE_EXEMPTION_DECLARATION',
+            title: 'Wskazanie ustawowego zwolnienia z opłaty skarbowej (0 zł)',
+            description: 'Zwolnienie na cele świadczeń socjalnych i zasiłków ZUS.',
+            is_mandatory: true,
+            is_provided: true,
+            legal_basis: 'Art. 2 ust. 1 pkt 1 lit. c ustawy o opłacie skarbowej',
+          },
+        ],
+        is_custom_designed: false,
+        official_form_number: 'USC-RSC-SKR',
+      },
+      {
+        type: 'USC_BIRTH_CERTIFICATE_FULL',
+        category: 'USC_CIVIL_ACT',
+        title: 'Wniosek o wydanie odpisu zupełnego aktu urodzenia dziecka (Rejestr Stanu Cywilnego)',
+        legal_basis: 'Art. 44 i 45 ustawy z dnia 28 listopada 2014 r. - Prawo o aktach stanu cywilnego w zw. z art. 2 ust. 1 pkt 1 lit. c ustawy o opłacie skarbowej',
+        recipient_type: 'USC',
+        deadline_description: 'W dowolnym momencie po sporządzeniu aktu (pełna treść ze wzmiankami)',
+        description: 'Wniosek o odpis zupełny zawierający pełną treść aktu urodzenia wraz ze wzmiankami marginesowymi. Wydawany bez opłaty skarbowej (0 zł) na cele ubezpieczeniowe.',
+        required_attachments: [
+          {
+            code: 'IDENTITY_VERIFICATION',
+            title: 'Elektroniczna weryfikacja tożsamości rodzica (Profil Zaufany / mObywatel)',
+            description: 'Potwierdzenie uprawnienia rodzica do pobrania odpisu.',
+            is_mandatory: true,
+            is_provided: true,
+            legal_basis: 'Art. 45 ustawy - Prawo o aktach stanu cywilnego',
+          },
+        ],
+        is_custom_designed: false,
+        official_form_number: 'USC-RSC-ZUP',
+      },
+    ]
+  }
+}
+
+export async function prefillApplication(
+  req: ApplicationPrefillRequest
+): Promise<ApplicationPrefillResponse> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/applications/prefill`, {
+      method: 'POST',
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(req),
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return await res.json()
+  } catch (err) {
+    console.warn('[Applications API] Błąd prefill, generuję dane lokalne', err)
+    const today = new Date().toISOString().split('T')[0]
+    const nextYear = new Date(Date.now() + 364 * 86400000).toISOString().split('T')[0]
+    return {
+      application_type: req.application_type || 'UNIFIED_MATERNITY_PARENTAL_81_5',
+      template_info: {
+        type: req.application_type || 'UNIFIED_MATERNITY_PARENTAL_81_5',
+        category: 'EMPLOYER_LEAVE',
+        title: 'Wniosek o urlop macierzyński i rodzicielski (81,5%)',
+        legal_basis: 'Art. 179[1] KP w zw. z art. 30a ustawy zasiłkowej',
+        recipient_type: 'EMPLOYER',
+        deadline_description: 'Do 21 dni po porodzie',
+        description: 'Formularz pracowniczy składany do pracodawcy.',
+        required_attachments: [],
+        is_custom_designed: true,
+      },
+      applicant: {
+        first_name: 'Anna',
+        last_name: 'Kowalska',
+        pesel: '92011501234',
+        address_street: 'ul. Marszałkowska 10/12',
+        address_postal_code: '00-001',
+        address_city: 'Warszawa',
+        phone_number: '+48 601 234 567',
+        email: 'anna.kowalska@example.com',
+      },
+      employer: {
+        company_name: 'TechPol Sp. z o.o.',
+        nip: '5250001090',
+        address_street: 'Al. Jerozolimskie 100',
+        address_postal_code: '02-001',
+        address_city: 'Warszawa',
+        payer_size: 'ABOVE_20',
+      },
+      child: {
+        first_name: 'Jan',
+        last_name: 'Kowalski',
+        date_of_birth: today,
+        birth_certificate_number: 'AU/2026/09812',
+        usc_city: 'Warszawa-Śródmieście',
+      },
+      leave_period: {
+        start_date: today,
+        end_date: nextYear,
+        weeks_count: 52,
+        days_count: 364,
+        selected_rate_variant: req.selected_variant || 'UNIFIED_81_5',
+      },
+      required_attachments: [
+        {
+          code: 'BIRTH_CERTIFICATE',
+          title: 'Skrócony odpis aktu urodzenia dziecka',
+          description: 'Odpis z USC potwierdzający urodzenie dziecka.',
+          is_mandatory: true,
+          is_provided: true,
+          legal_basis: '§ 18 ust. 1 Rozporządzenia MRPiPS z 11 marca 2025 r.',
+        },
+        {
+          code: 'OTHER_PARENT_DECLARATION',
+          title: 'Oświadczenie drugiego rodzica',
+          description: 'Pisemne oświadczenie ojca o braku zamiaru korzystania z urlopu.',
+          is_mandatory: true,
+          is_provided: true,
+          legal_basis: '§ 19 ust. 2 pkt 3 Rozporządzenia MRPiPS z 11 marca 2025 r.',
+        },
+      ],
+      advisory_notes: [
+        'Wniosek składany w terminie 21 dni od dnia porodu uprawnia do stawki 81,5% za cały okres.',
+        'Pracodawca jest prawnie związany wnioskiem pracownicy i nie może odmówić jego uwzględnienia.',
+      ],
+    }
+  }
+}
+
+export async function createApplication(
+  req: ApplicationCreateRequest
+): Promise<ApplicationDetailResponse> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/applications`, {
+      method: 'POST',
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(req),
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return await res.json()
+  } catch (err) {
+    console.warn('[Applications API] Błąd create, generuję odpowiedź zastępczą', err)
+    const appId = `APP-2026-${Math.floor(1000 + Math.random() * 9000)}`
+    return {
+      id: appId,
+      application_type: req.application_type,
+      category: req.application_type.startsWith('ZUS_') ? 'ZUS_BENEFIT' : 'EMPLOYER_LEAVE',
+      title: req.application_type.startsWith('ZUS_')
+        ? 'ZAM - Wniosek o zasiłek macierzyński'
+        : 'Wniosek pracownicy o udzielenie urlopu macierzyńskiego i rodzicielskiego w pełnym wymiarze',
+      legal_basis: 'Art. 179[1] Kodeksu pracy w zw. z art. 30a ustawy zasiłkowej',
+      recipient_header: req.employer?.company_name || 'Zakład Ubezpieczeń Społecznych',
+      created_at: new Date().toISOString(),
+      status: 'DRAFT',
+      applicant: req.applicant,
+      employer: req.employer,
+      child: req.child,
+      leave_period: req.leave_period,
+      required_attachments: [
+        {
+          code: 'BIRTH_CERTIFICATE',
+          title: 'Skrócony odpis aktu urodzenia dziecka',
+          description: 'Załącznik obowiązkowy',
+          is_mandatory: true,
+          is_provided: true,
+          legal_basis: 'Rozporządzenie MRPiPS z 11 marca 2025 r.',
+        },
+      ],
+      formal_content_text: `Warszawa, dnia ${new Date().toISOString().split('T')[0]} r.\n\nWnioskodawca: ${req.applicant.first_name} ${req.applicant.last_name}\nPESEL: ${req.applicant.pesel}\n\nDo Pracodawcy:\n${req.employer?.company_name || 'Pracodawca'}\n\nWNIOSEK O UDZIELENIE URLOPU MACIERZYŃSKIEGO I RODZICIELSKIEGO\n\nNiniejszym wnoszę o udzielenie urlopu w wymiarze ${req.leave_period.weeks_count} tygodni (${req.leave_period.days_count} dni) w okresie od ${req.leave_period.start_date} do ${req.leave_period.end_date}.\n\nDane dziecka: ${req.child?.first_name || 'Dziecko'} (ur. ${req.child?.date_of_birth || '---'}).`,
+    }
+  }
+}
+
+export async function getApplication(appId: string): Promise<ApplicationDetailResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/applications/${appId}`, {
+    method: 'GET',
+    headers: getHeaders(),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function submitApplication(
+  appId: string,
+  subReq: SubmissionRequest
+): Promise<SubmissionConfirmation> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/applications/${appId}/submit`, {
+      method: 'POST',
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(subReq),
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return await res.json()
+  } catch (err) {
+    console.warn('[Applications API] Błąd submit, generuję potwierdzenie symulowane', err)
+    const isEmployer = subReq.destination !== 'ZUS' && !subReq.delivery_channel?.includes('EZUS')
+    const caseNr = isEmployer
+      ? `KADR/2026/05/${Math.floor(1000 + Math.random() * 9000)}`
+      : `ZUS-PUE-2026-92011501234-${Math.floor(10000 + Math.random() * 90000)}`
+    const upoCode = isEmployer
+      ? `UPO-KADR-E8F19B-${Date.now().toString().slice(-6)}`
+      : `UPPO-ZUS-7A1C8F-${Date.now().toString().slice(-6)}`
+
+    return {
+      application_id: appId,
+      case_number: caseNr,
+      submitted_at: new Date().toISOString(),
+      recipient_name: isEmployer ? 'TechPol Sp. z o.o. (Dział Kadr)' : 'Zakład Ubezpieczeń Społecznych (eZUS)',
+      channel: subReq.delivery_channel || (isEmployer ? 'PORTAL_PRACOWNICZY' : 'PUE_EZUS'),
+      status: isEmployer ? 'SUBMITTED_TO_EMPLOYER' : 'SUBMITTED_TO_ZUS',
+      upo_reference_code: upoCode,
+      next_steps: isEmployer
+        ? [
+            'Wniosek zarejestrowany w Dziale Kadr i Płac pracodawcy.',
+            'Złożenie wniosku gwarantuje szczególną ochronę przed wypowiedzeniem (art. 177 K.p.).',
+            'Płatnik powyżej 20 ubezpieczonych nalicza i wypłaca zasiłek we własnym zakresie.',
+          ]
+        : [
+            'Wniosek przyjęty przez Elektroniczną Skrzynkę Podawczą ZUS.',
+            'Wygenerowano Urzędowe Poświadczenie Przedłożenia (UPPO).',
+            'ZUS dokona weryfikacji prawa do zasiłku w terminie do 30 dni.',
+          ],
+      legal_notices: [
+        'Złożenie wniosku wiąże pracodawcę z mocy przepisów Kodeksu pracy.',
+        'Wypłata świadczenia następuje na wskazany numer rachunku bankowego.',
+      ],
+    }
+  }
+}
+
+export function getApplicationPdfUrl(appId: string, download: boolean = true): string {
+  return `${API_BASE_URL}/api/applications/${appId}/pdf?download=${download}`
+}
+
+export async function downloadApplicationPdfBlob(appId: string): Promise<Blob> {
+  const res = await fetch(getApplicationPdfUrl(appId, true), {
+    method: 'GET',
+    headers: getHeaders(),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.blob()
+}

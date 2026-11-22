@@ -209,6 +209,37 @@ def _get_required_attachments_for_type(app_type: ApplicationType) -> list[Requir
             ),
         ]
 
+    if app_type in (
+        ApplicationType.USC_BIRTH_CERTIFICATE_SHORT,
+        ApplicationType.USC_BIRTH_CERTIFICATE_FULL,
+    ):
+        return [
+            RequiredAttachment(
+                code="IDENTITY_VERIFICATION",
+                title="Elektroniczna weryfikacja tożsamości rodzica (Profil Zaufany / mObywatel)",
+                description=(
+                    "Potwierdzenie uprawnienia rodzica do pobrania odpisu aktu urodzenia "
+                    "zgodnie z art. 45 ustawy - Prawo o aktach stanu cywilnego."
+                ),
+                is_mandatory=True,
+                legal_basis=(
+                    "Art. 45 ustawy z dnia 28 listopada 2014 r. - Prawo o aktach stanu cywilnego"
+                ),
+            ),
+            RequiredAttachment(
+                code="FEE_EXEMPTION_DECLARATION",
+                title="Wskazanie ustawowego zwolnienia z opłaty skarbowej (0 zł)",
+                description=(
+                    "Zwolnienie na cele świadczeń socjalnych, zasiłków ZUS i urlopów "
+                    "(art. 2 ust. 1 pkt 1 lit. c ustawy o opłacie skarbowej)."
+                ),
+                is_mandatory=True,
+                legal_basis=(
+                    "Art. 2 ust. 1 pkt 1 lit. c ustawy z 16 listopada 2006 r. o opłacie skarbowej"
+                ),
+            ),
+        ]
+
     return [
         RequiredAttachment(
             code="MANDATE_CONTRACT_COPY",
@@ -396,6 +427,57 @@ TEMPLATES_CATALOG: dict[ApplicationType, ApplicationTemplateInfo] = {
         is_custom_designed=False,
         official_form_number="Z-3a",
     ),
+    ApplicationType.USC_BIRTH_CERTIFICATE_SHORT: ApplicationTemplateInfo(
+        type=ApplicationType.USC_BIRTH_CERTIFICATE_SHORT,
+        category=ApplicationCategory.USC_CIVIL_ACT,
+        title=(
+            "Wniosek o wydanie odpisu skróconego aktu urodzenia dziecka "
+            "(Rejestr Stanu Cywilnego)"
+        ),
+        legal_basis=(
+            "Art. 44 i 45 ustawy z dnia 28 listopada 2014 r. - Prawo o aktach stanu cywilnego "
+            "w zw. z art. 2 ust. 1 pkt 1 lit. c ustawy o opłacie skarbowej"
+        ),
+        recipient_type="USC",
+        deadline_description=(
+            "W dowolnym momencie po sporządzeniu aktu (kluczowy załącznik do wniosku ZAM w ZUS)"
+        ),
+        description=(
+            "Elektroniczny wniosek do Urzędu Stanu Cywilnego przez portal gov.pl / ePUAP "
+            "o wydanie odpisu skróconego aktu urodzenia z centralnego Rejestru Stanu Cywilnego. "
+            "Dokument w postaci elektronicznej z kwalifikowaną pieczęcią cyfrową jest wydawany "
+            "bezpłatnie (0 zł) na cele ubezpieczeń społecznych i zasiłku macierzyńskiego ZUS."
+        ),
+        required_attachments=_get_required_attachments_for_type(
+            ApplicationType.USC_BIRTH_CERTIFICATE_SHORT
+        ),
+        is_custom_designed=False,
+        official_form_number="USC-RSC-SKR",
+    ),
+    ApplicationType.USC_BIRTH_CERTIFICATE_FULL: ApplicationTemplateInfo(
+        type=ApplicationType.USC_BIRTH_CERTIFICATE_FULL,
+        category=ApplicationCategory.USC_CIVIL_ACT,
+        title=(
+            "Wniosek o wydanie odpisu zupełnego aktu urodzenia dziecka "
+            "(Rejestr Stanu Cywilnego)"
+        ),
+        legal_basis=(
+            "Art. 44 i 45 ustawy z dnia 28 listopada 2014 r. - Prawo o aktach stanu cywilnego "
+            "w zw. z art. 2 ust. 1 pkt 1 lit. c ustawy o opłacie skarbowej"
+        ),
+        recipient_type="USC",
+        deadline_description="W dowolnym momencie po sporządzeniu aktu (pełna treść ze wzmiankami)",
+        description=(
+            "Wniosek o odpis zupełny zawierający pełną treść aktu urodzenia wraz ze wszystkimi "
+            "wzmiankami marginesowymi, adnotacjami sądowymi i uznaniem ojcostwa. "
+            "Wydawany bez opłaty skarbowej (0 zł) na cele ubezpieczenia społecznego i opiekuńcze."
+        ),
+        required_attachments=_get_required_attachments_for_type(
+            ApplicationType.USC_BIRTH_CERTIFICATE_FULL
+        ),
+        is_custom_designed=False,
+        official_form_number="USC-RSC-ZUP",
+    ),
 }
 
 
@@ -548,6 +630,30 @@ def prefill_application_service(req: ApplicationPrefillRequest) -> ApplicationPr
             "Praca na 1/2 etatu przez 8 tygodni wydłuża urlop rodzicielski o dodatkowe 4 tygodnie."
         )
 
+    elif req.application_type in (
+        ApplicationType.USC_BIRTH_CERTIFICATE_SHORT,
+        ApplicationType.USC_BIRTH_CERTIFICATE_FULL,
+    ):
+        leave = LeavePeriodData(
+            start_date=birth_d.isoformat(),
+            end_date=birth_d.isoformat(),
+            weeks_count=0,
+            days_count=0,
+            portion_number=1,
+            selected_rate_variant="USC_EXEMPT_0_PLN",
+        )
+        advisory_notes.append(
+            "Wniosek składany elektronicznie przez portal gov.pl do Urzędu Stanu Cywilnego."
+        )
+        advisory_notes.append(
+            "Zwolnienie z opłaty skarbowej 0 zł na podstawie art. 2 ust. 1 pkt 1 lit. c "
+            "ustawy o opłacie skarbowej (sprawy ubezpieczeń społecznych i zasiłku ZUS)."
+        )
+        advisory_notes.append(
+            "Odpis elektroniczny z kwalifikowaną pieczęcią cyfrową ministra (art. 45 ust. 4 PASC) "
+            "pochodzi z Rejestru Stanu Cywilnego (gov.pl/web/cyfryzacja/rejestr-stanu-cywilnego)."
+        )
+
     else:
         start_d = birth_d
         end_d = start_d + datetime.timedelta(days=139)
@@ -685,6 +791,53 @@ def generate_formal_content_text(
         )
         return body
 
+    if template.category == ApplicationCategory.USC_CIVIL_ACT:
+        is_short = template.type == ApplicationType.USC_BIRTH_CERTIFICATE_SHORT
+        doc_kind = "ODPISU SKRÓCONEGO" if is_short else "ODPISU ZUPEŁNEGO"
+        usc_name = req.child.usc_city if req.child and req.child.usc_city else "USC m.st. Warszawy"
+        recipient_block = (
+            f"KIEROWNIK URZĘDU STANU CYWILNEGO\n"
+            f"{usc_name}\n"
+            f"Centralny Rejestr Stanu Cywilnego (RSC gov.pl / ePUAP)"
+        )
+        body = (
+            f"{place}, dnia {app_date} r.\n\n"
+            f"Wnioskodawca (Rodzic / Osoba uprawniona z art. 45 PASC):\n"
+            f"{req.applicant.first_name} {req.applicant.last_name}\n"
+            f"PESEL: {req.applicant.pesel}\n"
+            f"Adres: {applicant_addr}\n"
+            f"Tel: {req.applicant.phone_number or '---'}\n"
+            f"E-mail: {req.applicant.email or '---'}\n\n"
+            f"Adresat:\n"
+            f"{recipient_block}\n\n"
+            f"--------------------------------------------------------------------------------\n"
+            f"WNIOSEK O WYDANIE {doc_kind} AKTU URODZENIA DZIECKA\n"
+            f"Podstawa prawna: {template.legal_basis}\n"
+            f"Portal urzędowy: https://www.gov.pl/web/cyfryzacja/rejestr-stanu-cywilnego\n"
+            f"--------------------------------------------------------------------------------\n\n"
+            f"Działając na podstawie art. 44 i 45 ustawy z dnia 28 listopada 2014 r. - "
+            f"Prawo o aktach\n"
+            f"stanu cywilnego (Dz. U. z 2023 r. poz. 1378 z późn. zm.), wnoszę o wydanie\n"
+            f"{doc_kind.lower()} aktu urodzenia dla mojego dziecka:\n\n"
+            f"{child_info}\n"
+            f"Wybór formy i parametrów wydania odpisu:\n"
+            f"- Postać dokumentu: postać elektroniczna opatrzona kwalifikowaną pieczęcią cyfrową\n"
+            f"  ministra właściwego do spraw informatyzacji (art. 45 ust. 4 PASC);\n"
+            f"- Sposób odbioru: skrzynka ePUAP wnioskodawcy / portal gov.pl / mObywatel;\n"
+            f"- Cel wydania dokumentu: ubieganie się o zasiłek macierzyński w ZUS i urlop "
+            f"rodzicielski;\n"
+            f"- Opłata skarbowa: 0,00 zł - ustawowe zwolnienie z opłaty skarbowej na podstawie\n"
+            f"  art. 2 ust. 1 pkt 1 lit. c ustawy z 16 listopada 2006 r. o opłacie skarbowej\n"
+            f"  (sprawy ubezpieczeń społecznych, opieki i świadczeń na dzieci).\n\n"
+            f"Oświadczam pod rygorem odpowiedzialności karnej z art. 233 § 1 Kodeksu karnego,\n"
+            f"że jestem rodzicem dziecka i posiadam uprawnienie do pobrania odpisu.\n\n"
+            f"Załączniki formalne:\n"
+            f"{attachments_block}\n\n\n"
+            f".......................................................\n"
+            f"    (podpis elektroniczny rodzica - Profil Zaufany ePUAP)"
+        )
+        return body
+
     recipient_block = (
         "ZAKŁAD UBEZPIECZEŃ SPOŁECZNYCH\nWłaściwy Oddział / Inspektorat ZUS\n(Portal PUE / eZUS)"
     )
@@ -722,11 +875,13 @@ def create_application_service(req: ApplicationCreateRequest) -> ApplicationDeta
     app_id = f"APP-{uuid.uuid4().hex[:12].upper()}"
     formal_text = generate_formal_content_text(req, template)
 
-    recipient_hdr = (
-        f"{req.employer.company_name} - Dział Kadr"
-        if template.category == ApplicationCategory.EMPLOYER_LEAVE and req.employer
-        else "Zakład Ubezpieczeń Społecznych (eZUS)"
-    )
+    if template.category == ApplicationCategory.EMPLOYER_LEAVE and req.employer:
+        recipient_hdr = f"{req.employer.company_name} - Dział Kadr"
+    elif template.category == ApplicationCategory.USC_CIVIL_ACT:
+        usc_c = req.child.usc_city if req.child and req.child.usc_city else "USC"
+        recipient_hdr = f"Kierownik Urzędu Stanu Cywilnego ({usc_c} / Rejestr gov.pl)"
+    else:
+        recipient_hdr = "Zakład Ubezpieczeń Społecznych (eZUS)"
 
     detail = ApplicationDetailResponse(
         id=app_id,
@@ -756,6 +911,7 @@ _DEFAULT_APP_IDS = {
     "APP-2026-0004",
     "APP-2026-0005",
     "APP-2026-0006",
+    "APP-2026-0007",
 }
 
 
@@ -767,6 +923,7 @@ def _initialize_default_applications() -> None:
         ("APP-2026-0004", ApplicationType.PARENTAL_WORK_COMBINATION, "alicja-chojnicka"),
         ("APP-2026-0005", ApplicationType.ZUS_ZAM, "anna-kowalska"),
         ("APP-2026-0006", ApplicationType.ZUS_ZAS_53, "piotr-chojnicki"),
+        ("APP-2026-0007", ApplicationType.USC_BIRTH_CERTIFICATE_SHORT, "anna-kowalska"),
     ]
     for app_id, app_type, user_id in seed_configs:
         if app_id in APPLICATIONS_STORE:
@@ -874,6 +1031,27 @@ def submit_application_service(app_id: str, sub_req: SubmissionRequest) -> Submi
         legal_notices = [
             "Złożenie wniosku chroni pracownika przed zwolnieniem z art. 177 Kodeksu pracy.",
             "Wniosek jest prawnie wiążący dla pracodawcy przy spełnieniu wymogów Kodeksu pracy.",
+        ]
+    elif app_obj.category == ApplicationCategory.USC_CIVIL_ACT:
+        usc_name = (
+            app_obj.child.usc_city
+            if app_obj.child and app_obj.child.usc_city
+            else "Urząd Stanu Cywilnego"
+        )
+        case_nr = f"USC.5353.AU.{now.year}.{random_suffix}"
+        upo_code = f"UPO-EPUAP-RSC-{uuid.uuid4().hex[:8].upper()}-{now.strftime('%Y%m%d%H%M')}"
+        status_code = "SUBMITTED_TO_USC"
+        recipient = f"{usc_name} / Rejestr Stanu Cywilnego (gov.pl / ePUAP)"
+        next_steps = [
+            f"Wniosek przekazano do Rejestru Stanu Cywilnego (znak sprawy: {case_nr}).",
+            f"Wygenerowano Urzędowe Poświadczenie Przedłożenia (UPO): {upo_code}.",
+            "Odpis z pieczęcią cyfrową ministra zostanie doręczony na skrzynkę ePUAP.",
+            "Wydany odpis (0 zł) możesz od razu dołączyć do wniosku ZAM w eZUS.",
+        ]
+        legal_notices = [
+            "Zwolnienie z opłaty skarbowej (0 zł) - art. 2 ust. 1 pkt 1 lit. c ustawy o opłacie.",
+            "Elektroniczny odpis z kwalifikowaną pieczęcią cyfrową ma moc prawną oryginału.",
+            "Weryfikacja autentyczności: https://www.gov.pl/web/cyfryzacja/rejestr-stanu-cywilnego",
         ]
     else:
         pesel_val = app_obj.applicant.pesel
@@ -1051,13 +1229,13 @@ class _CairoApplicationPdfRenderer:
 
     def draw_footer(self) -> None:
         self.cr.save()
-        self.cr.set_source_rgb(0.85, 0.88, 0.92)
+        self.cr.set_source_rgb(0.3, 0.3, 0.3)
         self.cr.set_line_width(0.6)
         self.cr.move_to(self.margin_x, 810)
         self.cr.line_to(self.margin_x + self.usable_w, 810)
         self.cr.stroke()
 
-        self.cr.set_source_rgb(0.45, 0.45, 0.45)
+        self.cr.set_source_rgb(0.2, 0.2, 0.2)
         self.set_font(7.0)
         self.cr.move_to(self.margin_x, 822)
         self.cr.show_text(
@@ -1072,218 +1250,260 @@ class _CairoApplicationPdfRenderer:
         self.cr.restore()
 
     def render(self) -> bytes:
-        # 1. Top banner bar
-        self.cr.set_source_rgb(0.00, 0.23, 0.44)  # ZUS Navy
-        self.cr.rectangle(self.margin_x, 34, self.usable_w, 3)
-        self.cr.fill()
+        # 1. Top banner bar (Monochrome, no background fill)
+        self.cr.set_source_rgb(0.0, 0.0, 0.0)
+        self.cr.set_line_width(0.8)
+        self.cr.move_to(self.margin_x, 36)
+        self.cr.line_to(self.margin_x + self.usable_w, 36)
+        self.cr.stroke()
 
         self.set_font(8.5, bold=True)
+        self.cr.set_source_rgb(0.0, 0.0, 0.0)
         self.cr.move_to(self.margin_x, 48)
         self.cr.show_text("RZECZPOSPOLITA POLSKA • URZĘDOWY MODUŁ WNIOSKÓW I ŚWIADCZEŃ")
 
         self.set_font(8.0)
-        self.cr.set_source_rgb(0.3, 0.3, 0.3)
+        self.cr.set_source_rgb(0.2, 0.2, 0.2)
         date_str = f"Warszawa, dn. {self.app.created_at[:10]} r."
         dw = self.cr.text_extents(date_str).width
         self.cr.move_to(self.width - self.margin_x - dw, 48)
         self.cr.show_text(date_str)
 
         self.set_font(7.5)
-        self.cr.set_source_rgb(0.45, 0.45, 0.45)
+        self.cr.set_source_rgb(0.3, 0.3, 0.3)
         ref_str = f"Znak ref.: {self.app.id}"
         rw = self.cr.text_extents(ref_str).width
         self.cr.move_to(self.width - self.margin_x - rw, 60)
         self.cr.show_text(ref_str)
 
-        # 2. Parties Box (2 columns with natural breathing room)
+        # 2. Parties Box (2 frameless and backgroundless columns)
         col_w = (self.usable_w - 19.0) / 2
-        parties_h = 90.0
 
-        # Left Box (Wnioskodawca)
-        self.cr.set_source_rgb(0.98, 0.99, 1.0)
-        self.cr.rectangle(self.margin_x, 74, col_w, parties_h)
-        self.cr.fill()
-        self.cr.set_source_rgb(0.80, 0.85, 0.90)
-        self.cr.set_line_width(0.8)
-        self.cr.rectangle(self.margin_x, 74, col_w, parties_h)
-        self.cr.stroke()
-
-        self.cr.set_source_rgb(0.00, 0.23, 0.44)
+        # Left Column (Wnioskodawca)
+        self.cr.set_source_rgb(0.0, 0.0, 0.0)
         self.set_font(7.5, bold=True)
-        self.cr.move_to(self.margin_x + 8, 90)
+        self.cr.move_to(self.margin_x, 88)
         self.cr.show_text("WNIOSKODAWCA (PRACOWNIK / UBEZPIECZONY):")
 
-        self.cr.set_source_rgb(0.1, 0.1, 0.1)
+        self.cr.set_source_rgb(0.0, 0.0, 0.0)
         self.set_font(9.5, bold=True)
-        self.cr.move_to(self.margin_x + 8, 108)
+        self.cr.move_to(self.margin_x, 106)
         self.cr.show_text(f"{self.app.applicant.first_name} {self.app.applicant.last_name}")
 
         self.set_font(8.0)
-        self.cr.move_to(self.margin_x + 8, 125)
+        self.cr.move_to(self.margin_x, 123)
         self.cr.show_text(f"PESEL: {self.app.applicant.pesel}")
 
         self.set_font(7.5)
         app_street = self.app.applicant.address_street or ""
         app_city = self.app.applicant.address_city or ""
         addr = f"Adres: {app_street}, {app_city}".strip(", ")
-        self.cr.move_to(self.margin_x + 8, 141)
+        self.cr.move_to(self.margin_x, 139)
         self.cr.show_text(addr[:42])
 
         app_phone = self.app.applicant.phone_number or "---"
         app_email = self.app.applicant.email or "---"
         contact = f"Kontakt: Tel. {app_phone} | {app_email}"
         self.set_font(7.2)
-        self.cr.move_to(self.margin_x + 8, 156)
+        self.cr.move_to(self.margin_x, 154)
         self.cr.show_text(contact[:42])
 
-        # Right Box (Adresat)
+        # Right Column (Adresat)
         rx = self.margin_x + col_w + 19.0
-        self.cr.set_source_rgb(0.98, 0.99, 1.0)
-        self.cr.rectangle(rx, 74, col_w, parties_h)
-        self.cr.fill()
-        self.cr.set_source_rgb(0.80, 0.85, 0.90)
-        self.cr.set_line_width(0.8)
-        self.cr.rectangle(rx, 74, col_w, parties_h)
-        self.cr.stroke()
+        if self.app.category == ApplicationCategory.USC_CIVIL_ACT:
+            self.cr.set_source_rgb(0.0, 0.0, 0.0)
+            self.set_font(7.5, bold=True)
+            self.cr.move_to(rx, 88)
+            self.cr.show_text("ADRESAT (URZĄD STANU CYWILNEGO / RSC):")
 
-        self.cr.set_source_rgb(0.00, 0.23, 0.44)
-        self.set_font(7.5, bold=True)
-        self.cr.move_to(rx + 8, 90)
-        self.cr.show_text("ADRESAT (PRACODAWCA / ZUS):")
+            self.cr.set_source_rgb(0.0, 0.0, 0.0)
+            self.set_font(9.5, bold=True)
+            usc_box = (
+                self.app.child.usc_city
+                if self.app.child and self.app.child.usc_city
+                else "Urząd Stanu Cywilnego"
+            )
+            self.cr.move_to(rx, 106)
+            self.cr.show_text(usc_box[:38])
 
-        self.cr.set_source_rgb(0.1, 0.1, 0.1)
-        self.set_font(9.5, bold=True)
-        emp_name = (
-            self.app.employer.company_name
-            if self.app.employer
-            else "Zakład Ubezpieczeń Społecznych"
-        )
-        self.cr.move_to(rx + 8, 108)
-        self.cr.show_text(emp_name[:38])
+            self.set_font(8.0)
+            self.cr.move_to(rx, 123)
+            self.cr.show_text("Centralny Rejestr Stanu Cywilnego (RSC)")
 
-        self.set_font(8.0)
-        emp_nip = (
-            f"NIP: {self.app.employer.nip}"
-            if self.app.employer and self.app.employer.nip
-            else "Elektroniczna Skrzynka PUE ZUS"
-        )
-        self.cr.move_to(rx + 8, 125)
-        self.cr.show_text(emp_nip)
+            self.set_font(7.5)
+            self.cr.move_to(rx, 139)
+            self.cr.show_text("Portal: gov.pl / Skrzynka ePUAP")
 
-        self.set_font(7.5)
-        emp_street = self.app.employer.address_street or "" if self.app.employer else ""
-        emp_city = self.app.employer.address_city or "" if self.app.employer else ""
-        emp_addr = (
-            f"Adres: {emp_street}, {emp_city}".strip(", ")
-            if self.app.employer
-            else "Centralny Rejestr Ubezpieczonych"
-        )
-        self.cr.move_to(rx + 8, 141)
-        self.cr.show_text(emp_addr[:38])
+            self.set_font(7.2)
+            self.cr.move_to(rx, 154)
+            self.cr.show_text("Kanał: ePUAP / gov.pl (Zwolnienie 0 zł)")
+        else:
+            self.cr.set_source_rgb(0.0, 0.0, 0.0)
+            self.set_font(7.5, bold=True)
+            self.cr.move_to(rx, 88)
+            self.cr.show_text("ADRESAT (PRACODAWCA / ZUS):")
 
-        self.set_font(7.2)
-        self.cr.move_to(rx + 8, 156)
-        self.cr.show_text("Kanał: Portal Pracowniczy / PUE eZUS")
+            self.cr.set_source_rgb(0.0, 0.0, 0.0)
+            self.set_font(9.5, bold=True)
+            emp_name = (
+                self.app.employer.company_name
+                if self.app.employer
+                else "Zakład Ubezpieczeń Społecznych"
+            )
+            self.cr.move_to(rx, 106)
+            self.cr.show_text(emp_name[:38])
 
-        # 3. Formal Document Title (Clean, authoritative header - NO GREEN FRAME)
-        self.cr.set_source_rgb(0.85, 0.88, 0.92)
+            self.set_font(8.0)
+            emp_nip = (
+                f"NIP: {self.app.employer.nip}"
+                if self.app.employer and self.app.employer.nip
+                else "Elektroniczna Skrzynka PUE ZUS"
+            )
+            self.cr.move_to(rx, 123)
+            self.cr.show_text(emp_nip)
+
+            self.set_font(7.5)
+            emp_street = self.app.employer.address_street or "" if self.app.employer else ""
+            emp_city = self.app.employer.address_city or "" if self.app.employer else ""
+            emp_addr = (
+                f"Adres: {emp_street}, {emp_city}".strip(", ")
+                if self.app.employer
+                else "Centralny Rejestr Ubezpieczonych"
+            )
+            self.cr.move_to(rx, 139)
+            self.cr.show_text(emp_addr[:38])
+
+            self.set_font(7.2)
+            self.cr.move_to(rx, 154)
+            self.cr.show_text("Kanał: Portal Pracowniczy / PUE eZUS")
+
+        # 3. Formal Document Title (Clean, monochrome rules)
+        self.cr.set_source_rgb(0.0, 0.0, 0.0)
         self.cr.set_line_width(0.6)
-        self.cr.move_to(self.margin_x, 182)
-        self.cr.line_to(self.margin_x + self.usable_w, 182)
+        self.cr.move_to(self.margin_x, 180)
+        self.cr.line_to(self.margin_x + self.usable_w, 180)
         self.cr.stroke()
 
-        self.cr.set_source_rgb(0.00, 0.23, 0.44)
         t_lines = self.wrap(self.app.title.upper(), self.usable_w - 20, size=9.5, bold=True)
         self.set_font(9.5, bold=True)
+        self.cr.set_source_rgb(0.0, 0.0, 0.0)
         if len(t_lines) == 1:
-            self.cr.move_to(self.margin_x + 6, 202)
+            self.cr.move_to(self.margin_x, 200)
             self.cr.show_text(t_lines[0])
-            lb_y = 222
+            lb_y = 220
         else:
-            self.cr.move_to(self.margin_x + 6, 196)
+            self.cr.move_to(self.margin_x, 195)
             self.cr.show_text(t_lines[0])
-            self.cr.move_to(self.margin_x + 6, 212)
+            self.cr.move_to(self.margin_x, 211)
             self.cr.show_text(t_lines[1][:85])
-            lb_y = 228
+            lb_y = 227
 
-        self.cr.set_source_rgb(0.35, 0.40, 0.45)
+        self.cr.set_source_rgb(0.25, 0.25, 0.25)
         self.set_font(7.5, italic=True)
-        self.cr.move_to(self.margin_x + 6, lb_y)
+        self.cr.move_to(self.margin_x, lb_y)
         self.cr.show_text(f"Podstawa prawna: {self.app.legal_basis[:95]}")
 
-        self.cr.set_source_rgb(0.85, 0.88, 0.92)
+        self.cr.set_source_rgb(0.0, 0.0, 0.0)
         self.cr.set_line_width(0.6)
         self.cr.move_to(self.margin_x, 242)
         self.cr.line_to(self.margin_x + self.usable_w, 242)
         self.cr.stroke()
 
-        # 4. Section 1: Parameters Table (Spacious row heights of 35 pt)
-        self.cr.set_source_rgb(0.00, 0.23, 0.44)
+        # 4. Section 1: Parameters (Spacious row heights of 35 pt, clean divider rules)
+        self.cr.set_source_rgb(0.0, 0.0, 0.0)
         self.set_font(8.5, bold=True)
         self.cr.move_to(self.margin_x, 262)
-        self.cr.show_text("1. WNIOSKOWANY WYMIAR I OKRES ŚWIADCZENIA / URLOPU")
+        sec1_title = (
+            "1. PARAMETRY WNIOSKOWANEGO ODPISU AKTU URODZENIA"
+            if self.app.category == ApplicationCategory.USC_CIVIL_ACT
+            else "1. WNIOSKOWANY WYMIAR I OKRES ŚWIADCZENIA / URLOPU"
+        )
+        self.cr.show_text(sec1_title)
         self.cr.set_line_width(0.6)
         self.cr.move_to(self.margin_x, 266)
         self.cr.line_to(self.margin_x + self.usable_w, 266)
         self.cr.stroke()
 
-        self.cr.set_source_rgb(1.0, 1.0, 1.0)
-        self.cr.rectangle(self.margin_x, 274, self.usable_w, 105)
-        self.cr.fill()
-        self.cr.set_source_rgb(0.82, 0.85, 0.89)
-        self.cr.set_line_width(0.8)
-        self.cr.rectangle(self.margin_x, 274, self.usable_w, 105)
-        self.cr.stroke()
-
         self.cr.set_line_width(0.5)
-        self.cr.set_source_rgb(0.88, 0.90, 0.93)
+        self.cr.set_source_rgb(0.5, 0.5, 0.5)
         self.cr.move_to(self.margin_x, 309)
         self.cr.line_to(self.margin_x + self.usable_w, 309)
         self.cr.move_to(self.margin_x, 344)
         self.cr.line_to(self.margin_x + self.usable_w, 344)
-        self.cr.move_to(self.margin_x + 160, 274)
-        self.cr.line_to(self.margin_x + 160, 379)
+        self.cr.move_to(self.margin_x, 379)
+        self.cr.line_to(self.margin_x + self.usable_w, 379)
         self.cr.stroke()
 
-        self.cr.set_source_rgb(0.1, 0.1, 0.1)
+        self.cr.set_source_rgb(0.0, 0.0, 0.0)
         self.set_font(8.0, bold=True)
-        self.cr.move_to(self.margin_x + 8, 296)
-        self.cr.show_text("Okres korzystania:")
-        self.set_font(8.0)
-        self.cr.move_to(self.margin_x + 168, 296)
-        lp = self.app.leave_period
-        self.cr.show_text(
-            f"Od {lp.start_date} do {lp.end_date} ({lp.weeks_count} tyg. / {lp.days_count} dni)"
-        )
+        self.cr.move_to(self.margin_x, 296)
+        if self.app.category == ApplicationCategory.USC_CIVIL_ACT:
+            self.cr.show_text("Rodzaj odpisu:")
+            self.set_font(8.0)
+            self.cr.move_to(self.margin_x + 160, 296)
+            is_sh = self.app.application_type == ApplicationType.USC_BIRTH_CERTIFICATE_SHORT
+            doc_k = "Odpis skrócony aktu urodzenia" if is_sh else "Odpis zupełny aktu urodzenia"
+            self.cr.show_text(f"{doc_k} (postać elektroniczna z pieczęcią cyfrową)")
 
-        self.set_font(8.0, bold=True)
-        self.cr.move_to(self.margin_x + 8, 331)
-        self.cr.show_text("Wariant zasiłku / stawka:")
-        self.set_font(8.0)
-        self.cr.move_to(self.margin_x + 168, 331)
-        rate_desc = (
-            "Stawka 81,5% podstawy wymiaru (wniosek jednolity w terminie 21 dni)"
-            if self.app.leave_period.selected_rate_variant == "UNIFIED_81_5"
-            else "Stawka 100% / 70% podstawy wymiaru"
-        )
-        self.cr.show_text(rate_desc)
+            self.set_font(8.0, bold=True)
+            self.cr.move_to(self.margin_x, 331)
+            self.cr.show_text("Postać i opłata:")
+            self.set_font(8.0)
+            self.cr.move_to(self.margin_x + 160, 331)
+            self.cr.show_text(
+                "Dokument elektroniczny (ePUAP) • Zwolnienie z opłaty skarbowej 0,00 zł"
+            )
 
-        self.set_font(8.0, bold=True)
-        self.cr.move_to(self.margin_x + 8, 366)
-        self.cr.show_text("Dane dziecka:")
-        self.set_font(8.0)
-        self.cr.move_to(self.margin_x + 168, 366)
-        ch = self.app.child
-        ch_info = (
-            f"{ch.first_name} {ch.last_name}, ur. {ch.date_of_birth}, "
-            f"Akt: {ch.birth_certificate_number} ({ch.usc_city})"
-            if ch
-            else "---"
-        )
-        self.cr.show_text(ch_info[:70])
+            self.set_font(8.0, bold=True)
+            self.cr.move_to(self.margin_x, 366)
+            self.cr.show_text("Dane dziecka i aktu:")
+            self.set_font(8.0)
+            self.cr.move_to(self.margin_x + 160, 366)
+            ch = self.app.child
+            ch_info = (
+                f"{ch.first_name} {ch.last_name}, ur. {ch.date_of_birth}, "
+                f"Akt: {ch.birth_certificate_number} ({ch.usc_city})"
+                if ch
+                else "---"
+            )
+            self.cr.show_text(ch_info[:70])
+        else:
+            self.cr.show_text("Okres korzystania:")
+            self.set_font(8.0)
+            self.cr.move_to(self.margin_x + 160, 296)
+            lp = self.app.leave_period
+            self.cr.show_text(
+                f"Od {lp.start_date} do {lp.end_date} ({lp.weeks_count} tyg. / {lp.days_count} dni)"
+            )
 
-        # 5. Section 2: Declarations (Natural line spacing of 22 pt)
-        self.cr.set_source_rgb(0.00, 0.23, 0.44)
+            self.set_font(8.0, bold=True)
+            self.cr.move_to(self.margin_x, 331)
+            self.cr.show_text("Wariant zasiłku / stawka:")
+            self.set_font(8.0)
+            self.cr.move_to(self.margin_x + 160, 331)
+            rate_desc = (
+                "Stawka 81,5% podstawy wymiaru (wniosek jednolity w terminie 21 dni)"
+                if self.app.leave_period.selected_rate_variant == "UNIFIED_81_5"
+                else "Stawka 100% / 70% podstawy wymiaru"
+            )
+            self.cr.show_text(rate_desc)
+
+            self.set_font(8.0, bold=True)
+            self.cr.move_to(self.margin_x, 366)
+            self.cr.show_text("Dane dziecka:")
+            self.set_font(8.0)
+            self.cr.move_to(self.margin_x + 160, 366)
+            ch = self.app.child
+            ch_info = (
+                f"{ch.first_name} {ch.last_name}, ur. {ch.date_of_birth}, "
+                f"Akt: {ch.birth_certificate_number} ({ch.usc_city})"
+                if ch
+                else "---"
+            )
+            self.cr.show_text(ch_info[:70])
+
+        # 5. Section 2: Declarations (Natural line spacing of 22 pt, black & white)
+        self.cr.set_source_rgb(0.0, 0.0, 0.0)
         self.set_font(8.5, bold=True)
         self.cr.move_to(self.margin_x, 404)
         self.cr.show_text("2. OŚWIADCZENIA I POUCZENIA PRAWNE WNIOSKODAWCY")
@@ -1293,25 +1513,42 @@ class _CairoApplicationPdfRenderer:
         self.cr.stroke()
 
         self.set_font(7.8)
-        self.cr.set_source_rgb(0.15, 0.15, 0.15)
-        self.cr.move_to(self.margin_x + 6, 428)
-        self.cr.show_text(
-            "[X] Oświadczam, że drugi z rodziców nie korzysta z urlopu / "
-            "zasiłku macierzyńskiego w tym samym okresie."
-        )
-        self.cr.move_to(self.margin_x + 6, 450)
-        self.cr.show_text(
-            "[X] Oświadczam pod rygorem odpowiedzialności karnej z art. 233 § 1 "
-            "Kodeksu karnego, że powyższe dane są prawdziwe."
-        )
-        self.cr.move_to(self.margin_x + 6, 472)
-        self.cr.show_text(
-            "[X] Zobowiązuję się niezwłocznie powiadomić płatnika składek / ZUS "
-            "o wszelkich zmianach uprawnień."
-        )
+        self.cr.set_source_rgb(0.0, 0.0, 0.0)
+        if self.app.category == ApplicationCategory.USC_CIVIL_ACT:
+            self.cr.move_to(self.margin_x, 428)
+            self.cr.show_text(
+                "[X] Oświadczam, że jestem rodzicem dziecka uprawnionym do pobrania odpisu "
+                "(art. 45 PASC)."
+            )
+            self.cr.move_to(self.margin_x, 450)
+            self.cr.show_text(
+                "[X] Wnoszę o ustawowe zwolnienie z opłaty skarbowej (0 zł) na cele "
+                "zasiłku macierzyńskiego ZUS."
+            )
+            self.cr.move_to(self.margin_x, 472)
+            self.cr.show_text(
+                "[X] Oświadczam pod rygorem odpowiedzialności karnej z art. 233 § 1 KK, "
+                "że dane są prawdziwe."
+            )
+        else:
+            self.cr.move_to(self.margin_x, 428)
+            self.cr.show_text(
+                "[X] Oświadczam, że drugi z rodziców nie korzysta z urlopu / "
+                "zasiłku macierzyńskiego w tym samym okresie."
+            )
+            self.cr.move_to(self.margin_x, 450)
+            self.cr.show_text(
+                "[X] Oświadczam pod rygorem odpowiedzialności karnej z art. 233 § 1 "
+                "Kodeksu karnego, że powyższe dane są prawdziwe."
+            )
+            self.cr.move_to(self.margin_x, 472)
+            self.cr.show_text(
+                "[X] Zobowiązuję się niezwłocznie powiadomić płatnika składek / ZUS "
+                "o wszelkich zmianach uprawnień."
+            )
 
-        # 6. Section 3: Attachments (Natural line spacing of 22 pt)
-        self.cr.set_source_rgb(0.00, 0.23, 0.44)
+        # 6. Section 3: Attachments (Natural line spacing of 22 pt, black & white)
+        self.cr.set_source_rgb(0.0, 0.0, 0.0)
         self.set_font(8.5, bold=True)
         self.cr.move_to(self.margin_x, 500)
         self.cr.show_text(
@@ -1323,76 +1560,72 @@ class _CairoApplicationPdfRenderer:
         self.cr.stroke()
 
         self.set_font(7.8)
-        self.cr.set_source_rgb(0.15, 0.15, 0.15)
+        self.cr.set_source_rgb(0.0, 0.0, 0.0)
         ay = 524
         for idx, att in enumerate(self.app.required_attachments[:3], 1):
             status = "Dołączono" if att.is_provided else "Do uzupełnienia"
-            self.cr.move_to(self.margin_x + 6, ay)
+            self.cr.move_to(self.margin_x, ay)
             self.cr.show_text(f"[X] {idx}. {att.title[:55]} ({status}) - {att.legal_basis[:30]}")
             ay += 22
 
-        # 7. Section 4: UPO if submitted
+        # 7. Section 4: UPO if submitted (Frameless, black & white)
         if self.app.submission_confirmation:
-            self.cr.set_source_rgb(0.96, 0.99, 0.97)
-            self.cr.rectangle(self.margin_x, 590, self.usable_w, 55)
-            self.cr.fill()
-            self.cr.set_source_rgb(0.10, 0.50, 0.25)
-            self.cr.set_line_width(0.8)
-            self.cr.rectangle(self.margin_x, 590, self.usable_w, 55)
+            self.cr.set_source_rgb(0.0, 0.0, 0.0)
+            self.cr.set_line_width(0.6)
+            self.cr.move_to(self.margin_x, 586)
+            self.cr.line_to(self.margin_x + self.usable_w, 586)
             self.cr.stroke()
 
             self.set_font(7.5, bold=True)
-            self.cr.move_to(self.margin_x + 8, 604)
+            self.cr.move_to(self.margin_x, 602)
             self.cr.show_text("URZĘDOWE POŚWIADCZENIE PRZEDŁOŻENIA / ODBIORU (UPO):")
 
             self.set_font(7.2)
             conf = self.app.submission_confirmation
-            self.cr.move_to(self.margin_x + 8, 620)
+            self.cr.move_to(self.margin_x, 618)
             self.cr.show_text(
                 f"Znak sprawy: {conf.case_number} | Status: {conf.status} | "
                 f"Kod UPO: {conf.upo_reference_code}"
             )
-            self.cr.move_to(self.margin_x + 8, 633)
+            self.cr.move_to(self.margin_x, 632)
             self.cr.show_text(
                 f"Data doręczenia: {conf.submitted_at[:19]} | Adresat: {conf.recipient_name[:40]}"
             )
             sig_y = 660
-            sig_h = 85.0
         else:
             sig_y = 595
-            sig_h = 115.0
 
-        # 8. Section 5: Signature Boxes (Generous vertical space)
-        self.cr.set_source_rgb(0.99, 0.99, 1.0)
-        self.cr.rectangle(self.margin_x, sig_y, col_w, sig_h)
-        self.cr.rectangle(rx, sig_y, col_w, sig_h)
-        self.cr.fill()
-        self.cr.set_source_rgb(0.80, 0.85, 0.90)
-        self.cr.set_line_width(0.8)
-        self.cr.rectangle(self.margin_x, sig_y, col_w, sig_h)
-        self.cr.rectangle(rx, sig_y, col_w, sig_h)
-        self.cr.stroke()
-
-        self.cr.set_source_rgb(0.00, 0.23, 0.44)
+        # 8. Section 5: Signature Boxes (Frameless and backgroundless)
+        self.cr.set_source_rgb(0.0, 0.0, 0.0)
         self.set_font(7.5, bold=True)
         title_y = sig_y + 18 if self.app.submission_confirmation else sig_y + 20
-        self.cr.move_to(self.margin_x + 8, title_y)
-        self.cr.show_text("POTWIERDZENIE ODBIORU (PŁATNIK / ZUS)")
-        self.cr.move_to(rx + 8, title_y)
-        self.cr.show_text("PODPIS WNIOSKODAWCY (PRACOWNIKA)")
+        self.cr.move_to(self.margin_x, title_y)
+        t_left = (
+            "POTWIERDZENIE WPŁYWU (USC / RSC)"
+            if self.app.category == ApplicationCategory.USC_CIVIL_ACT
+            else "POTWIERDZENIE ODBIORU (PŁATNIK / ZUS)"
+        )
+        t_right = (
+            "PODPIS ELEKTRONICZNY RODZICA"
+            if self.app.category == ApplicationCategory.USC_CIVIL_ACT
+            else "PODPIS WNIOSKODAWCY (PRACOWNIKA)"
+        )
+        self.cr.show_text(t_left)
+        self.cr.move_to(rx, title_y)
+        self.cr.show_text(t_right)
 
         self.set_font(7.2)
-        self.cr.set_source_rgb(0.4, 0.4, 0.4)
+        self.cr.set_source_rgb(0.3, 0.3, 0.3)
         line1_y = sig_y + 44 if self.app.submission_confirmation else sig_y + 54
         line2_y = sig_y + 70 if self.app.submission_confirmation else sig_y + 88
-        self.cr.move_to(self.margin_x + 8, line1_y)
+        self.cr.move_to(self.margin_x, line1_y)
         self.cr.show_text("Data wpływu: .......................................")
-        self.cr.move_to(self.margin_x + 8, line2_y)
+        self.cr.move_to(self.margin_x, line2_y)
         self.cr.show_text("Podpis i pieczęć przyjmującego: ....................")
 
-        self.cr.move_to(rx + 8, line1_y)
+        self.cr.move_to(rx, line1_y)
         self.cr.show_text(f"Miejscowość i data: Warszawa, {self.app.created_at[:10]} r.")
-        self.cr.move_to(rx + 8, line2_y)
+        self.cr.move_to(rx, line2_y)
         self.cr.show_text("Czytelny podpis: ...................................")
 
         # 9. Footer
@@ -1465,283 +1698,422 @@ def _render_pdf_with_pure_python(app_obj: ApplicationDetailResponse) -> bytes:
             + b") Tj ET\n"
         )
 
-    # 1. Top banner bar
-    rect(margin_x, 34, usable_w, 3, fill=(0.0, 0.23, 0.44))
+    # 1. Top banner bar (Monochrome, frameless, no fill)
+    line(margin_x, 36, margin_x + usable_w, 36, stroke=(0.0, 0.0, 0.0), lw=0.8)
     text(
         "RZECZPOSPOLITA POLSKA • URZĘDOWY MODUŁ WNIOSKÓW I ŚWIADCZEŃ",
         margin_x,
         48,
         font="/F1",
         size=8.5,
-        rgb=(0.0, 0.23, 0.44),
+        rgb=(0.0, 0.0, 0.0),
     )
     date_str = f"Warszawa, dn. {app_obj.created_at[:10]} r."
-    text(date_str, 400, 48, font="/F2", size=8.0, rgb=(0.3, 0.3, 0.3))
-    text(f"Znak ref.: {app_obj.id}", 400, 60, font="/F2", size=7.5, rgb=(0.45, 0.45, 0.45))
+    text(date_str, 400, 48, font="/F2", size=8.0, rgb=(0.2, 0.2, 0.2))
+    text(f"Znak ref.: {app_obj.id}", 400, 60, font="/F2", size=7.5, rgb=(0.3, 0.3, 0.3))
 
-    # 2. Parties Box (2 columns with generous vertical breathing room)
-    parties_h = 90.0
-    rect(margin_x, 74, col_w, parties_h, fill=(0.98, 0.99, 1.0), stroke=(0.80, 0.85, 0.90), lw=0.8)
+    # 2. Parties Box (2 columns, frameless and backgroundless)
     text(
         "WNIOSKODAWCA (PRACOWNIK / UBEZPIECZONY):",
-        margin_x + 8,
-        90,
+        margin_x,
+        88,
         font="/F1",
         size=7.5,
-        rgb=(0.0, 0.23, 0.44),
+        rgb=(0.0, 0.0, 0.0),
     )
     text(
         f"{app_obj.applicant.first_name} {app_obj.applicant.last_name}",
-        margin_x + 8,
-        108,
+        margin_x,
+        106,
         font="/F1",
         size=9.5,
+        rgb=(0.0, 0.0, 0.0),
     )
-    text(f"PESEL: {app_obj.applicant.pesel}", margin_x + 8, 125, font="/F2", size=8.0)
+    text(
+        f"PESEL: {app_obj.applicant.pesel}",
+        margin_x,
+        123,
+        font="/F2",
+        size=8.0,
+        rgb=(0.0, 0.0, 0.0),
+    )
     strt = app_obj.applicant.address_street or ""
     cty = app_obj.applicant.address_city or ""
     app_addr = f"Adres: {strt}, {cty}".strip(", ")
-    text(app_addr[:42], margin_x + 8, 141, font="/F2", size=7.5)
+    text(app_addr[:42], margin_x, 139, font="/F2", size=7.5, rgb=(0.0, 0.0, 0.0))
     phone_s = app_obj.applicant.phone_number or "---"
     email_s = app_obj.applicant.email or "---"
     app_contact = f"Kontakt: Tel. {phone_s} | {email_s}"
-    text(app_contact[:42], margin_x + 8, 156, font="/F2", size=7.2)
+    text(app_contact[:42], margin_x, 154, font="/F2", size=7.2, rgb=(0.0, 0.0, 0.0))
 
-    rect(rx, 74, col_w, parties_h, fill=(0.98, 0.99, 1.0), stroke=(0.80, 0.85, 0.90), lw=0.8)
-    text("ADRESAT (PRACODAWCA / ZUS):", rx + 8, 90, font="/F1", size=7.5, rgb=(0.0, 0.23, 0.44))
-    emp_name = (
-        app_obj.employer.company_name if app_obj.employer else "Zakład Ubezpieczeń Społecznych"
-    )
-    text(emp_name[:38], rx + 8, 108, font="/F1", size=9.5)
-    emp_nip = (
-        f"NIP: {app_obj.employer.nip}"
-        if app_obj.employer and app_obj.employer.nip
-        else "Elektroniczna Skrzynka PUE ZUS"
-    )
-    text(emp_nip, rx + 8, 125, font="/F2", size=8.0)
-    estr = app_obj.employer.address_street or "" if app_obj.employer else ""
-    ecty = app_obj.employer.address_city or "" if app_obj.employer else ""
-    emp_addr = (
-        f"Adres: {estr}, {ecty}".strip(", ")
-        if app_obj.employer
-        else "Centralny Rejestr Ubezpieczonych"
-    )
-    text(emp_addr[:38], rx + 8, 141, font="/F2", size=7.5)
-    text("Kanał: Portal Pracowniczy / PUE eZUS", rx + 8, 156, font="/F2", size=7.2)
-
-    # 3. Formal Document Title (Clean, authoritative header - NO GREEN FRAME)
-    line(margin_x, 182, margin_x + usable_w, 182, stroke=(0.85, 0.88, 0.92), lw=0.6)
-    t1 = app_obj.title[:75]
-    t2 = app_obj.title[75:150] if len(app_obj.title) > 75 else ""
-    if t2:
-        text(t1.upper(), margin_x + 6, 196, font="/F1", size=9.5, rgb=(0.0, 0.23, 0.44))
-        text(t2.upper(), margin_x + 6, 212, font="/F1", size=9.5, rgb=(0.0, 0.23, 0.44))
-        lb_y = 228
+    if app_obj.category == ApplicationCategory.USC_CIVIL_ACT:
+        text(
+            "ADRESAT (URZĄD STANU CYWILNEGO / RSC):",
+            rx,
+            88,
+            font="/F1",
+            size=7.5,
+            rgb=(0.0, 0.0, 0.0),
+        )
+        usc_b = (
+            app_obj.child.usc_city
+            if app_obj.child and app_obj.child.usc_city
+            else "Urząd Stanu Cywilnego"
+        )
+        text(usc_b[:38], rx, 106, font="/F1", size=9.5, rgb=(0.0, 0.0, 0.0))
+        text(
+            "Centralny Rejestr Stanu Cywilnego (RSC)",
+            rx,
+            123,
+            font="/F2",
+            size=8.0,
+            rgb=(0.0, 0.0, 0.0),
+        )
+        text(
+            "Portal: gov.pl / Skrzynka ePUAP",
+            rx,
+            139,
+            font="/F2",
+            size=7.5,
+            rgb=(0.0, 0.0, 0.0),
+        )
+        text(
+            "Kanał: ePUAP / gov.pl (Zwolnienie 0 zł)",
+            rx,
+            154,
+            font="/F2",
+            size=7.2,
+            rgb=(0.0, 0.0, 0.0),
+        )
     else:
-        text(t1.upper(), margin_x + 6, 202, font="/F1", size=9.5, rgb=(0.0, 0.23, 0.44))
-        lb_y = 222
+        text(
+            "ADRESAT (PRACODAWCA / ZUS):",
+            rx,
+            88,
+            font="/F1",
+            size=7.5,
+            rgb=(0.0, 0.0, 0.0),
+        )
+        emp_name = (
+            app_obj.employer.company_name
+            if app_obj.employer
+            else "Zakład Ubezpieczeń Społecznych"
+        )
+        text(emp_name[:38], rx, 106, font="/F1", size=9.5, rgb=(0.0, 0.0, 0.0))
+        emp_nip = (
+            f"NIP: {app_obj.employer.nip}"
+            if app_obj.employer and app_obj.employer.nip
+            else "Elektroniczna Skrzynka PUE ZUS"
+        )
+        text(emp_nip, rx, 123, font="/F2", size=8.0, rgb=(0.0, 0.0, 0.0))
+        estr = app_obj.employer.address_street or "" if app_obj.employer else ""
+        ecty = app_obj.employer.address_city or "" if app_obj.employer else ""
+        emp_addr = (
+            f"Adres: {estr}, {ecty}".strip(", ")
+            if app_obj.employer
+            else "Centralny Rejestr Ubezpieczonych"
+        )
+        text(emp_addr[:38], rx, 139, font="/F2", size=7.5, rgb=(0.0, 0.0, 0.0))
+        text(
+            "Kanał: Portal Pracowniczy / PUE eZUS",
+            rx,
+            154,
+            font="/F2",
+            size=7.2,
+            rgb=(0.0, 0.0, 0.0),
+        )
+
+    # 3. Formal Document Title (Clean, monochrome rules)
+    line(margin_x, 180, margin_x + usable_w, 180, stroke=(0.0, 0.0, 0.0), lw=0.6)
+    title_words = app_obj.title.split(" ")
+    t1_parts: list[str] = []
+    t2_parts: list[str] = []
+    cur_len = 0
+    for w in title_words:
+        if cur_len + len(w) + 1 <= 65 and not t2_parts:
+            t1_parts.append(w)
+            cur_len += len(w) + 1
+        else:
+            t2_parts.append(w)
+    t1 = " ".join(t1_parts)
+    t2 = " ".join(t2_parts)
+
+    if t2:
+        text(t1.upper(), margin_x, 195, font="/F1", size=9.5, rgb=(0.0, 0.0, 0.0))
+        text(t2.upper(), margin_x, 211, font="/F1", size=9.5, rgb=(0.0, 0.0, 0.0))
+        lb_y = 227
+    else:
+        text(t1.upper(), margin_x, 200, font="/F1", size=9.5, rgb=(0.0, 0.0, 0.0))
+        lb_y = 220
     text(
         f"Podstawa prawna: {app_obj.legal_basis[:95]}",
-        margin_x + 6,
+        margin_x,
         lb_y,
         font="/F3",
         size=7.5,
-        rgb=(0.35, 0.40, 0.45),
+        rgb=(0.25, 0.25, 0.25),
     )
-    line(margin_x, 242, margin_x + usable_w, 242, stroke=(0.85, 0.88, 0.92), lw=0.6)
+    line(margin_x, 242, margin_x + usable_w, 242, stroke=(0.0, 0.0, 0.0), lw=0.6)
 
-    # 4. Section 1: Parameters Table (Spacious row heights of 35 pt)
-    text(
-        "1. WNIOSKOWANY WYMIAR I OKRES ŚWIADCZENIA / URLOPU",
-        margin_x,
-        262,
-        font="/F1",
-        size=8.5,
-        rgb=(0.0, 0.23, 0.44),
+    # 4. Section 1: Parameters Table (Spacious row heights of 35 pt, no outer border or fill)
+    sec1_t = (
+        "1. PARAMETRY WNIOSKOWANEGO ODPISU AKTU URODZENIA"
+        if app_obj.category == ApplicationCategory.USC_CIVIL_ACT
+        else "1. WNIOSKOWANY WYMIAR I OKRES ŚWIADCZENIA / URLOPU"
     )
-    line(margin_x, 266, margin_x + usable_w, 266, stroke=(0.0, 0.23, 0.44), lw=0.6)
-    rect(margin_x, 274, usable_w, 105, fill=(1.0, 1.0, 1.0), stroke=(0.82, 0.85, 0.89), lw=0.8)
-    line(margin_x, 309, margin_x + usable_w, 309, stroke=(0.88, 0.90, 0.93), lw=0.5)
-    line(margin_x, 344, margin_x + usable_w, 344, stroke=(0.88, 0.90, 0.93), lw=0.5)
-    line(margin_x + 160, 274, margin_x + 160, 379, stroke=(0.88, 0.90, 0.93), lw=0.5)
+    text(sec1_t, margin_x, 262, font="/F1", size=8.5, rgb=(0.0, 0.0, 0.0))
+    line(margin_x, 266, margin_x + usable_w, 266, stroke=(0.0, 0.0, 0.0), lw=0.6)
+    line(margin_x, 309, margin_x + usable_w, 309, stroke=(0.5, 0.5, 0.5), lw=0.5)
+    line(margin_x, 344, margin_x + usable_w, 344, stroke=(0.5, 0.5, 0.5), lw=0.5)
+    line(margin_x, 379, margin_x + usable_w, 379, stroke=(0.5, 0.5, 0.5), lw=0.5)
 
-    lp_p = app_obj.leave_period
-    lp_text = (
-        f"Od {lp_p.start_date} do {lp_p.end_date} "
-        f"({lp_p.weeks_count} tyg. / {lp_p.days_count} dni)"
-    )
-    text("Okres korzystania:", margin_x + 8, 296, font="/F1", size=8.0)
-    text(lp_text, margin_x + 168, 296, font="/F2", size=8.0)
+    if app_obj.category == ApplicationCategory.USC_CIVIL_ACT:
+        text("Rodzaj odpisu:", margin_x, 296, font="/F1", size=8.0, rgb=(0.0, 0.0, 0.0))
+        is_s = app_obj.application_type == ApplicationType.USC_BIRTH_CERTIFICATE_SHORT
+        d_name = "Odpis skrócony aktu urodzenia" if is_s else "Odpis zupełny aktu urodzenia"
+        text(
+            f"{d_name} (postać elektroniczna z pieczęcią cyfrową)",
+            margin_x + 160,
+            296,
+            font="/F2",
+            size=8.0,
+            rgb=(0.0, 0.0, 0.0),
+        )
 
-    text("Wariant zasiłku / stawka:", margin_x + 8, 331, font="/F1", size=8.0)
-    rate_desc = (
-        "Stawka 81,5% podstawy wymiaru (wniosek jednolity w terminie 21 dni)"
-        if app_obj.leave_period.selected_rate_variant == "UNIFIED_81_5"
-        else "Stawka 100% / 70% podstawy wymiaru"
-    )
-    text(rate_desc, margin_x + 168, 331, font="/F2", size=8.0)
+        text("Postać i opłata:", margin_x, 331, font="/F1", size=8.0, rgb=(0.0, 0.0, 0.0))
+        text(
+            "Dokument elektroniczny (ePUAP) • Zwolnienie z opłaty: 0,00 zł",
+            margin_x + 160,
+            331,
+            font="/F2",
+            size=8.0,
+            rgb=(0.0, 0.0, 0.0),
+        )
 
-    text("Dane dziecka:", margin_x + 8, 366, font="/F1", size=8.0)
-    ch_p = app_obj.child
-    ch_info = (
-        f"{ch_p.first_name} {ch_p.last_name}, ur. {ch_p.date_of_birth}, "
-        f"Akt: {ch_p.birth_certificate_number} ({ch_p.usc_city})"
-        if ch_p
-        else "---"
-    )
-    text(ch_info[:70], margin_x + 168, 366, font="/F2", size=8.0)
+        text("Dane dziecka i aktu:", margin_x, 366, font="/F1", size=8.0, rgb=(0.0, 0.0, 0.0))
+        ch_p = app_obj.child
+        ch_info = (
+            f"{ch_p.first_name} {ch_p.last_name}, ur. {ch_p.date_of_birth}, "
+            f"Akt: {ch_p.birth_certificate_number} ({ch_p.usc_city})"
+            if ch_p
+            else "---"
+        )
+        text(ch_info[:70], margin_x + 160, 366, font="/F2", size=8.0, rgb=(0.0, 0.0, 0.0))
+    else:
+        lp_p = app_obj.leave_period
+        lp_text = (
+            f"Od {lp_p.start_date} do {lp_p.end_date} "
+            f"({lp_p.weeks_count} tyg. / {lp_p.days_count} dni)"
+        )
+        text("Okres korzystania:", margin_x, 296, font="/F1", size=8.0, rgb=(0.0, 0.0, 0.0))
+        text(lp_text, margin_x + 160, 296, font="/F2", size=8.0, rgb=(0.0, 0.0, 0.0))
 
-    # 5. Section 2: Declarations (Natural line spacing of 22 pt)
+        text("Wariant zasiłku / stawka:", margin_x, 331, font="/F1", size=8.0, rgb=(0.0, 0.0, 0.0))
+        rate_desc = (
+            "Stawka 81,5% podstawy wymiaru (wniosek jednolity w terminie 21 dni)"
+            if app_obj.leave_period.selected_rate_variant == "UNIFIED_81_5"
+            else "Stawka 100% / 70% podstawy wymiaru"
+        )
+        text(rate_desc, margin_x + 160, 331, font="/F2", size=8.0, rgb=(0.0, 0.0, 0.0))
+
+        text("Dane dziecka:", margin_x, 366, font="/F1", size=8.0, rgb=(0.0, 0.0, 0.0))
+        ch_p = app_obj.child
+        ch_info = (
+            f"{ch_p.first_name} {ch_p.last_name}, ur. {ch_p.date_of_birth}, "
+            f"Akt: {ch_p.birth_certificate_number} ({ch_p.usc_city})"
+            if ch_p
+            else "---"
+        )
+        text(ch_info[:70], margin_x + 160, 366, font="/F2", size=8.0, rgb=(0.0, 0.0, 0.0))
+
+    # 5. Section 2: Declarations (Natural line spacing of 22 pt, black & white)
     text(
         "2. OŚWIADCZENIA I POUCZENIA PRAWNE WNIOSKODAWCY",
         margin_x,
         404,
         font="/F1",
         size=8.5,
-        rgb=(0.0, 0.23, 0.44),
+        rgb=(0.0, 0.0, 0.0),
     )
-    line(margin_x, 408, margin_x + usable_w, 408, stroke=(0.0, 0.23, 0.44), lw=0.6)
-    text(
-        "[X] Oświadczam, że drugi z rodziców nie korzysta z urlopu / "
-        "zasiłku macierzyńskiego w tym samym okresie.",
-        margin_x + 6,
-        428,
-        font="/F2",
-        size=7.8,
-    )
-    text(
-        "[X] Oświadczam pod rygorem odpowiedzialności karnej z art. 233 § 1 "
-        "Kodeksu karnego, że powyższe dane są prawdziwe.",
-        margin_x + 6,
-        450,
-        font="/F2",
-        size=7.8,
-    )
-    text(
-        "[X] Zobowiązuję się niezwłocznie powiadomić płatnika składek / ZUS "
-        "o wszelkich zmianach uprawnień.",
-        margin_x + 6,
-        472,
-        font="/F2",
-        size=7.8,
-    )
+    line(margin_x, 408, margin_x + usable_w, 408, stroke=(0.0, 0.0, 0.0), lw=0.6)
+    if app_obj.category == ApplicationCategory.USC_CIVIL_ACT:
+        text(
+            "[X] Oświadczam, że jestem rodzicem dziecka uprawnionym do pobrania odpisu "
+            "(art. 45 PASC).",
+            margin_x,
+            428,
+            font="/F2",
+            size=7.8,
+            rgb=(0.0, 0.0, 0.0),
+        )
+        text(
+            "[X] Wnoszę o ustawowe zwolnienie z opłaty skarbowej (0 zł) na cele "
+            "zasiłku macierzyńskiego ZUS.",
+            margin_x,
+            450,
+            font="/F2",
+            size=7.8,
+            rgb=(0.0, 0.0, 0.0),
+        )
+        text(
+            "[X] Oświadczam pod rygorem odpowiedzialności karnej z art. 233 § 1 KK, "
+            "że dane są prawdziwe.",
+            margin_x,
+            472,
+            font="/F2",
+            size=7.8,
+            rgb=(0.0, 0.0, 0.0),
+        )
+    else:
+        text(
+            "[X] Oświadczam, że drugi z rodziców nie korzysta z urlopu / "
+            "zasiłku macierzyńskiego w tym samym okresie.",
+            margin_x,
+            428,
+            font="/F2",
+            size=7.8,
+            rgb=(0.0, 0.0, 0.0),
+        )
+        text(
+            "[X] Oświadczam pod rygorem odpowiedzialności karnej z art. 233 § 1 "
+            "Kodeksu karnego, że powyższe dane są prawdziwe.",
+            margin_x,
+            450,
+            font="/F2",
+            size=7.8,
+            rgb=(0.0, 0.0, 0.0),
+        )
+        text(
+            "[X] Zobowiązuję się niezwłocznie powiadomić płatnika składek / ZUS "
+            "o wszelkich zmianach uprawnień.",
+            margin_x,
+            472,
+            font="/F2",
+            size=7.8,
+            rgb=(0.0, 0.0, 0.0),
+        )
 
-    # 6. Section 3: Attachments (Natural line spacing of 22 pt)
+    # 6. Section 3: Attachments (Natural line spacing of 22 pt, black & white)
     text(
         "3. WYKAZ ZAŁĄCZNIKÓW FORMALNYCH (ROZPORZĄDZENIE MRPIPS Z 11 MARCA 2025 R.)",
         margin_x,
         500,
         font="/F1",
         size=8.5,
-        rgb=(0.0, 0.23, 0.44),
+        rgb=(0.0, 0.0, 0.0),
     )
-    line(margin_x, 504, margin_x + usable_w, 504, stroke=(0.0, 0.23, 0.44), lw=0.6)
+    line(margin_x, 504, margin_x + usable_w, 504, stroke=(0.0, 0.0, 0.0), lw=0.6)
     ay = 524
     for idx, att in enumerate(app_obj.required_attachments[:3], 1):
         status = "Dołączono" if att.is_provided else "Do uzupełnienia"
         text(
             f"[X] {idx}. {att.title[:55]} ({status}) - {att.legal_basis[:30]}",
-            margin_x + 6,
+            margin_x,
             ay,
             font="/F2",
             size=7.8,
+            rgb=(0.0, 0.0, 0.0),
         )
         ay += 22
 
-    # 7. Section 4: UPO if present
+    # 7. Section 4: UPO if present (Frameless, monochrome)
     if app_obj.submission_confirmation:
-        rect(
-            margin_x, 590, usable_w, 55, fill=(0.96, 0.99, 0.97), stroke=(0.10, 0.50, 0.25), lw=0.8
-        )
+        line(margin_x, 586, margin_x + usable_w, 586, stroke=(0.0, 0.0, 0.0), lw=0.6)
         text(
             "URZĘDOWE POŚWIADCZENIE PRZEDŁOŻENIA / ODBIORU (UPO):",
-            margin_x + 8,
-            604,
+            margin_x,
+            602,
             font="/F1",
             size=7.5,
-            rgb=(0.10, 0.50, 0.25),
+            rgb=(0.0, 0.0, 0.0),
         )
         conf = app_obj.submission_confirmation
         text(
             f"Znak sprawy: {conf.case_number} | Status: {conf.status} | "
             f"Kod UPO: {conf.upo_reference_code}",
-            margin_x + 8,
-            620,
+            margin_x,
+            618,
             font="/F2",
             size=7.2,
-            rgb=(0.1, 0.3, 0.1),
+            rgb=(0.0, 0.0, 0.0),
         )
         text(
             f"Data doręczenia: {conf.submitted_at[:19]} | Adresat: {conf.recipient_name[:40]}",
-            margin_x + 8,
-            633,
+            margin_x,
+            632,
             font="/F2",
             size=7.2,
-            rgb=(0.1, 0.3, 0.1),
+            rgb=(0.0, 0.0, 0.0),
         )
         sig_y = 660
-        sig_h = 85.0
     else:
         sig_y = 595
-        sig_h = 115.0
 
-    # 8. Section 5: Signatures (Generous vertical space)
-    rect(margin_x, sig_y, col_w, sig_h, fill=(0.99, 0.99, 1.0), stroke=(0.80, 0.85, 0.90), lw=0.8)
-    rect(rx, sig_y, col_w, sig_h, fill=(0.99, 0.99, 1.0), stroke=(0.80, 0.85, 0.90), lw=0.8)
+    # 8. Section 5: Signatures (Frameless and backgroundless)
     title_y = sig_y + 18 if app_obj.submission_confirmation else sig_y + 20
-    text(
-        "POTWIERDZENIE ODBIORU (PŁATNIK / ZUS)",
-        margin_x + 8,
-        title_y,
-        font="/F1",
-        size=7.5,
-        rgb=(0.0, 0.23, 0.44),
+    t_left_p = (
+        "POTWIERDZENIE WPŁYWU (USC / RSC)"
+        if app_obj.category == ApplicationCategory.USC_CIVIL_ACT
+        else "POTWIERDZENIE ODBIORU (PŁATNIK / ZUS)"
+    )
+    t_right_p = (
+        "PODPIS ELEKTRONICZNY RODZICA"
+        if app_obj.category == ApplicationCategory.USC_CIVIL_ACT
+        else "PODPIS WNIOSKODAWCY (PRACOWNIKA)"
     )
     text(
-        "PODPIS WNIOSKODAWCY (PRACOWNIKA)",
-        rx + 8,
+        t_left_p,
+        margin_x,
         title_y,
         font="/F1",
         size=7.5,
-        rgb=(0.0, 0.23, 0.44),
+        rgb=(0.0, 0.0, 0.0),
+    )
+    text(
+        t_right_p,
+        rx,
+        title_y,
+        font="/F1",
+        size=7.5,
+        rgb=(0.0, 0.0, 0.0),
     )
     line1_y = sig_y + 44 if app_obj.submission_confirmation else sig_y + 54
     line2_y = sig_y + 70 if app_obj.submission_confirmation else sig_y + 88
     text(
         "Data wpływu: .......................................",
-        margin_x + 8,
+        margin_x,
         line1_y,
         font="/F2",
         size=7.2,
-        rgb=(0.4, 0.4, 0.4),
+        rgb=(0.3, 0.3, 0.3),
     )
     text(
         "Podpis i pieczęć przyjmującego: ....................",
-        margin_x + 8,
+        margin_x,
         line2_y,
         font="/F2",
         size=7.2,
-        rgb=(0.4, 0.4, 0.4),
+        rgb=(0.3, 0.3, 0.3),
     )
     text(
         f"Miejscowość i data: Warszawa, {app_obj.created_at[:10]} r.",
-        rx + 8,
+        rx,
         line1_y,
         font="/F2",
         size=7.2,
-        rgb=(0.4, 0.4, 0.4),
+        rgb=(0.3, 0.3, 0.3),
     )
     text(
         "Czytelny podpis: ...................................",
-        rx + 8,
+        rx,
         line2_y,
         font="/F2",
         size=7.2,
-        rgb=(0.4, 0.4, 0.4),
+        rgb=(0.3, 0.3, 0.3),
     )
 
     # 9. Footer
-    line(margin_x, 810, margin_x + usable_w, 810, stroke=(0.85, 0.88, 0.92), lw=0.6)
+    line(margin_x, 810, margin_x + usable_w, 810, stroke=(0.3, 0.3, 0.3), lw=0.6)
     text(
         f"Dokument urzędowy wygenerowany w module ZUS Asystent Rodzica | "
         f"MRPiPS 2025 | ID: {app_obj.id}",
@@ -1749,7 +2121,7 @@ def _render_pdf_with_pure_python(app_obj: ApplicationDetailResponse) -> bytes:
         822,
         font="/F2",
         size=7.0,
-        rgb=(0.45, 0.45, 0.45),
+        rgb=(0.2, 0.2, 0.2),
     )
     text(
         "Strona 1 z 1",
@@ -1757,7 +2129,7 @@ def _render_pdf_with_pure_python(app_obj: ApplicationDetailResponse) -> bytes:
         822,
         font="/F1",
         size=7.5,
-        rgb=(0.45, 0.45, 0.45),
+        rgb=(0.2, 0.2, 0.2),
     )
 
     stream_bytes = b"".join(stream_ops)
