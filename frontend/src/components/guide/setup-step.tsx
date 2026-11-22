@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef } from "react";
 import {
   ArrowRight,
   CheckCircle2,
+  ClipboardList,
   AlertTriangle,
   ShieldCheck,
   Sparkles,
@@ -153,23 +154,10 @@ export function SetupStep({
     >
       {/* 1. SEKCJA: Formularz danych w stylu ZUS */}
       <div className="zus-card">
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: "16px",
-            flexWrap: "wrap",
-            gap: "10px",
-          }}
-        >
-          <div>
-            <h2
-              className="zus-card-header-title"
-              style={{ margin: 0, border: "none", padding: 0 }}
-            >
-              Dane do kalkulacji uprawnień
-            </h2>
+        <div className="zus-card-header">
+          <div className="zus-card-header-title">
+            <ClipboardList className="size-5 text-[var(--zus-green)]" />
+            <span>Dane do kalkulacji uprawnień</span>
           </div>
 
           <div
@@ -189,16 +177,17 @@ export function SetupStep({
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "6px",
-                height: "38px",
-                padding: "0 12px",
-                fontSize: "0.84rem",
+                height: "36px",
+                padding: "0 14px",
+                fontSize: "0.85rem",
                 fontWeight: 600,
                 cursor: "pointer",
+                borderRadius: "9999px",
               }}
               disabled={isParsingPdf}
               title="Wgraj zaświadczenie płatnika lub wniosek ZUS w formacie PDF (np. Z-3, Z-3a, ZAM, e-ZLA)"
             >
-              <FileUp className="size-4 text-[#475569]" />
+              <FileUp className="size-4 text-[var(--zus-green)]" />
               <span>{isParsingPdf ? "Parsowanie PDF..." : "Wgraj PDF"}</span>
             </button>
             <input
@@ -255,7 +244,7 @@ export function SetupStep({
               className="zus-label"
               style={{ display: "flex", alignItems: "center", gap: "6px" }}
             >
-              <User className="size-4 text-[#475569]" />
+              <User className="size-4 text-[var(--zus-green)]" />
               <span>Kto wnioskuje o świadczenie? (Rola wnioskodawcy)</span>
             </label>
             <div
@@ -273,11 +262,11 @@ export function SetupStep({
                   borderRadius: "6px",
                   border:
                     input.role === "mother"
-                      ? "2px solid #334155"
+                      ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.role === "mother" ? "#F1F5F9" : "#FFFFFF",
-                  color: input.role === "mother" ? "#0F172A" : "#475569",
+                    input.role === "mother" ? "var(--zus-green-light)" : "#FFFFFF",
+                  color: input.role === "mother" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
                   fontWeight: input.role === "mother" ? 700 : 500,
                   fontSize: "0.94rem",
                   textAlign: "center",
@@ -289,7 +278,7 @@ export function SetupStep({
                   minHeight: "44px",
                   boxShadow:
                     input.role === "mother"
-                      ? "0 1px 2px rgba(0, 0, 0, 0.05)"
+                      ? "0 0 0 1px var(--zus-green)"
                       : "none",
                 }}
               >
@@ -304,11 +293,11 @@ export function SetupStep({
                   borderRadius: "6px",
                   border:
                     input.role === "father"
-                      ? "2px solid #334155"
+                      ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.role === "father" ? "#F1F5F9" : "#FFFFFF",
-                  color: input.role === "father" ? "#0F172A" : "#475569",
+                    input.role === "father" ? "var(--zus-green-light)" : "#FFFFFF",
+                  color: input.role === "father" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
                   fontWeight: input.role === "father" ? 700 : 500,
                   fontSize: "0.94rem",
                   textAlign: "center",
@@ -320,7 +309,7 @@ export function SetupStep({
                   minHeight: "44px",
                   boxShadow:
                     input.role === "father"
-                      ? "0 1px 2px rgba(0, 0, 0, 0.05)"
+                      ? "0 0 0 1px var(--zus-green)"
                       : "none",
                 }}
               >
@@ -335,11 +324,11 @@ export function SetupStep({
                   borderRadius: "6px",
                   border:
                     input.role === "guardian"
-                      ? "2px solid #334155"
+                      ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.role === "guardian" ? "#F1F5F9" : "#FFFFFF",
-                  color: input.role === "guardian" ? "#0F172A" : "#475569",
+                    input.role === "guardian" ? "var(--zus-green-light)" : "#FFFFFF",
+                  color: input.role === "guardian" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
                   fontWeight: input.role === "guardian" ? 700 : 500,
                   fontSize: "0.94rem",
                   textAlign: "center",
@@ -351,7 +340,7 @@ export function SetupStep({
                   minHeight: "44px",
                   boxShadow:
                     input.role === "guardian"
-                      ? "0 1px 2px rgba(0, 0, 0, 0.05)"
+                      ? "0 0 0 1px var(--zus-green)"
                       : "none",
                 }}
               >
@@ -366,7 +355,7 @@ export function SetupStep({
               className="zus-label"
               style={{ display: "flex", alignItems: "center", gap: "6px" }}
             >
-              <CreditCard className="size-4 text-[#475569]" />
+              <CreditCard className="size-4 text-[var(--zus-green)]" />
               <span>Forma zatrudnienia (Tytuł ubezpieczenia społecznego)</span>
             </label>
             <div
@@ -387,11 +376,11 @@ export function SetupStep({
                   borderRadius: "6px",
                   border:
                     input.employment === "uop"
-                      ? "2px solid #334155"
+                      ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.employment === "uop" ? "#F1F5F9" : "#FFFFFF",
-                  color: input.employment === "uop" ? "#0F172A" : "#475569",
+                    input.employment === "uop" ? "var(--zus-green-light)" : "#FFFFFF",
+                  color: input.employment === "uop" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
                   fontWeight: input.employment === "uop" ? 700 : 500,
                   fontSize: "0.9rem",
                   cursor: "pointer",
@@ -403,7 +392,7 @@ export function SetupStep({
                   transition: "all 0.15s ease",
                   boxShadow:
                     input.employment === "uop"
-                      ? "0 1px 2px rgba(0, 0, 0, 0.05)"
+                      ? "0 0 0 1px var(--zus-green)"
                       : "none",
                 }}
               >
@@ -421,12 +410,12 @@ export function SetupStep({
                   borderRadius: "6px",
                   border:
                     input.employment === "zlecenie"
-                      ? "2px solid #334155"
+                      ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.employment === "zlecenie" ? "#F1F5F9" : "#FFFFFF",
+                    input.employment === "zlecenie" ? "var(--zus-green-light)" : "#FFFFFF",
                   color:
-                    input.employment === "zlecenie" ? "#0F172A" : "#475569",
+                    input.employment === "zlecenie" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
                   fontWeight: input.employment === "zlecenie" ? 700 : 500,
                   fontSize: "0.9rem",
                   cursor: "pointer",
@@ -438,7 +427,7 @@ export function SetupStep({
                   transition: "all 0.15s ease",
                   boxShadow:
                     input.employment === "zlecenie"
-                      ? "0 1px 2px rgba(0, 0, 0, 0.05)"
+                      ? "0 0 0 1px var(--zus-green)"
                       : "none",
                 }}
               >
@@ -456,11 +445,11 @@ export function SetupStep({
                   borderRadius: "6px",
                   border:
                     input.employment === "jdg"
-                      ? "2px solid #334155"
+                      ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.employment === "jdg" ? "#F1F5F9" : "#FFFFFF",
-                  color: input.employment === "jdg" ? "#0F172A" : "#475569",
+                    input.employment === "jdg" ? "var(--zus-green-light)" : "#FFFFFF",
+                  color: input.employment === "jdg" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
                   fontWeight: input.employment === "jdg" ? 700 : 500,
                   fontSize: "0.9rem",
                   cursor: "pointer",
@@ -472,7 +461,7 @@ export function SetupStep({
                   transition: "all 0.15s ease",
                   boxShadow:
                     input.employment === "jdg"
-                      ? "0 1px 2px rgba(0, 0, 0, 0.05)"
+                      ? "0 0 0 1px var(--zus-green)"
                       : "none",
                 }}
               >
@@ -496,7 +485,7 @@ export function SetupStep({
                   color: "#334155",
                 }}
               >
-                <Info className="size-4 text-[#475569] shrink-0" />
+                <Info className="size-4 text-[var(--zus-green)] shrink-0" />
                 <span>
                   Ubezpieczenie chorobowe na etacie jest obowiązkowe od 1. dnia
                   pracy. Brak karencji przy macierzyńskim.
@@ -555,7 +544,7 @@ export function SetupStep({
                     style={{
                       width: "18px",
                       height: "18px",
-                      accentColor: "#334155",
+                      accentColor: "var(--zus-green)",
                       cursor: "pointer",
                       flexShrink: 0,
                     }}
@@ -573,7 +562,7 @@ export function SetupStep({
                 htmlFor="insured-days"
                 style={{ display: "flex", alignItems: "center", gap: "6px" }}
               >
-                <Calendar className="size-4 text-[#475569]" />
+                <Calendar className="size-4 text-[var(--zus-green)]" />
                 <span>Staż ubezpieczenia w dniach</span>
               </label>
               <input
@@ -631,7 +620,7 @@ export function SetupStep({
                 htmlFor="due-date"
                 style={{ display: "flex", alignItems: "center", gap: "6px" }}
               >
-                <Calendar className="size-4 text-[#475569]" />
+                <Calendar className="size-4 text-[var(--zus-green)]" />
                 <span>
                   {input.role === "guardian"
                     ? "Data przyjęcia dziecka"
@@ -686,7 +675,7 @@ export function SetupStep({
               htmlFor="gross-salary"
               style={{ display: "flex", alignItems: "center", gap: "6px" }}
             >
-              <CreditCard className="size-4 text-[#475569]" />
+              <CreditCard className="size-4 text-[var(--zus-green)]" />
               <span>
                 {input.employment === "jdg"
                   ? "Zadeklarowana miesięczna podstawa wymiaru składek (PLN)"
@@ -779,7 +768,7 @@ export function SetupStep({
                 gap: "6px",
               }}
             >
-              <ShieldCheck className="size-4 text-[#475569]" />
+              <ShieldCheck className="size-4 text-[var(--zus-green)]" />
               <span>Sytuacje szczególne (opcjonalnie):</span>
             </div>
 
@@ -798,7 +787,7 @@ export function SetupStep({
                   checked={input.premature}
                   onChange={(e) => update("premature", e.target.checked)}
                   style={{
-                    accentColor: "#334155",
+                    accentColor: "var(--zus-green)",
                     width: "16px",
                     height: "16px",
                   }}
@@ -824,7 +813,7 @@ export function SetupStep({
                 checked={input.zaZyciem}
                 onChange={(e) => update("zaZyciem", e.target.checked)}
                 style={{
-                  accentColor: "#334155",
+                  accentColor: "var(--zus-green)",
                   width: "16px",
                   height: "16px",
                 }}
@@ -840,16 +829,12 @@ export function SetupStep({
 
       {/* 2. SEKCJA: Wstępne podsumowanie (pod sytuacjami szczególnymi, nad kontynuuj) */}
       <div className="zus-card">
-        <h2
-          className="zus-card-header-title"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <span>Wstępne podsumowanie</span>
-        </h2>
+        <div className="zus-card-header">
+          <div className="zus-card-header-title">
+            <CheckCircle2 className="size-5 text-[var(--zus-green)]" />
+            <span>Wstępne podsumowanie</span>
+          </div>
+        </div>
 
         <div
           className="zus-results-box"
@@ -859,8 +844,8 @@ export function SetupStep({
           <div
             style={{
               padding: "12px 14px",
-              backgroundColor: qualification.eligible ? "#F8FAFC" : "#FEF2F2",
-              border: `1px solid ${qualification.eligible ? "#CBD5E1" : "#FCA5A5"}`,
+              backgroundColor: qualification.eligible ? "#FAFAFA" : "#F5F5F5",
+              border: `1px solid ${qualification.eligible ? "#D4D4D4" : "#E5E5E5"}`,
               borderRadius: "6px",
               marginBottom: "16px",
             }}
@@ -879,7 +864,7 @@ export function SetupStep({
                 style={{
                   fontSize: "0.8rem",
                   fontWeight: 700,
-                  color: qualification.eligible ? "#1E293B" : "#DC2626",
+                  color: qualification.eligible ? "#171717" : "#525252",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "6px",
@@ -891,8 +876,8 @@ export function SetupStep({
                     height: "8px",
                     borderRadius: "50%",
                     backgroundColor: qualification.eligible
-                      ? "#475569"
-                      : "#DC2626",
+                      ? "#007834"
+                      : "#A3A3A3",
                   }}
                 ></span>
                 {qualification.headline}
@@ -902,7 +887,7 @@ export function SetupStep({
                   style={{
                     fontSize: "0.75rem",
                     fontWeight: 600,
-                    color: "#64748B",
+                    color: "#737373",
                     textTransform: "uppercase",
                   }}
                 >
@@ -918,7 +903,7 @@ export function SetupStep({
             <p
               style={{
                 fontSize: "0.84rem",
-                color: qualification.eligible ? "#334155" : "#991B1B",
+                color: qualification.eligible ? "#404040" : "#525252",
                 lineHeight: 1.45,
                 margin: 0,
               }}
@@ -1032,7 +1017,7 @@ export function SetupStep({
                 gap: "6px",
               }}
             >
-              <Info className="size-4 text-[#475569]" />
+              <Info className="size-4 text-[var(--zus-green)]" />
               <span>Co sprawdzisz w Kroku 2:</span>
             </div>
             Otrzymasz harmonogram wypłat z dokładnymi datami, terminy złożenia

@@ -1,3 +1,4 @@
+import { ViewHeader } from "../common/ViewHeader";
 import React, { useState } from 'react';
 import { calculateSpecialCases } from '@/lib/api-client';
 import type { SpecialCasesInput, SpecialCasesResult } from '@/types/special_cases';
@@ -29,12 +30,10 @@ export const SpecialCasesView: React.FC = () => {
 
   return (
     <div className="zus-view-container">
-      <div className="zus-view-header">
-        <h1 className="zus-view-title">Kalkulator Przypadków Szczególnych i Pomoc ZUS</h1>
-        <p className="zus-view-desc">
-          ZUS zapewnia szczególne mechanizmy ochronne i wydłużone urlopy w przypadku narodzin wcześniaka, hospitalizacji noworodka, orzeczenia „Za życiem” oraz w najtrudniejszych chwilach straty dziecka.
-        </p>
-      </div>
+      <ViewHeader
+        title="Kalkulator Przypadków Szczególnych i Pomoc ZUS"
+        description="ZUS zapewnia szczególne mechanizmy ochronne i wydłużone urlopy w przypadku narodzin wcześniaka, hospitalizacji noworodka, orzeczenia „Za życiem” oraz w najtrudniejszych chwilach straty dziecka."
+      />
 
       <div className="zus-view-grid">
         <div className="zus-card">

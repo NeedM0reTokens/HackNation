@@ -1,3 +1,4 @@
+import { ViewHeader } from "../common/ViewHeader";
 import React, { useState } from 'react';
 
 export const DocumentsView: React.FC = () => {
@@ -5,12 +6,10 @@ export const DocumentsView: React.FC = () => {
 
   return (
     <div className="zus-view-container">
-      <div className="zus-view-header">
-        <h1 className="zus-view-title">Co, gdzie i kiedy złożyć? – Przewodnik formalności ZUS</h1>
-        <p className="zus-view-desc">
-          Terminowe złożenie właściwych formularzy jest kluczem do uzyskania optymalnych stawek (np. <strong>81,5% za cały okres</strong>) oraz pełnej ochrony przed zwolnieniem z pracy.
-        </p>
-      </div>
+      <ViewHeader
+        title="Co, gdzie i kiedy złożyć? – Przewodnik formalności ZUS"
+        description={<>Terminowe złożenie właściwych formularzy jest kluczem do uzyskania optymalnych stawek (np. <strong>81,5% za cały okres</strong>) oraz pełnej ochrony przed zwolnieniem z pracy.</>}
+      />
 
       {/* Zakładki kategorii */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '2px solid #E2E8F0', flexWrap: 'wrap' }}>
