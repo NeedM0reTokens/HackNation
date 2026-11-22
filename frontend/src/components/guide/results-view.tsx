@@ -28,11 +28,9 @@ type TabId = 'summary' | 'timeline' | 'documents' | 'alerts';
 export function ResultsView({
   input,
   onEdit,
-  onLoadSample,
 }: {
   input: GuideInput;
   onEdit: () => void;
-  onLoadSample: (input: GuideInput) => void;
 }) {
   const [options, setOptions] = useState(defaultResultOptions);
   const [tab, setTab] = useState<TabId>('summary');

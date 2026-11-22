@@ -1451,6 +1451,12 @@ button {
   gap: 14px;
 }
 
+.zus-form-row-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
 .zus-label {
   font-size: 0.88rem;
   font-weight: 600;
@@ -1473,6 +1479,17 @@ button {
   outline: none;
   border-color: var(--zus-green);
   box-shadow: 0 0 0 3px rgba(0, 120, 52, 0.15);
+}
+
+.zus-input.is-invalid {
+  border-color: #DC2626 !important;
+  background-color: #FFFFFF !important;
+}
+
+.zus-input.is-invalid:focus {
+  outline: none !important;
+  border-color: #DC2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
 }
 
 /* Przyciski zakładek */
@@ -1651,7 +1668,8 @@ button {
   .zus-view-grid {
     grid-template-columns: 1fr;
   }
-  .zus-form-row {
+  .zus-form-row,
+  .zus-form-row-3 {
     grid-template-columns: 1fr;
   }
   .zus-stat-grid {
@@ -1681,17 +1699,16 @@ button {
   gap: 12px;
   flex: 1;
   background: none;
-  border: 1.5px solid transparent;
+  border: none;
   text-align: left;
-  padding: 10px 14px;
-  border-radius: var(--zus-radius-sm);
+  padding: 6px 8px;
   cursor: default;
   transition: all 0.2s ease;
 }
 
 .zus-step-item.active {
-  background-color: var(--zus-green-light);
-  border-color: var(--zus-green-border);
+  background: none;
+  border: none;
 }
 
 .zus-step-number {

@@ -25,12 +25,12 @@ export const PIT_ADVANCE_RATE = 0.12
 export const MIN_BENEFIT = 1000
 
 export const defaultGuideInput: GuideInput = {
-  role: 'mother',
-  employment: 'uop',
-  sicknessInsurance: true,
-  insuredDays: 365,
-  dueDate: '2027-03-15',
-  grossSalary: 7000,
+  role: '' as Role,
+  employment: '' as Employment,
+  sicknessInsurance: false,
+  insuredDays: 0,
+  dueDate: '',
+  grossSalary: 0,
   premature: false,
   zaZyciem: false,
 }
@@ -55,12 +55,15 @@ const employmentShort: Record<Employment, string> = {
   jdg: 'JDG',
 }
 
-export function waitingPeriodDays(employment: Employment) {
-  return employment === 'uop' ? 30 : 90
+export function waitingPeriodDays(employment?: Employment | null) {
+  if (employment === 'uop') return 30
+  if (employment === 'zlecenie' || employment === 'jdg') return 90
+  return 30
 }
 
 export function hasSicknessInsurance(input: GuideInput) {
-  return input.employment === 'uop' || input.sicknessInsurance
+  if (!input.employment) return false
+  return input.employment === 'uop' || Boolean(input.sicknessInsurance)
 }
 
 export type Qualification = {
@@ -70,6 +73,31 @@ export type Qualification = {
 }
 
 export function qualify(input: GuideInput): Qualification {
+  if (!input.role || !input.employment || input.grossSalary === undefined || input.grossSalary === null || Number(input.grossSalary) < 0) {
+    return {
+      eligible: false,
+      headline: 'Wprowadź dane do kalkulacji',
+      reason: 'Wybierz rolę wnioskodawcy, tytuł ubezpieczenia oraz podaj wynagrodzenie brutto, aby zweryfikować uprawnienia.',
+    }
+  }
+
+  if (Number(input.insuredDays) < 0) {
+    return {
+      eligible: false,
+      headline: 'Nieprawidłowy staż ubezpieczenia',
+      reason: 'Staż ubezpieczenia nie może być ujemny.',
+    }
+  }
+
+  const todayStr = new Date().toISOString().split('T')[0]
+  if (input.dueDate && input.dueDate < todayStr) {
+    return {
+      eligible: false,
+      headline: 'Nieprawidłowa data',
+      reason: 'Planowana data nie może być z przeszłości.',
+    }
+  }
+
   const waiting = waitingPeriodDays(input.employment)
   if (!hasSicknessInsurance(input)) {
     return {
@@ -79,21 +107,19 @@ export function qualify(input: GuideInput): Qualification {
     }
   }
 
-  // Zgodnie z art. 4 ust. 2 pkt 3 ustawy zasiłkowej, prawo do zasiłku macierzyńskiego
-  // i rodzicielskiego przysługuje od 1. dnia ubezpieczenia (brak okresu wyczekiwania).
-  // Okres wyczekiwania 30/90 dni dotyczy wyłącznie zasiłku chorobowego (L4).
-  if (input.insuredDays < waiting) {
+  const days = Number(input.insuredDays) || 0
+  if (days < waiting) {
     return {
       eligible: true,
       headline: 'Prawo do zasiłku macierzyńskiego (0 dni karencji)',
-      reason: `Zasiłek macierzyński/ojcowski przysługuje od 1. dnia ubezpieczenia. Uwaga: na zwolnienie lekarskie L4 przed porodem obowiązuje okres wyczekiwania ${waiting} dni (posiadasz ${input.insuredDays} dni).`,
+      reason: `Zasiłek macierzyński/ojcowski przysługuje od 1. dnia ubezpieczenia. Uwaga: na zwolnienie lekarskie L4 przed porodem obowiązuje okres wyczekiwania ${waiting} dni (posiadasz ${days} dni).`,
     }
   }
 
   return {
     eligible: true,
     headline: 'Kwalifikacja pozytywna – pełne prawo do świadczeń',
-    reason: `Masz prawo do zasiłku macierzyńskiego od 1. dnia oraz spełniasz warunek ${waiting} dni okresu wyczekiwania dla zasiłku chorobowego na ${employmentShort[input.employment]}.`,
+    reason: `Masz prawo do zasiłku macierzyńskiego od 1. dnia oraz spełniasz warunek ${waiting} dni okresu wyczekiwania dla zasiłku chorobowego na ${employmentShort[input.employment] || 'wybranej umowie'}.`,
   }
 }
 
@@ -545,9 +571,12 @@ const knowledgeByRole: Partial<Record<Role, KnowledgeCard>> = {
 }
 
 export function buildKnowledge(input: GuideInput): KnowledgeCard[] {
-  const roleCard = knowledgeByRole[input.role]
-  const employmentCard = knowledgeByEmployment[input.employment]
-  return roleCard ? [roleCard, employmentCard] : [employmentCard]
+  const roleCard = input.role ? knowledgeByRole[input.role] : undefined
+  const employmentCard = input.employment ? knowledgeByEmployment[input.employment] : undefined
+  const cards: KnowledgeCard[] = []
+  if (roleCard) cards.push(roleCard)
+  if (employmentCard) cards.push(employmentCard)
+  return cards
 }
 
 export const moreKnowledge: { id: string; title: string; body: string }[] = [
@@ -585,36 +614,36 @@ export const sampleCases: SampleCase[] = [
     id: 'anna-uop',
     label: 'Anna – etat (UoP)',
     description: 'Matka, 2 lata stażu, 7 800 zł brutto',
-    input: { ...defaultGuideInput, role: 'mother', employment: 'uop', insuredDays: 720, grossSalary: 7800 },
+    input: { ...defaultGuideInput, role: 'mother', employment: 'uop', sicknessInsurance: true, insuredDays: 720, dueDate: '2027-03-15', grossSalary: 7800 },
   },
   {
     id: 'marta-jdg',
     label: 'Marta – JDG bez chorobowego',
     description: 'Matka, nie opłaca składki chorobowej',
-    input: { ...defaultGuideInput, role: 'mother', employment: 'jdg', sicknessInsurance: false, insuredDays: 400, grossSalary: 5200 },
+    input: { ...defaultGuideInput, role: 'mother', employment: 'jdg', sicknessInsurance: false, insuredDays: 400, dueDate: '2027-03-15', grossSalary: 5200 },
   },
   {
     id: 'kasia-jdg',
     label: 'Kasia – świeża JDG, 45 dni',
     description: 'Matka, wysoka podstawa składek',
-    input: { ...defaultGuideInput, role: 'mother', employment: 'jdg', insuredDays: 45, grossSalary: 12500 },
+    input: { ...defaultGuideInput, role: 'mother', employment: 'jdg', sicknessInsurance: true, insuredDays: 45, dueDate: '2027-03-15', grossSalary: 12500 },
   },
   {
     id: 'piotr-uop',
     label: 'Piotr – tata na etacie',
     description: 'Ojciec, 4 lata stażu, 9 200 zł brutto',
-    input: { ...defaultGuideInput, role: 'father', employment: 'uop', insuredDays: 1500, grossSalary: 9200 },
+    input: { ...defaultGuideInput, role: 'father', employment: 'uop', sicknessInsurance: true, insuredDays: 1500, dueDate: '2027-03-15', grossSalary: 9200 },
   },
   {
     id: 'ewa-adopcja',
     label: 'Ewa – adopcja, zlecenie',
     description: 'Opiekunka, zlecenie z chorobowym',
-    input: { ...defaultGuideInput, role: 'guardian', employment: 'zlecenie', insuredDays: 400, grossSalary: 6000 },
+    input: { ...defaultGuideInput, role: 'guardian', employment: 'zlecenie', sicknessInsurance: true, insuredDays: 400, dueDate: '2027-03-15', grossSalary: 6000 },
   },
   {
     id: 'ola-wczesniak',
     label: 'Ola – wcześniak, „Za życiem”',
     description: 'Matka na etacie, dodatkowe tygodnie',
-    input: { ...defaultGuideInput, role: 'mother', employment: 'uop', insuredDays: 900, grossSalary: 6800, premature: true, zaZyciem: true },
+    input: { ...defaultGuideInput, role: 'mother', employment: 'uop', sicknessInsurance: true, insuredDays: 900, dueDate: '2027-03-15', grossSalary: 6800, premature: true, zaZyciem: true },
   },
 ]

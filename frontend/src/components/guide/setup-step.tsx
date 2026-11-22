@@ -11,13 +11,7 @@ import {
   Info,
   FileUp,
 } from "lucide-react";
-import {
-  waitingPeriodDays,
-  qualify,
-  sampleCases,
-  type GuideInput,
-} from "@/lib/guide";
-import { SampleCasesMenu } from "./sample-cases-menu";
+import { waitingPeriodDays, qualify, type GuideInput } from "@/lib/guide";
 import { parsePdfDocument } from "@/lib/api-client";
 
 export function SetupStep({
@@ -35,20 +29,52 @@ export function SetupStep({
   const update = <K extends keyof GuideInput>(key: K, value: GuideInput[K]) =>
     setInput((current) => ({ ...current, [key]: value }));
 
+  const [daysStr, setDaysStr] = useState<string>(
+    initialInput.insuredDays ? String(initialInput.insuredDays) : "",
+  );
+  const [salaryStr, setSalaryStr] = useState<string>(
+    initialInput.grossSalary ? String(initialInput.grossSalary) : "",
+  );
+
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }, []);
+
+  // Walidacja pól:
+  // 1. staż >= 0
+  const isDaysNegative = daysStr !== "" && Number(daysStr) < 0;
+  const isDaysValid =
+    daysStr !== "" && !isNaN(Number(daysStr)) && Number(daysStr) >= 0;
+
+  // 2. data >= today
+  const isDateInPast = Boolean(input.dueDate) && input.dueDate < todayStr;
+  const isDateValid = Boolean(input.dueDate) && input.dueDate >= todayStr;
+
+  // 3. wynagrodzenie >= 0
+  const isSalaryNegative = salaryStr !== "" && Number(salaryStr) < 0;
+  const isSalaryValid =
+    salaryStr !== "" && !isNaN(Number(salaryStr)) && Number(salaryStr) >= 0;
+
   const isEmployee = input.employment === "uop";
-  const canSubmit = Boolean(input.dueDate) && input.grossSalary > 0;
+  const canSubmit =
+    Boolean(input.role) &&
+    Boolean(input.employment) &&
+    isDateValid &&
+    isSalaryValid &&
+    isDaysValid;
 
   // Wstępna kwalifikacja na żywo
   const qualification = useMemo(() => qualify(input), [input]);
 
   // Szacunki na żywo
-  const baseNet = Math.round(input.grossSalary * (1 - 0.1371) * 100) / 100;
+  const grossNum = isSalaryValid ? Number(salaryStr) : 0;
+  const baseNet = Math.round(grossNum * (1 - 0.1371) * 100) / 100;
   const estimatedMonthlyUnified = Math.round(baseNet * 0.815 * 100) / 100;
   const estimatedMonthly100 = Math.round(baseNet * 1.0 * 100) / 100;
-
-  const handleSelectSample = (sampleInput: GuideInput) => {
-    setInput(sampleInput);
-  };
 
   const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -71,7 +97,7 @@ export function SetupStep({
           return {
             ...prev,
             grossSalary:
-              extracted.gross_salary && extracted.gross_salary > 0
+              extracted.gross_salary && extracted.gross_salary >= 0
                 ? extracted.gross_salary
                 : prev.grossSalary,
             employment: emp,
@@ -80,9 +106,16 @@ export function SetupStep({
           };
         });
 
-        const salaryText = extracted.gross_salary
-          ? `${extracted.gross_salary} zł brutto`
-          : "";
+        if (
+          extracted.gross_salary !== undefined &&
+          extracted.gross_salary >= 0
+        ) {
+          setSalaryStr(String(extracted.gross_salary));
+        }
+        const salaryText =
+          extracted.gross_salary !== undefined
+            ? `${extracted.gross_salary} zł brutto`
+            : "";
         setPdfStatusMessage(
           `Wczytano z pliku ${file.name}: dokument ${docType} (${salaryText || "uzupełniono parametry formularza"}).`,
         );
@@ -99,8 +132,26 @@ export function SetupStep({
   };
 
   return (
-    <div className="zus-calc-grid">
-      {/* 1. LEWA KOLUMNA: Formularz danych w stylu ZUS */}
+    <form
+      className="zus-calc-flow"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (canSubmit) {
+          onSubmit({
+            ...input,
+            grossSalary: Math.max(0, Number(salaryStr) || 0),
+            insuredDays: Math.max(0, Number(daysStr) || 0),
+          });
+        }
+      }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "24px",
+        width: "100%",
+      }}
+    >
+      {/* 1. SEKCJA: Formularz danych w stylu ZUS */}
       <div className="zus-card">
         <div
           style={{
@@ -129,9 +180,6 @@ export function SetupStep({
               flexWrap: "wrap",
             }}
           >
-            {/* Załaduj przykładową sprawę ZUS - identycznie jak w Kroku 2 */}
-            <SampleCasesMenu onSelect={handleSelectSample} />
-
             {/* Opcja wgrania PDF */}
             <button
               type="button"
@@ -200,13 +248,7 @@ export function SetupStep({
           </div>
         )}
 
-        <form
-          className="zus-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (canSubmit) onSubmit(input);
-          }}
-        >
+        <div className="zus-form">
           {/* 1. Rola: Kto wnioskuje o świadczenie */}
           <div className="zus-form-group">
             <label
@@ -336,7 +378,10 @@ export function SetupStep({
             >
               <button
                 type="button"
-                onClick={() => update("employment", "uop")}
+                onClick={() => {
+                  update("employment", "uop");
+                  update("sicknessInsurance", true);
+                }}
                 style={{
                   padding: "12px 10px",
                   borderRadius: "6px",
@@ -367,7 +412,10 @@ export function SetupStep({
 
               <button
                 type="button"
-                onClick={() => update("employment", "zlecenie")}
+                onClick={() => {
+                  update("employment", "zlecenie");
+                  update("sicknessInsurance", false);
+                }}
                 style={{
                   padding: "12px 10px",
                   borderRadius: "6px",
@@ -399,7 +447,10 @@ export function SetupStep({
 
               <button
                 type="button"
-                onClick={() => update("employment", "jdg")}
+                onClick={() => {
+                  update("employment", "jdg");
+                  update("sicknessInsurance", false);
+                }}
                 style={{
                   padding: "12px 10px",
                   borderRadius: "6px",
@@ -430,7 +481,7 @@ export function SetupStep({
             </div>
 
             {/* Informacja o statusie ubezpieczenia chorobowego */}
-            {isEmployee ? (
+            {!input.employment ? null : isEmployee ? (
               <div
                 style={{
                   padding: "10px 14px",
@@ -529,30 +580,49 @@ export function SetupStep({
                 id="insured-days"
                 type="number"
                 min="0"
-                className="zus-input"
-                value={input.insuredDays || ""}
-                onChange={(e) =>
-                  update(
-                    "insuredDays",
-                    Math.max(0, Number(e.target.value) || 0),
-                  )
-                }
+                className={`zus-input ${isDaysNegative ? "is-invalid" : ""}`}
+                style={{
+                  borderColor: isDaysNegative ? "#DC2626" : undefined,
+                }}
+                value={daysStr}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setDaysStr(val);
+                  update("insuredDays", val === "" ? 0 : Number(val) || 0);
+                }}
                 placeholder="np. 365"
               />
-              <span
-                style={{
-                  fontSize: "0.76rem",
-                  color: "#64748B",
-                  marginTop: "3px",
-                }}
-              >
-                Min. {waitingPeriodDays(input.employment)} dni okresu
-                wyczekiwania (
-                {input.employment === "uop"
-                  ? "przy UoP brak karencji na macierzyński"
-                  : "wymagana ciągłość składek"}
-                ).
-              </span>
+              {isDaysNegative ? (
+                <span
+                  style={{
+                    fontSize: "0.78rem",
+                    color: "#DC2626",
+                    fontWeight: 600,
+                    marginTop: "4px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <AlertTriangle className="size-3.5 shrink-0" />
+                  Staż nie może być ujemny.
+                </span>
+              ) : (
+                <span
+                  style={{
+                    fontSize: "0.76rem",
+                    color: "#64748B",
+                    marginTop: "3px",
+                  }}
+                >
+                  Min. {waitingPeriodDays(input.employment)} dni okresu
+                  wyczekiwania (
+                  {input.employment === "uop"
+                    ? "przy UoP brak karencji na macierzyński"
+                    : "wymagana ciągłość składek"}
+                  ).
+                </span>
+              )}
             </div>
 
             <div className="zus-form-group">
@@ -571,20 +641,41 @@ export function SetupStep({
               <input
                 id="due-date"
                 type="date"
+                min={todayStr}
                 required
-                className="zus-input"
-                value={input.dueDate}
+                className={`zus-input ${isDateInPast ? "is-invalid" : ""}`}
+                style={{
+                  borderColor: isDateInPast ? "#DC2626" : undefined,
+                }}
+                value={input.dueDate || ""}
                 onChange={(e) => update("dueDate", e.target.value)}
               />
-              <span
-                style={{
-                  fontSize: "0.76rem",
-                  color: "#64748B",
-                  marginTop: "3px",
-                }}
-              >
-                Początek okresu pobierania świadczenia.
-              </span>
+              {isDateInPast ? (
+                <span
+                  style={{
+                    fontSize: "0.78rem",
+                    color: "#DC2626",
+                    fontWeight: 600,
+                    marginTop: "4px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <AlertTriangle className="size-3.5 shrink-0" />
+                  Data nie może być z przeszłości.
+                </span>
+              ) : (
+                <span
+                  style={{
+                    fontSize: "0.76rem",
+                    color: "#64748B",
+                    marginTop: "3px",
+                  }}
+                >
+                  Początek okresu pobierania świadczenia.
+                </span>
+              )}
             </div>
           </div>
 
@@ -609,16 +700,18 @@ export function SetupStep({
                 min="0"
                 step="50"
                 required
-                className="zus-input"
-                value={input.grossSalary || ""}
-                onChange={(e) =>
-                  update(
-                    "grossSalary",
-                    Math.max(0, Number(e.target.value) || 0),
-                  )
-                }
+                className={`zus-input ${isSalaryNegative ? "is-invalid" : ""}`}
+                style={{
+                  paddingRight: "45px",
+                  borderColor: isSalaryNegative ? "#DC2626" : undefined,
+                }}
+                value={salaryStr}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSalaryStr(val);
+                  update("grossSalary", val === "" ? 0 : Number(val) || 0);
+                }}
                 placeholder="np. 7000"
-                style={{ paddingRight: "45px" }}
               />
               <span
                 style={{
@@ -627,7 +720,7 @@ export function SetupStep({
                   top: "50%",
                   transform: "translateY(-50%)",
                   fontWeight: 600,
-                  color: "#64748B",
+                  color: isSalaryNegative ? "#DC2626" : "#64748B",
                   fontSize: "0.88rem",
                   pointerEvents: "none",
                 }}
@@ -635,16 +728,33 @@ export function SetupStep({
                 zł
               </span>
             </div>
-            <span
-              style={{
-                fontSize: "0.76rem",
-                color: "#64748B",
-                marginTop: "3px",
-              }}
-            >
-              Przeciętne wynagrodzenie z ostatnich 12 miesięcy kalendarzowych
-              przed porodem.
-            </span>
+            {isSalaryNegative ? (
+              <span
+                style={{
+                  fontSize: "0.78rem",
+                  color: "#DC2626",
+                  fontWeight: 600,
+                  marginTop: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
+                <AlertTriangle className="size-3.5 shrink-0" />
+                Wynagrodzenie nie może być ujemne.
+              </span>
+            ) : (
+              <span
+                style={{
+                  fontSize: "0.76rem",
+                  color: "#64748B",
+                  marginTop: "3px",
+                }}
+              >
+                Przeciętne wynagrodzenie z ostatnich 12 miesięcy kalendarzowych
+                przed porodem.
+              </span>
+            )}
           </div>
 
           {/* 5. Sytuacje szczególne (opcjonalnie) */}
@@ -725,35 +835,10 @@ export function SetupStep({
               </span>
             </label>
           </div>
-
-          {/* Przycisk przejścia do Kroku 2 */}
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className="zus-btn-primary"
-            style={{
-              width: "100%",
-              padding: "14px 20px",
-              fontSize: "1rem",
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "10px",
-              opacity: canSubmit ? 1 : 0.6,
-              cursor: canSubmit ? "pointer" : "not-allowed",
-              borderRadius: "6px",
-              boxShadow: canSubmit ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "none",
-              marginTop: "4px",
-            }}
-          >
-            <span>Kontynuuj</span>
-            <ArrowRight className="size-4" />
-          </button>
-        </form>
+        </div>
       </div>
 
-      {/* 2. PRAWA KOLUMNA: Spokojne, czytelne podsumowanie wstępne */}
+      {/* 2. SEKCJA: Wstępne podsumowanie (pod sytuacjami szczególnymi, nad kontynuuj) */}
       <div className="zus-card">
         <h2
           className="zus-card-header-title"
@@ -764,11 +849,6 @@ export function SetupStep({
           }}
         >
           <span>Wstępne podsumowanie</span>
-          <span
-            style={{ fontSize: "0.78rem", fontWeight: 600, color: "#475569" }}
-          >
-            Szacunek na żywo
-          </span>
         </h2>
 
         <div
@@ -815,24 +895,24 @@ export function SetupStep({
                       : "#DC2626",
                   }}
                 ></span>
-                {qualification.eligible
-                  ? "Warunki formalne spełnione"
-                  : "Brak wymaganego stażu"}
+                {qualification.headline}
               </span>
-              <span
-                style={{
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  color: "#64748B",
-                  textTransform: "uppercase",
-                }}
-              >
-                {input.employment === "uop"
-                  ? "Etat (UoP)"
-                  : input.employment === "zlecenie"
-                    ? "Zlecenie"
-                    : "Działalność"}
-              </span>
+              {input.employment && (
+                <span
+                  style={{
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    color: "#64748B",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {input.employment === "uop"
+                    ? "Etat (UoP)"
+                    : input.employment === "zlecenie"
+                      ? "Zlecenie"
+                      : "Działalność"}
+                </span>
+              )}
             </div>
 
             <p
@@ -847,8 +927,14 @@ export function SetupStep({
             </p>
           </div>
 
-          {/* Statystyki wstępne na kafelkach (2x2) */}
-          <div className="zus-stat-grid" style={{ marginBottom: "16px" }}>
+          {/* Statystyki wstępne na kafelkach (2x2 / 4 w rzędzie na szerszych) */}
+          <div
+            className="zus-stat-grid"
+            style={{
+              marginBottom: "16px",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            }}
+          >
             <div className="zus-stat-item">
               <div className="zus-stat-label">Podstawa netto</div>
               <div className="zus-stat-value" style={{ color: "#0F172A" }}>
@@ -904,11 +990,13 @@ export function SetupStep({
             <div className="zus-stat-item">
               <div className="zus-stat-label">Łączny wymiar opieki</div>
               <div className="zus-stat-value" style={{ color: "#0F172A" }}>
-                {input.zaZyciem
-                  ? "85 tyg."
-                  : input.role === "father"
-                    ? "9 tyg. + 14 dni"
-                    : "61 tyg."}
+                {!input.role
+                  ? "—"
+                  : input.zaZyciem
+                    ? "85 tyg."
+                    : input.role === "father"
+                      ? "9 tyg. + 14 dni"
+                      : "61 tyg."}
               </div>
               <div
                 style={{
@@ -953,6 +1041,41 @@ export function SetupStep({
           </div>
         </div>
       </div>
-    </div>
+
+      {/* 3. OSOBNA WYSPA: Przycisk kontynuuj */}
+      <div
+        className="zus-card"
+        style={{
+          borderTop: "1px solid var(--zus-border, #CBD5E0)",
+          padding: "16px 20px",
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+        }}
+      >
+        <button
+          type="submit"
+          disabled={!canSubmit}
+          className="zus-btn-primary"
+          style={{
+            width: "100%",
+            padding: "14px 20px",
+            fontSize: "1rem",
+            fontWeight: 700,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+            opacity: canSubmit ? 1 : 0.6,
+            cursor: canSubmit ? "pointer" : "not-allowed",
+            borderRadius: "6px",
+            boxShadow: canSubmit ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "none",
+          }}
+        >
+          <span>Kontynuuj</span>
+          <ArrowRight className="size-4" />
+        </button>
+      </div>
+    </form>
   );
 }
