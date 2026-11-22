@@ -1,3 +1,4 @@
+import { ViewHeader } from "../common/ViewHeader";
 import React, { useState } from 'react';
 import { calculatePregnancyBenefit, PregnancyBenefitPayload } from '@/lib/api-client';
 
@@ -38,12 +39,10 @@ export const PregnancyView: React.FC = () => {
 
   return (
     <div className="zus-view-container">
-      <div className="zus-view-header">
-        <h1 className="zus-view-title">Kwalifikator i Kalkulator Zasiłku Chorobowego (Kod B)</h1>
-        <p className="zus-view-desc">
-          Zwolnienie lekarskie z kodem literowym <strong>„B”</strong> przysługuje kobiecie w okresie ciąży i jest płatne w wysokości <strong>100% podstawy wymiaru</strong>. Okres zasiłkowy wynosi aż <strong>270 dni</strong> (zamiast standardowych 182 dni).
-        </p>
-      </div>
+      <ViewHeader
+        title="Kwalifikator i Kalkulator Zasiłku Chorobowego (Kod B)"
+        description={<>Zwolnienie lekarskie z kodem literowym <strong>„B”</strong> przysługuje kobiecie w okresie ciąży i jest płatne w wysokości <strong>100% podstawy wymiaru</strong>. Okres zasiłkowy wynosi aż <strong>270 dni</strong> (zamiast standardowych 182 dni).</>}
+      />
 
       <div className="zus-view-grid">
         {/* Formularz kalkulacji */}

@@ -1,3 +1,4 @@
+import { ViewHeader } from "../common/ViewHeader";
 import React, { useState } from 'react';
 import {
   calculatePaternityLeave,
@@ -146,12 +147,10 @@ export const PaternityView: React.FC = () => {
   return (
     <div className="zus-view-container">
       {/* NAGŁÓWEK WIDOKU */}
-      <div className="zus-view-header">
-        <h1 className="zus-view-title">Urlopy Rodzicielskie, Prawa Ojca i Opiekunów</h1>
-        <p className="zus-view-desc">
-          Zgodnie z unijną dyrektywą <strong>Work-Life Balance</strong> oraz przepisami ZUS, rodzice i opiekunowie dysponują elastycznymi narzędziami podziału opieki: <strong>14 dni urlopu ojcowskiego</strong> (100%), <strong>9 tygodni nieprzenoszalnego urlopu dla taty</strong> (70%), <strong>przejęcie macierzyńskiego</strong>, <strong>łączenie urlopu z pracą na 1/2 etatu</strong> oraz <strong>uprawnienia adopcyjne</strong>.
-        </p>
-      </div>
+      <ViewHeader
+        title="Urlopy Rodzicielskie, Prawa Ojca i Opiekunów"
+        description={<>Zgodnie z unijną dyrektywą <strong>Work-Life Balance</strong> oraz przepisami ZUS, rodzice i opiekunowie dysponują elastycznymi narzędziami podziału opieki: <strong>14 dni urlopu ojcowskiego</strong> (100%), <strong>9 tygodni nieprzenoszalnego urlopu dla taty</strong> (70%), <strong>przejęcie macierzyńskiego</strong>, <strong>łączenie urlopu z pracą na 1/2 etatu</strong> oraz <strong>uprawnienia adopcyjne</strong>.</>}
+      />
 
       {/* SUB-MENU PIGUŁKOWE (ZUS STYLE) */}
       <div style={{

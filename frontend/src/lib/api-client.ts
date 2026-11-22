@@ -27,6 +27,7 @@ import type {
   MaternityParentalInput,
   MaternityParentalResult,
 } from "@/types/maternity";
+import type { AdminConfig, AdminConfigUpdate } from "@/types/admin";
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
 
@@ -694,8 +695,8 @@ export async function parsePdfDocument(file: File) {
   }
 }
 
-// 15. Panel Administratora (GET / PUT /api/admin/config)
-export async function getAdminConfig() {
+// 15. Panel Administratora (GET / PUT /api/admin/config, POST /api/admin/config/reset)
+export async function getAdminConfig(): Promise<AdminConfig> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/admin/config`, {
       method: "GET",
@@ -708,7 +709,7 @@ export async function getAdminConfig() {
   }
 }
 
-export async function updateAdminConfig(payload: any) {
+export async function updateAdminConfig(payload: AdminConfigUpdate): Promise<AdminConfig> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/admin/config`, {
       method: "PUT",
@@ -719,6 +720,19 @@ export async function updateAdminConfig(payload: any) {
     return await res.json();
   } catch (err: any) {
     throw new BackendOfflineError("PUT /api/admin/config", err);
+  }
+}
+
+export async function resetAdminConfig(): Promise<AdminConfig> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/config/reset`, {
+      method: "POST",
+      headers: getHeaders({ "Content-Type": "application/json" }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err: any) {
+    throw new BackendOfflineError("POST /api/admin/config/reset", err);
   }
 }
 

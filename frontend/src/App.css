@@ -1397,24 +1397,30 @@ button, input, select, textarea {
   padding-right: 20px;
 }
 
+main {
+  background-color: var(--zus-quick-bg);
+  min-height: calc(100vh - 160px);
+}
+
 .zus-view-header {
   margin-bottom: 28px;
   max-width: 860px;
 }
 
 .zus-view-title {
-  font-size: 2rem;
+  font-size: 1.85rem;
   font-weight: 800;
   color: var(--zus-text-main);
+  letter-spacing: -0.02em;
   line-height: 1.25;
-  margin-bottom: 12px;
-  letter-spacing: -0.5px;
+  margin-bottom: 8px;
 }
 
 .zus-view-desc {
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: var(--zus-text-secondary);
-  line-height: 1.6;
+  line-height: 1.55;
+  max-width: 820px;
 }
 
 .zus-view-grid {
@@ -1427,19 +1433,60 @@ button, input, select, textarea {
 .zus-card {
   background-color: var(--zus-card-bg);
   border: 1px solid var(--zus-border);
-  border-top: 4px solid var(--zus-green);
-  border-radius: var(--zus-radius-md);
+  border-radius: var(--zus-radius-lg);
   padding: 24px;
-  box-shadow: var(--zus-shadow-sm);
+  box-shadow: var(--zus-shadow);
+  overflow: hidden;
+}
+
+.zus-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-height: 56px;
+  margin: -24px -24px 24px -24px;
+  padding: 14px 24px;
+  background-color: var(--zus-card-alt);
+  border-bottom: 1px solid var(--zus-border);
 }
 
 .zus-card-header-title {
-  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--zus-text-main);
-  margin-bottom: 18px;
+  margin: 0;
+  padding: 0;
+  line-height: 1.3;
+}
+
+.zus-card-header-title svg {
+  color: var(--zus-green);
+  flex-shrink: 0;
+}
+
+.zus-card > .zus-card-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--zus-text-main);
+  min-height: 56px;
+  margin: -24px -24px 24px -24px;
+  padding: 14px 24px;
+  background-color: var(--zus-card-alt);
   border-bottom: 1px solid var(--zus-border);
-  padding-bottom: 10px;
+  line-height: 1.3;
+}
+
+.zus-card > .zus-card-header-title svg {
+  color: var(--zus-green);
+  flex-shrink: 0;
 }
 
 /* Formularze ZUS */
@@ -1458,6 +1505,12 @@ button, input, select, textarea {
 .zus-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.zus-form-row-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -1514,6 +1567,18 @@ button, input, select, textarea {
   display: none;
 }
 
+.zus-input.is-invalid {
+  border-color: #DC2626 !important;
+  background-color: #FFFFFF !important;
+}
+
+.zus-input.is-invalid:focus {
+  outline: none !important;
+  border-color: #DC2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
+}
+
+/* Przyciski zakładek */
 .zus-tab-btn {
   padding: 10px 18px;
   font-size: 0.95rem;
@@ -1796,7 +1861,8 @@ button, input, select, textarea {
   .zus-view-grid {
     grid-template-columns: 1fr;
   }
-  .zus-form-row {
+  .zus-form-row,
+  .zus-form-row-3 {
     grid-template-columns: 1fr;
   }
   .zus-stat-grid {
@@ -1826,21 +1892,16 @@ button, input, select, textarea {
   gap: 12px;
   flex: 1;
   background: none;
-  border: 1.5px solid transparent;
+  border: none;
   text-align: left;
-  padding: 10px 14px;
-  border-radius: var(--zus-radius-sm);
-  cursor: pointer;
+  padding: 6px 8px;
+  cursor: default;
   transition: all 0.2s ease;
 }
 
-.zus-step-item:hover:not(:disabled) {
-  background-color: var(--zus-card-alt);
-}
-
 .zus-step-item.active {
-  background-color: var(--zus-green-light);
-  border-color: var(--zus-green-border);
+  background: none;
+  border: none;
 }
 
 .zus-step-number {
@@ -2148,10 +2209,12 @@ button, input, select, textarea {
 
 
 .zus-benefits-catalog-section {
-  padding: 40px 0 60px 0;
-  background-color: var(--zus-quick-bg);
-  border-top: 1px solid var(--zus-border);
-  border-bottom: 1px solid var(--zus-border);
+  padding: 36px 0 60px 0;
+  max-width: var(--container-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .zus-catalog-header {
@@ -2346,7 +2409,8 @@ button, input, select, textarea {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-  padding: 16px 24px;
+  min-height: 56px;
+  padding: 14px 24px;
   background-color: var(--zus-card-alt);
   border-bottom: 1px solid var(--zus-border);
 }
@@ -2355,13 +2419,20 @@ button, input, select, textarea {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--zus-navy);
+  color: var(--zus-green);
+}
+
+.zus-filter-header-title svg {
+  color: var(--zus-green);
+  flex-shrink: 0;
 }
 
 .zus-filter-header-title h3 {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--zus-text-main);
+  margin: 0;
+  line-height: 1.3;
 }
 
 .zus-filter-header-actions {
@@ -2408,6 +2479,16 @@ button, input, select, textarea {
   color: #FFFFFF;
 }
 
+.zus-btn-quick-mobywatel:active {
+  background-color: var(--zus-green-hover);
+  color: #FFFFFF;
+}
+
+.zus-btn-quick-mobywatel:focus-visible {
+  outline: 3px solid #ffbf00;
+  outline-offset: 2px;
+}
+
 .zus-filter-body-grid {
   padding: 24px;
   display: flex;
@@ -2434,7 +2515,7 @@ button, input, select, textarea {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background-color: var(--zus-navy);
+  background-color: var(--zus-green);
   color: #FFFFFF;
   display: inline-flex;
   align-items: center;
@@ -2735,9 +2816,121 @@ button, input, select, textarea {
   border-top: 4px solid var(--zus-green);
 }
 
-.zus-benefit-card.is-not-eligible {
-  border-top: 4px solid #CBD5E1;
+.zus-benefit-card.is-not-eligible,
+.zus-benefit-card.is-pending {
+  border-top: 4px solid #A3A3A3;
   background-color: #FAFAFA;
+  border-color: #E5E5E5;
+  box-shadow: none;
+}
+
+.zus-benefit-card.is-not-eligible:hover,
+.zus-benefit-card.is-pending:hover {
+  transform: none;
+  box-shadow: var(--zus-shadow-sm);
+  border-color: #A3A3A3;
+}
+
+.zus-benefit-card.is-not-eligible .zus-card-category-pill,
+.zus-benefit-card.is-pending .zus-card-category-pill {
+  background-color: #E5E5E5;
+  color: #525252;
+}
+
+.zus-benefit-card.is-not-eligible .zus-card-order-tag,
+.zus-benefit-card.is-pending .zus-card-order-tag {
+  color: #A3A3A3;
+}
+
+.zus-benefit-card.is-not-eligible .zus-card-title,
+.zus-benefit-card.is-pending .zus-card-title {
+  color: #525252;
+}
+
+.zus-benefit-card.is-not-eligible .zus-card-desc,
+.zus-benefit-card.is-pending .zus-card-desc {
+  color: #737373;
+}
+
+.zus-benefit-card.is-not-eligible .zus-card-specs-grid,
+.zus-benefit-card.is-pending .zus-card-specs-grid {
+  border-color: #E5E5E5;
+}
+
+.zus-benefit-card.is-not-eligible .zus-spec-label,
+.zus-benefit-card.is-pending .zus-spec-label {
+  color: #737373;
+}
+
+.zus-benefit-card.is-not-eligible .zus-spec-val,
+.zus-benefit-card.is-pending .zus-spec-val {
+  color: #525252;
+  font-weight: 600;
+}
+
+.zus-benefit-card.is-not-eligible .zus-spec-val.highlight-rate,
+.zus-benefit-card.is-pending .zus-spec-val.highlight-rate {
+  color: #525252;
+  font-weight: 700;
+}
+
+.zus-benefit-card.is-not-eligible .zus-card-expanded-content,
+.zus-benefit-card.is-pending .zus-card-expanded-content {
+  background-color: #F5F5F5;
+  border: 1px solid #E5E5E5;
+}
+
+.zus-benefit-card.is-not-eligible .zus-rules-heading,
+.zus-benefit-card.is-pending .zus-rules-heading {
+  color: #525252;
+}
+
+.zus-benefit-card.is-not-eligible .zus-rules-list,
+.zus-benefit-card.is-not-eligible .zus-rules-list li,
+.zus-benefit-card.is-pending .zus-rules-list,
+.zus-benefit-card.is-pending .zus-rules-list li {
+  color: #525252;
+}
+
+.zus-benefit-card.is-not-eligible .zus-legal-basis-box,
+.zus-benefit-card.is-pending .zus-legal-basis-box {
+  border-color: #D4D4D4;
+  color: #737373;
+}
+
+.zus-benefit-card.is-not-eligible .zus-legal-label,
+.zus-benefit-card.is-pending .zus-legal-label {
+  color: #525252;
+}
+
+.zus-benefit-card.is-not-eligible .zus-legal-text,
+.zus-benefit-card.is-pending .zus-legal-text {
+  color: #737373;
+}
+
+.zus-benefit-card.is-not-eligible .zus-card-expand-btn,
+.zus-benefit-card.is-pending .zus-card-expand-btn {
+  color: #525252;
+}
+
+.zus-benefit-card.is-not-eligible .zus-card-expand-btn:hover,
+.zus-benefit-card.is-pending .zus-card-expand-btn:hover {
+  color: #171717;
+  text-decoration: underline;
+}
+
+.zus-benefit-card.is-not-eligible .zus-card-pdf-action,
+.zus-benefit-card.is-pending .zus-card-pdf-action {
+  background-color: #F5F5F5;
+  border-color: #D4D4D4;
+  color: #525252;
+}
+
+.zus-benefit-card.is-not-eligible .zus-card-pdf-action:hover,
+.zus-benefit-card.is-pending .zus-card-pdf-action:hover {
+  background-color: #E5E5E5;
+  border-color: #A3A3A3;
+  color: #171717;
 }
 
 .zus-card-top-row {
@@ -2794,9 +2987,28 @@ button, input, select, textarea {
   border-color: var(--zus-green-border);
 }
 
-.zus-benefit-card.is-not-eligible .zus-card-qualification-box {
-  background-color: #c2c2c2;
-  border-color: #655151;
+.zus-benefit-card.is-not-eligible .zus-card-qualification-box,
+.zus-benefit-card.is-pending .zus-card-qualification-box {
+  background-color: #F5F5F5;
+  border-color: #D4D4D4;
+}
+
+.zus-benefit-card.is-not-eligible .zus-badge-qualification,
+.zus-benefit-card.is-not-eligible .zus-badge-qualification.badge-red,
+.zus-benefit-card.is-not-eligible .zus-badge-qualification.badge-gray,
+.zus-benefit-card.is-pending .zus-badge-qualification,
+.zus-badge-qualification.badge-gray,
+.zus-badge-qualification.badge-pending {
+  background-color: #737373;
+  color: #FFFFFF;
+}
+
+.zus-benefit-card.is-not-eligible .zus-card-reason-text,
+.zus-benefit-card.is-not-eligible .zus-card-reason-text.text-not-eligible,
+.zus-benefit-card.is-pending .zus-card-reason-text,
+.zus-card-reason-text.text-pending {
+  color: #525252;
+  font-weight: 500;
 }
 
 .zus-badge-qualification {

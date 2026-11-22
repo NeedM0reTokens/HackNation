@@ -1,3 +1,4 @@
+import { ViewHeader } from "./components/common/ViewHeader";
 import React, { useState, useEffect } from "react";
 import { Header } from "./components/Header";
 import { Navbar } from "./components/Navbar";
@@ -261,16 +262,10 @@ const AppContent: React.FC = () => {
 
         {activeTab === "kalkulator" && (
           <div className="zus-view-container">
-            <div className="zus-view-header">
-              <h1 className="zus-view-title">
-                Zintegrowany Kalkulator Zasiłkowy
-              </h1>
-              <p className="zus-view-desc">
-                Wprowadź swoje dane, wybierz rodzaj umowy i sprawdź kwoty
-                zasiłku macierzyńskiego, rodzicielskiego oraz terminy składania
-                wniosków.
-              </p>
-            </div>
+            <ViewHeader
+              title="Zintegrowany Kalkulator Zasiłkowy"
+              description="Wprowadź swoje dane, wybierz rodzaj umowy i sprawdź kwoty zasiłku macierzyńskiego, rodzicielskiego oraz terminy składania wniosków."
+            />
             <GuideFlow />
           </div>
         )}
