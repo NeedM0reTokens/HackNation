@@ -274,19 +274,11 @@ const AppContent: React.FC = () => {
           </div>
         )}
 
-        {activeTab === "chorobowy" && <PregnancyView />}
-        {activeTab === "macierzynski" && <PaternityView />}
-        {activeTab === "wnioski" && <DocumentsView />}
-        {activeTab === "trudne-sytuacje" && <SpecialCasesView />}
-        {activeTab === "strefa-pdf" && (
-          <PdfZoneView
-            onNavigateToTab={(tab) => {
-              setActiveTab(tab);
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-          />
-        )}
-        {activeTab === "admin" && <AdminView />}
+        {activeTab === 'chorobowy' && <PregnancyView />}
+        {activeTab === 'macierzynski' && <PaternityView />}
+        {activeTab === 'wnioski' && <DocumentsView />}
+        {activeTab === 'trudne-sytuacje' && <SpecialCasesView />}
+        {activeTab === 'admin' && <AdminView />}
       </main>
 
       {/* STOPKA OFICJALNA */}
