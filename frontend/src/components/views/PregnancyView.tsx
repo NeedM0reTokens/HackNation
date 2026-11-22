@@ -67,7 +67,7 @@ export const PregnancyView: React.FC = () => {
               <input
                 type="number"
                 min="0"
-                step="50"
+                step="any"
                 className="zus-input"
                 value={grossSalary}
                 onChange={(e) => setGrossSalary(Number(e.target.value))}

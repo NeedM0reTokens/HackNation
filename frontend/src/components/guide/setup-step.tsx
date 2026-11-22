@@ -157,7 +157,7 @@ export function SetupStep({
         <div className="zus-card-header">
           <div className="zus-card-header-title">
             <ClipboardList className="size-5 text-[var(--zus-green)]" />
-            <span>Dane do kalkulacji uprawnień</span>
+            <span>Dane do kalkulacji</span>
           </div>
 
           <div
@@ -265,8 +265,13 @@ export function SetupStep({
                       ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.role === "mother" ? "var(--zus-green-light)" : "#FFFFFF",
-                  color: input.role === "mother" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
+                    input.role === "mother"
+                      ? "var(--zus-green-light)"
+                      : "#FFFFFF",
+                  color:
+                    input.role === "mother"
+                      ? "var(--zus-green-dark)"
+                      : "var(--zus-text-main)",
                   fontWeight: input.role === "mother" ? 700 : 500,
                   fontSize: "0.94rem",
                   textAlign: "center",
@@ -296,8 +301,13 @@ export function SetupStep({
                       ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.role === "father" ? "var(--zus-green-light)" : "#FFFFFF",
-                  color: input.role === "father" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
+                    input.role === "father"
+                      ? "var(--zus-green-light)"
+                      : "#FFFFFF",
+                  color:
+                    input.role === "father"
+                      ? "var(--zus-green-dark)"
+                      : "var(--zus-text-main)",
                   fontWeight: input.role === "father" ? 700 : 500,
                   fontSize: "0.94rem",
                   textAlign: "center",
@@ -327,8 +337,13 @@ export function SetupStep({
                       ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.role === "guardian" ? "var(--zus-green-light)" : "#FFFFFF",
-                  color: input.role === "guardian" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
+                    input.role === "guardian"
+                      ? "var(--zus-green-light)"
+                      : "#FFFFFF",
+                  color:
+                    input.role === "guardian"
+                      ? "var(--zus-green-dark)"
+                      : "var(--zus-text-main)",
                   fontWeight: input.role === "guardian" ? 700 : 500,
                   fontSize: "0.94rem",
                   textAlign: "center",
@@ -379,8 +394,13 @@ export function SetupStep({
                       ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.employment === "uop" ? "var(--zus-green-light)" : "#FFFFFF",
-                  color: input.employment === "uop" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
+                    input.employment === "uop"
+                      ? "var(--zus-green-light)"
+                      : "#FFFFFF",
+                  color:
+                    input.employment === "uop"
+                      ? "var(--zus-green-dark)"
+                      : "var(--zus-text-main)",
                   fontWeight: input.employment === "uop" ? 700 : 500,
                   fontSize: "0.9rem",
                   cursor: "pointer",
@@ -413,9 +433,13 @@ export function SetupStep({
                       ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.employment === "zlecenie" ? "var(--zus-green-light)" : "#FFFFFF",
+                    input.employment === "zlecenie"
+                      ? "var(--zus-green-light)"
+                      : "#FFFFFF",
                   color:
-                    input.employment === "zlecenie" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
+                    input.employment === "zlecenie"
+                      ? "var(--zus-green-dark)"
+                      : "var(--zus-text-main)",
                   fontWeight: input.employment === "zlecenie" ? 700 : 500,
                   fontSize: "0.9rem",
                   cursor: "pointer",
@@ -448,8 +472,13 @@ export function SetupStep({
                       ? "2px solid var(--zus-green)"
                       : "1.5px solid #CBD5E0",
                   backgroundColor:
-                    input.employment === "jdg" ? "var(--zus-green-light)" : "#FFFFFF",
-                  color: input.employment === "jdg" ? "var(--zus-green-dark)" : "var(--zus-text-main)",
+                    input.employment === "jdg"
+                      ? "var(--zus-green-light)"
+                      : "#FFFFFF",
+                  color:
+                    input.employment === "jdg"
+                      ? "var(--zus-green-dark)"
+                      : "var(--zus-text-main)",
                   fontWeight: input.employment === "jdg" ? 700 : 500,
                   fontSize: "0.9rem",
                   cursor: "pointer",
@@ -687,7 +716,7 @@ export function SetupStep({
                 id="gross-salary"
                 type="number"
                 min="0"
-                step="50"
+                step="any"
                 required
                 className={`zus-input ${isSalaryNegative ? "is-invalid" : ""}`}
                 style={{
