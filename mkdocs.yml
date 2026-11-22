@@ -1,0 +1,74 @@
+site_name: Zasiłkowy Przewodnik Przyszłego Rodzica
+site_description: Dokumentacja aplikacji kalkulatorów świadczeń rodzicielskich
+repo_url: https://github.com/haniawaronska/hackathon
+
+theme:
+  name: material
+  language: pl
+  palette:
+    - scheme: default
+      primary: green
+      accent: light green
+      toggle:
+        icon: material/weather-night
+        name: Przełącz na tryb ciemny
+    - scheme: slate
+      primary: green
+      accent: light green
+      toggle:
+        icon: material/weather-sunny
+        name: Przełącz na tryb jasny
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - tables
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+nav:
+  - Start: index.md
+  - Szybki start: quick-start.md
+  - Architektura: architecture.md
+  - Backend:
+      - Lista modułów: backend/modules.md
+      - Kalkulatory: backend/calculators.md
+      - API: backend/api.md
+      - Komponenty:
+          - Health i diagnostyka: components/01_health.md
+          - Panel administracyjny: components/02_admin.md
+          - Kalkulator zintegrowany: components/03_calculator_integrated.md
+          - Ciąża i kod B: components/04_pregnancy.md
+          - Macierzyński i rodzicielski: components/05_maternity.md
+          - Ojcostwo i podział opieki: components/06_paternity.md
+          - Praca i urlop rodzicielski: components/07_parental_work.md
+          - Adopcja i rodzina zastępcza: components/08_adoption.md
+          - Przypadki szczególne: components/09_special_cases.md
+          - Parser PDF ZUS: components/10_pdf_parser.md
+          - Symulacja ZUS i mObywatel: components/11_simulation.md
+  - Frontend: frontend.md
+  - Wzory i obliczenia: formulas.md
+  - Zrzuty ekranu: screenshots.md
+  - Testy: testing.md
+  - Kontrakty:
+      - Bezpieczeństwo panelu administracyjnego: architektura_bezpieczenstwa_panelu_admina.md
+      - Konfiguracja admina: kontrakt_admin_config.md
+      - Ojcostwo i podział opieki: kontrakt_ojcowski_i_podzial_opieki.md
+      - Praca, adopcja i rodzina zastępcza: kontrakt_praca_rodzicielski_i_adopcja.md
+      - Przypadki szczególne: kontrakt_przypadki_szczegolne.md
+      - Kalkulator zintegrowany i presety: kontrakt_zintegrowany_i_presety.md

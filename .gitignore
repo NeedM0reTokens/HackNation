@@ -12,6 +12,9 @@ __pycache__/
 dist/
 build/
 
+# Generated documentation
+site/
+
 # Tests & coverage
 .pytest_cache/
 .coverage
