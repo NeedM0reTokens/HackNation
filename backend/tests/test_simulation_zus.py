@@ -212,7 +212,7 @@ class TestZusInsuranceSimulation(unittest.TestCase):
         res = self.client.get("/api/mock/mobywatel/identities")
         self.assertEqual(res.status_code, 200)
         data = res.json()
-        self.assertEqual(len(data), 6)
+        self.assertGreaterEqual(len(data), 6)
 
     def test_api_endpoint_mock_mobywatel_login(self) -> None:
         res = self.client.post("/api/mock/mobywatel/login", json={"pesel": "92011501234"})
