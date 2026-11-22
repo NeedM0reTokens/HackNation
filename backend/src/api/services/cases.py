@@ -211,11 +211,11 @@ def evaluate_case_service(case_id: str) -> TestCaseEvaluationResult:
                 "status_badge": "WARNING_DEBT",
                 "message": (
                     f"Zadłużenie składkowe {debt:.2f} zł przekracza 1% minimalnego wynagrodzenia "
-                    "(art. 2a). Wypłata wstrzymana do spłaty w terminie 6 miesięcy."
+                    "(art. 2a). ZUS może wstrzymać wypłatę; sytuację rozstrzyga termin i sposób uregulowania długu."
                 ),
             }
             notes.append(
-                f"Zadłużenie {debt:.2f} zł > limitu 48,06 zł - zasiłek zablokowany per art. 2a"
+                f"Zadłużenie {debt:.2f} zł przekracza próg 48,06 zł - należy rozpatrzyć skutki art. 2a"
             )
             notes.append(
                 "Prawo ulegnie przedawnieniu, jeśli dług nie zostanie spłacony w ciągu 6 miesięcy"

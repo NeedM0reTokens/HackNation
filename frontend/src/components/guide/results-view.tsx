@@ -61,24 +61,47 @@ export function ResultsView({
         ? 'MANDATE_CONTRACT'
         : 'B2B';
 
+    const isMother = input.role === 'mother';
+    const isFather = input.role === 'father';
+
+    const motherIncome = isMother
+      ? input.grossSalary
+      : input.includePartner
+      ? (input.partnerGrossSalary || 0)
+      : 0;
+
+    const fatherIncome = isFather
+      ? input.grossSalary
+      : isMother && input.includePartner
+      ? (input.partnerGrossSalary || 0)
+      : 0;
+
+    const isMotherInsured = isMother
+      ? (input.employment === 'uop' || input.sicknessInsurance)
+      : (input.includePartner && motherIncome > 0);
+
+    const isFatherInsured = isFather
+      ? (input.employment === 'uop' || input.sicknessInsurance)
+      : (input.includePartner && fatherIncome > 0);
+
     const payload: IntegratedCalculatorInput = {
-      child_birth_date: input.dueDate || '2026-06-01',
-      mother_gross_monthly_income: input.role === 'mother' ? input.grossSalary : 7500,
-      father_gross_monthly_income: input.role === 'father' ? input.grossSalary : 8500,
-      mother_employment_type: empType,
-      father_employment_type: 'EMPLOYMENT_CONTRACT',
-      is_mother_insured: input.employment === 'uop' || input.sicknessInsurance,
-      is_father_insured: true,
+      child_birth_date: input.dueDate || '2027-03-15',
+      mother_gross_monthly_income: motherIncome,
+      father_gross_monthly_income: fatherIncome,
+      mother_employment_type: isMother ? empType : 'EMPLOYMENT_CONTRACT',
+      father_employment_type: isFather ? empType : 'EMPLOYMENT_CONTRACT',
+      is_mother_insured: isMotherInsured,
+      is_father_insured: isFatherInsured,
       insurance_duration_days: input.insuredDays,
       insured_days: input.insuredDays,
       sickness_insurance: input.employment === 'uop' || input.sicknessInsurance,
       children_count: 1,
       chosen_variant: options.variant === 'single' ? 'UNIFIED_81_5' : 'VARIABLE_100_70',
       applied_within_21_days: options.variant === 'single',
-      include_paternity_leave: true,
+      include_paternity_leave: isFather || (input.includePartner && fatherIncome > 0),
       paternity_start_offset_days: 14,
-      include_pregnancy_sick_leave: input.role === 'mother',
-      pregnancy_sick_leave_days: 30,
+      include_pregnancy_sick_leave: Boolean(input.pregnancySickLeave && isMother),
+      pregnancy_sick_leave_days: input.pregnancySickLeave ? (input.pregnancySickLeaveDays || 30) : 0,
       special_case_type: input.zaZyciem
         ? 'ZA_ZYCIEM'
         : input.premature
@@ -91,7 +114,7 @@ export function ResultsView({
       is_adoption: input.role === 'guardian',
       work_combination: {
         enabled: options.partTime,
-        parent_working: 'mother',
+        parent_working: isMother ? 'mother' : 'father',
         work_fraction: 0.5,
         weeks_to_combine: 32,
         work_during_extended_period: true,

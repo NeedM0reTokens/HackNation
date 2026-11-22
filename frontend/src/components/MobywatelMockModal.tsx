@@ -71,9 +71,9 @@ const PERSONA_METADATA: Record<string, PersonaDetails> = {
     badgeText: 'JDG • BLOKADA ART. 2A',
     employmentLabel: 'Działalność gospodarcza (JDG B2B)',
     benefitStatus: 'Wstrzymanie wypłaty świadczeń (dług > limit)',
-    specialCase: 'Dług 1 250,00 zł > limit 48,06 zł (art. 2a)',
+    specialCase: 'Dług 1 250,00 zł przekracza próg 48,06 zł (art. 2a)',
     description:
-      'Scenariusz weryfikacji zadłużenia: zaległość składkowa przekraczająca 1% minimalnego wynagrodzenia blokuje wypłatę zasiłków w myśl art. 2a ustawy zasiłkowej (6 m-cy na spłatę).',
+      'Scenariusz weryfikacji zadłużenia: zaległość przekraczająca 1% minimalnego wynagrodzenia może spowodować wstrzymanie świadczeń; ZUS rozpatruje spłatę w terminie do 6 miesięcy.',
   },
   '99010155555': {
     scenarioTitle: 'Obywatelka bez Ubezpieczenia',

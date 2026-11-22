@@ -13,6 +13,10 @@ export type GuideInput = {
   grossSalary: number
   premature: boolean
   zaZyciem: boolean
+  includePartner?: boolean
+  partnerGrossSalary?: number
+  pregnancySickLeave?: boolean
+  pregnancySickLeaveDays?: number
 }
 
 export type ResultOptions = {
@@ -33,6 +37,10 @@ export const defaultGuideInput: GuideInput = {
   grossSalary: 0,
   premature: false,
   zaZyciem: false,
+  includePartner: false,
+  partnerGrossSalary: 0,
+  pregnancySickLeave: false,
+  pregnancySickLeaveDays: 30,
 }
 
 export const defaultResultOptions: ResultOptions = { variant: 'standard', partTime: false }

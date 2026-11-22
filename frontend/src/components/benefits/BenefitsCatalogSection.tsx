@@ -1,6 +1,7 @@
 import { ViewHeader } from "../common/ViewHeader";
 import { useAppState } from "../app-state";
 import React, { useState, useMemo, useEffect } from 'react';
+import { AiFieldExplainer } from '../ai/AiFieldExplainer';
 import {
   evaluateBenefits,
   BenefitEvaluationResult,
@@ -172,7 +173,7 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
                     {user?.simulation?.insurance_title || "Umowa o pracę (pracownik)"}
                   </span>
                 </div>
-                <div className="zus-auth-param-chip">
+                <div className="zus-auth-param-chip" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <span className="zus-param-label">Ubezpieczenie chorobowe:</span>
                   {user?.simulation?.has_sickness_insurance !== false ? (
                     <span className="zus-param-value zus-text-success">
@@ -181,6 +182,7 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
                   ) : (
                     <span className="zus-param-value zus-text-muted">Brak ubezpieczenia</span>
                   )}
+                  <AiFieldExplainer topicId="status-ubezpieczenia-aktywny" label="Status ubezpieczenia" variant="compact" />
                 </div>
                 <div className="zus-auth-param-chip">
                   <span className="zus-param-label">Okres wyczekiwania:</span>

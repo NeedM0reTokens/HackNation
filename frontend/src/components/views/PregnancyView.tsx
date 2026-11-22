@@ -1,6 +1,7 @@
 import { ViewHeader } from "../common/ViewHeader";
 import React, { useState } from 'react';
 import { calculatePregnancyBenefit, PregnancyBenefitPayload } from '@/lib/api-client';
+import { AiFieldExplainer } from '@/components/ai/AiFieldExplainer';
 
 export const PregnancyView: React.FC = () => {
   const [employmentType, setEmploymentType] = useState<PregnancyBenefitPayload['employment_type']>('EMPLOYMENT_CONTRACT');
@@ -41,7 +42,7 @@ export const PregnancyView: React.FC = () => {
     <div className="zus-view-container">
       <ViewHeader
         title="Kwalifikator i Kalkulator Zasiłku Chorobowego (Kod B)"
-        description={<>Zwolnienie lekarskie z kodem literowym <strong>„B”</strong> przysługuje kobiecie w okresie ciąży i jest płatne w wysokości <strong>100% podstawy wymiaru</strong>. Okres zasiłkowy wynosi aż <strong>270 dni</strong> (zamiast standardowych 182 dni).</>}
+        description={<>Zwolnienie lekarskie z kodem literowym <strong>„B”</strong> przysługuje kobiecie w okresie ciąży i jest płatne w wysokości <strong>100% podstawy wymiaru</strong>. Maksymalny okres zasiłkowy wynosi <strong>270 dni</strong> (zamiast standardowych 182 dni), gdy niezdolność do pracy trwa odpowiednio długo.</>}
       />
 
       <div className="zus-view-grid">
@@ -50,7 +51,10 @@ export const PregnancyView: React.FC = () => {
           <h2 className="zus-card-header-title">Dane do kwalifikacji e-ZLA</h2>
           <form onSubmit={handleCalculate} className="zus-form">
             <div className="zus-form-group">
-              <label className="zus-label">Tytuł ubezpieczenia (Forma zatrudnienia)</label>
+              <label className="zus-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <span>Tytuł ubezpieczenia (Forma zatrudnienia)</span>
+                <AiFieldExplainer topicId="pole-forma-zatrudnienia" label="Forma zatrudnienia" variant="compact" />
+              </label>
               <select
                 className="zus-input"
                 value={employmentType}
@@ -63,7 +67,7 @@ export const PregnancyView: React.FC = () => {
             </div>
 
             <div className="zus-form-group">
-              <label className="zus-label">Miesięczne wynagrodzenie brutto (PLN)</label>
+              <label className="zus-label" style={{ marginBottom: '6px', display: 'block' }}>Miesięczne wynagrodzenie brutto (PLN)</label>
               <input
                 type="number"
                 min="0"
@@ -77,7 +81,10 @@ export const PregnancyView: React.FC = () => {
 
             <div className="zus-form-row">
               <div className="zus-form-group">
-                <label className="zus-label">Dni ubezpieczenia (okres karencji)</label>
+                <label className="zus-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span>Dni ubezpieczenia (karencja)</span>
+                  <AiFieldExplainer topicId="pole-staz-ubezpieczenia" label="Okres karencji" variant="compact" />
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -91,7 +98,10 @@ export const PregnancyView: React.FC = () => {
               </div>
 
               <div className="zus-form-group">
-                <label className="zus-label">Dni zwolnienia lekarskiego</label>
+                <label className="zus-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span>Dni zwolnienia lekarskiego (kod B)</span>
+                  <AiFieldExplainer topicId="pole-l4-ciaza" label="Dni L4 w ciąży" variant="compact" />
+                </label>
                 <input
                   type="number"
                   min="1"
@@ -120,7 +130,10 @@ export const PregnancyView: React.FC = () => {
               </div>
 
               <div className="zus-form-group">
-                <label className="zus-label">Liczba ubezpieczonych u pracodawcy</label>
+                <label className="zus-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span>Liczba zatrudnionych u płatnika</span>
+                  <AiFieldExplainer topicId="platnik-skladek" label="Płatnik powyżej 20 osób" variant="compact" />
+                </label>
                 <select
                   className="zus-input"
                   value={payerSize}
@@ -147,7 +160,10 @@ export const PregnancyView: React.FC = () => {
 
             {employmentType === 'B2B' && (
               <div className="zus-form-group">
-                <label className="zus-label">Stan zadłużenia z tytułu składek ZUS (PLN)</label>
+                <label className="zus-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span>Stan zadłużenia z tytułu składek ZUS (PLN)</span>
+                  <AiFieldExplainer topicId="pole-zadluzenie-art2a" label="Zadłużenie art. 2a" variant="compact" />
+                </label>
                 <input
                   type="number"
                   min="0"

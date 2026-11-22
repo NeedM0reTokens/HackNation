@@ -19,6 +19,8 @@ DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
 FALLBACK_GEMINI_MODELS = (
     "gemini-3.1-flash-lite",
     "gemini-3.5-flash-lite",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
 )
 GEMINI_ENDPOINT_TEMPLATE = (
     "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
@@ -34,6 +36,16 @@ ZUS_ASSISTANT_SYSTEM_INSTRUCTION = (
     "pogoda, sport, programowanie, wiedza ogólna itp.), KATEGORYCZNIE ODMÓW odpowiedzi i "
     "wyjaśnij, że jako wirtualny doradca ZUS pomagasz wyłącznie w sprawach ubezpieczeniowych "
     "i zasiłkach rodzicielskich.\n\n"
+    "BEZWZGLĘDNY ZAKAZ ZGADYWANIA I HALUCYNACJI (ZASADA 'NIE WIEM'):\n"
+    "Jeśli nie posiadasz 100% pewności co do stanu prawnego, jeśli pytanie dotyczy indywidualnego, "
+    "złożonego stanu faktycznego, brakuje danych lub pytanie wykracza poza znane Ci przepisy: "
+    "KATEGORYCZNIE NIE ZGADUJ i NIE TWORZ DOMYSŁÓW! "
+    "W polu 'summary' wprost napisz, że nie posiadasz wystarczających informacji, aby wiążąco "
+    "rozstrzygnąć tę sprawę, i natychmiast odeślij obywatela do oficjalnych kanałów ZUS:\n"
+    "1. Infolinii Centrum Obsługi Telefonicznej ZUS (COT): tel. 22 560 16 00 (pon.-pt. 7:00-18:00),\n"
+    "2. Bezpośredniej rozmowy z pracownikiem ZUS (wizyta osobista lub rezerwacja e-wizyty przez PUE ZUS),\n"
+    "3. Kontaktu przez portal PUE ZUS / eZUS (gdzie pracownik ZUS posiada bezpieczny wgląd w akta i konto płatnika).\n"
+    "W polu 'details' wymień konkretne kroki kontaktu z pracownikiem ZUS lub infolinią.\n\n"
     "ZASADY PRAWNE 2026:\n"
     "1. Płaca minimalna 2026: 4 806,00 zł brutto. Składki finansowane przez pracownika: 13,71%.\n"
     "2. Okres wyczekiwania: 30 dni (umowa o pracę), 90 dni (zlecenie / JDG dobrowolnie).\n"
@@ -75,7 +87,293 @@ def _normalize_text(text: str) -> str:
     return normalized
 
 
+TOPIC_ALIASES: dict[str, str] = {
+    "gross-salary": "pole-wynagrodzenie-brutto",
+    "grosssalary": "pole-wynagrodzenie-brutto",
+    "wynagrodzenie": "pole-wynagrodzenie-brutto",
+    "wynagrodzenie-brutto": "pole-wynagrodzenie-brutto",
+    "podstawa": "pole-wynagrodzenie-brutto",
+    "insured-days": "pole-staz-ubezpieczenia",
+    "insureddays": "pole-staz-ubezpieczenia",
+    "staz": "pole-staz-ubezpieczenia",
+    "staz-ubezpieczenia": "pole-staz-ubezpieczenia",
+    "employment": "pole-forma-zatrudnienia",
+    "forma-zatrudnienia": "pole-forma-zatrudnienia",
+    "due-date": "pole-data-porodu",
+    "duedate": "pole-data-porodu",
+    "data-porodu": "pole-data-porodu",
+    "role": "pole-rola-wnioskodawcy",
+    "rola": "pole-rola-wnioskodawcy",
+    "rola-wnioskodawcy": "pole-rola-wnioskodawcy",
+    "pregnancy-sick-leave": "pole-l4-ciaza",
+    "pregnancysickleave": "pole-l4-ciaza",
+    "l4-ciaza": "pole-l4-ciaza",
+    "premature": "pole-wczesniak-hospitalizacja",
+    "wczesniak": "pole-wczesniak-hospitalizacja",
+    "zazyciem": "pole-ustawa-za-zyciem",
+    "za-zyciem": "pole-ustawa-za-zyciem",
+    "ustawa-za-zyciem": "pole-ustawa-za-zyciem",
+    "partner-gross-salary": "pole-dochod-drugiego-rodzica",
+    "partnergrosssalary": "pole-dochod-drugiego-rodzica",
+    "dochod-partnera": "pole-dochod-drugiego-rodzica",
+    "pol-etatu": "pole-pol-etatu",
+    "laczenie-z-praca": "pole-pol-etatu",
+    "parental-work": "pole-pol-etatu",
+    "zadluzenie-art2a": "pole-zadluzenie-art2a",
+    "art-2a": "pole-zadluzenie-art2a",
+    "zadluzenie": "pole-zadluzenie-art2a",
+    "potracenie-1371": "potracenie-1371",
+    "podstawa-netto-1371": "potracenie-1371",
+    "skladki-1371": "potracenie-1371",
+    "cashflow-ojciec-70": "cashflow-ojciec-70",
+    "wyplata-tata-70": "cashflow-ojciec-70",
+    "9-tygodni-taty-70": "cashflow-ojciec-70",
+    "status-ubezpieczenia-aktywny": "status-ubezpieczenia-aktywny",
+    "status-aktywny": "status-ubezpieczenia-aktywny",
+    "ubezpieczenie-aktywne": "status-ubezpieczenia-aktywny",
+    "deklaracja-dra": "status-ubezpieczenia-aktywny",
+    "ryzyko-pozornosc-umowy": "ryzyko-pozornosc-umowy",
+    "pozornosc-zatrudnienia": "ryzyko-pozornosc-umowy",
+    "pozornosc-umowy": "ryzyko-pozornosc-umowy",
+    "kontrola-zus-pozornosc": "ryzyko-pozornosc-umowy",
+}
+
 STATUTORY_GLOSSARY: dict[str, dict[str, Any]] = {
+    "potracenie-1371": {
+        "id": "potracenie-1371",
+        "title": "Odliczenie 13,71% składek społecznych (podstawa netto)",
+        "summary": (
+            "Dlaczego odejmujemy 13,71%? Jest to łączna suma składek emerytalnej (9,76%), "
+            "rentowej (1,5%) i chorobowej (2,45%) finansowanych ze środków pracownika. "
+            "Dopiero od kwoty po potrąceniu składek ZUS wylicza przysługujące zasiłki."
+        ),
+        "details": [
+            "Składka emerytalna pracownika: 9,76% podstawy.",
+            "Składka rentowa pracownika: 1,50% podstawy.",
+            "Składka chorobowa pracownika: 2,45% podstawy.",
+            "Suma potrąceń: dokładnie 13,71% wynagrodzenia brutto.",
+            "Minimalna gwarancja netto w 2026 r.: 4 147,10 zł (od płacy min. 4 806,00 zł).",
+        ],
+        "legal_basis": "Art. 3 pkt 4 i art. 36 ust. 1 ustawy zasiłkowej (Dz.U. 2026 poz. 854)",
+    },
+    "cashflow-ojciec-70": {
+        "id": "cashflow-ojciec-70",
+        "title": "Wypłata zasiłku dla ojca (stawka 70%)",
+        "summary": (
+            "Dlaczego w 9 tygodniach taty stawka wynosi 70%, a nie 81,5%? Dyrektywa unijna "
+            "Work-Life Balance gwarantuje 70% podstawy wymiaru dla wyłącznej, nieprzenoszalnej "
+            "części urlopu rodzicielskiego drugiego rodzica."
+        ),
+        "details": [
+            "Pula ojca: 9 tygodni z łącznej puli 41 tygodni urlopu rodzicielskiego.",
+            "Zawsze 70%: zasiłek wynosi 70% podstawy wymiaru ojca (niezależnie od wariantu matki 81,5%).",
+            "Nieprzenoszalność: jeśli tata nie wykorzysta tych 9 tygodni, uprawnienie bezpowrotnie przepada.",
+            "Urlop ojcowski: niezależnie od tego ojciec ma prawo do 14 dni urlopu ojcowskiego płatnego 100%.",
+        ],
+        "legal_basis": "Art. 182(1a) § 4 KP w zw. z art. 31 ust. 3 pkt 2 ustawy zasiłkowej",
+    },
+    "status-ubezpieczenia-aktywny": {
+        "id": "status-ubezpieczenia-aktywny",
+        "title": "Status ubezpieczenia chorobowego: AKTYWNY",
+        "summary": (
+            "Co oznacza status AKTYWNY? Płatnik składek opłacił deklarację DRA w terminie "
+            "do 15./20. dnia miesiąca oraz prawidłowo zgłosił Cię do ubezpieczeń społecznych."
+        ),
+        "details": [
+            "Terminy deklaracji DRA: do 15. dnia (jednostki budżetowe) lub do 20. dnia miesiąca (pozostali płatnicy).",
+            "Znaczenie statusu: oznacza aktywne ubezpieczenie chorobowe i poprawne zgłoszenie przez płatnika; prawo do konkretnego świadczenia wymaga też spełnienia pozostałych warunków.",
+            "Zadłużenie: dla JDG art. 2a może wstrzymać świadczenie, gdy zaległość przekracza 48,06 zł w 2026 r.; decyzja zależy także od terminu i sposobu uregulowania długu.",
+            "Weryfikacja online: dane są zsynchronizowane z Centralnym Rejestrem Ubezpieczonych ZUS.",
+        ],
+        "legal_basis": "Art. 36 i art. 47 ustawy o systemie ubezpieczeń społecznych (Dz.U. 2026 poz. 1245)",
+    },
+    "ryzyko-pozornosc-umowy": {
+        "id": "ryzyko-pozornosc-umowy",
+        "title": "Pozorność zatrudnienia i kontrola ZUS (art. 83 § 1 KC)",
+        "summary": (
+            "Kiedy ZUS bada pozorność umowy? Gdy umowa została zawarta krótko przed porodem "
+            "z wysoką pensją, a ubezpieczona nie świadczyła realnie pracy. ZUS weryfikuje "
+            "faktyczne wykonywanie obowiązków pracowniczych."
+        ),
+        "details": [
+            "Co bada ZUS: obecność na stanowisku, dowody wykonywania pracy (e-maile, dokumenty, raporty), potrzebę zatrudnienia pracownika.",
+            "Skutki pozorności: ZUS wydaje decyzję o niepodleganiu ubezpieczeniom, co oznacza brak zasiłku i nakaz zwrotu wypłaconych kwot.",
+            "Zawyżenie pensji: ZUS może również obniżyć podstawę wymiaru zasiłku, jeśli pensja była rażąco wyższa od rynkowej.",
+            "Działalność gospodarcza: kontrola obejmuje także rejestrację JDG tuż przed zwolnieniem lekarskim z wysoką deklaracją składek.",
+        ],
+        "legal_basis": "Art. 83 § 1 Kodeksu cywilnego w zw. z art. 68 ust. 1 i art. 83 ust. 1 ustawy o SUS",
+    },
+    "pole-wynagrodzenie-brutto": {
+        "id": "pole-wynagrodzenie-brutto",
+        "title": "Średnie miesięczne wynagrodzenie brutto (PLN)",
+        "summary": (
+            "Wpisz przeciętne miesięczne wynagrodzenie BRUTTO z ostatnich 12 miesięcy kalendarzowych "
+            "poprzedzających miesiąc porodu lub choroby. ZUS sam pomniejszy tę kwotę o 13,71% "
+            "(składki na ubezpieczenia społeczne finansowane przez pracownika). Nie wpisuj kwoty netto."
+        ),
+        "details": [
+            "Co wpisać: podstawę z umowy o pracę (wraz ze stałymi i zmiennymi premiami regulaminowymi).",
+            "Premie kwartalne i roczne: premie kwartalne wlicza się w 1/12 sumy z 4 kwartałów, a 13-tkę w 1/12.",
+            "Minimalna gwarancja 2026: podstawa zasiłku przy całym etacie nie może być niższa niż 4 147,10 zł netto (od 4 806 zł brutto).",
+            "Działalność gospodarcza (JDG): wpisz zadeklarowaną kwotę podstawy składek, a nie dochód z faktur.",
+        ],
+        "legal_basis": "Art. 36 ust. 1, art. 45 i art. 48 ustawy zasiłkowej (Dz.U. 2026 poz. 854)",
+    },
+    "pole-staz-ubezpieczenia": {
+        "id": "pole-staz-ubezpieczenia",
+        "title": "Staż ubezpieczenia w dniach",
+        "summary": (
+            "Łączna liczba dni nieprzerwanego podlegania ubezpieczeniu chorobowemu. Decyduje o "
+            "prawie do zasiłku chorobowego w ciąży (okres wyczekiwania). Pamiętaj: zasiłek macierzyński "
+            "NIE wymaga okresu wyczekiwania – wystarczy ubezpieczenie w dniu porodu!"
+        ),
+        "details": [
+            "Umowa o pracę (obowiązkowe): prawo do zasiłku chorobowego po 30 dniach nieprzerwanego ubezpieczenia.",
+            "Działalność / zlecenie (dobrowolne): prawo do zasiłku chorobowego po 90 dniach opłacania składek.",
+            "Zasiłek macierzyński: przysługuje od 1. dnia porodu bez względu na staż, o ile trwała składka.",
+            "Łączenie okresów: poprzednie okresy ubezpieczenia wliczają się, jeśli przerwa nie przekroczyła 30 dni.",
+        ],
+        "legal_basis": "Art. 4 ust. 1 i art. 29 ustawy zasiłkowej",
+    },
+    "pole-forma-zatrudnienia": {
+        "id": "pole-forma-zatrudnienia",
+        "title": "Forma zatrudnienia i tytuł ubezpieczenia",
+        "summary": (
+            "Wybierz podstawę prawną wykonywanej pracy: umowa o pracę (UoP), umowa zlecenie lub "
+            "działalność gospodarcza (JDG). Od tego zależy obowiązek ubezpieczenia, ochrona Kodeksu pracy "
+            "oraz to, czy zasiłek wypłaci pracodawca, czy bezpośrednio ZUS."
+        ),
+        "details": [
+            "Umowa o pracę: ubezpieczenie chorobowe jest obowiązkowe; przysługuje szczególna ochrona przed zwolnieniem (art. 177 KP).",
+            "Umowa zlecenie i JDG: ubezpieczenie chorobowe jest dobrowolne – musisz terminowo opłacać składkę 2,45%.",
+            "Kto wypłaca zasiłek: pracodawca zatrudniający powyżej 20 osób wypłaca sam; przy małych firmach i JDG wypłaca bezpośrednio ZUS.",
+            "Przedsiębiorcy (JDG): sprawdź stan zadłużenia – dług powyżej 48,06 zł (art. 2a) wstrzymuje wypłatę zasiłku.",
+        ],
+        "legal_basis": "Art. 6, art. 11, art. 61 ustawy o SUS oraz art. 177 Kodeksu pracy",
+    },
+    "pole-data-porodu": {
+        "id": "pole-data-porodu",
+        "title": "Planowana data porodu / Data przyjęcia dziecka",
+        "summary": (
+            "Data porodu uruchamia bieg kluczowych terminów ZUS, w tym nieprzekraczalnego terminu "
+            "21 dni na złożenie wniosku o stałą uśrednioną stawkę 81,5% za cały okres opieki."
+        ),
+        "details": [
+            "Zasada 21 dni: złożenie wniosku ZAM w ciągu 21 dni od narodzin gwarantuje stawkę 81,5% przez cały rok.",
+            "Przekroczenie terminu 21 dni: wypłata wynosi 100% za macierzyński i 70% za rodzicielski.",
+            "Urlop przed porodem: matka może wykorzystać do 6 tygodni urlopu macierzyńskiego jeszcze przed porodem.",
+            "Adopcja / rodzina zastępcza: termin biegnie od dnia przyjęcia dziecka na wychowanie.",
+        ],
+        "legal_basis": "Art. 180 § 2 KP oraz art. 30a ustawy zasiłkowej",
+    },
+    "pole-rola-wnioskodawcy": {
+        "id": "pole-rola-wnioskodawcy",
+        "title": "Rola wnioskodawcy (Matka / Ojciec / Opiekun)",
+        "summary": (
+            "Przepisy Kodeksu pracy określają odrębne pule uprawnień dla każdego z rodziców. "
+            "Matka posiada obowiązkowe 14 tygodni macierzyńskiego, ojciec ma wyłączny urlop ojcowski (14 dni, 100%) "
+            "oraz 9 tygodni nieprzenoszalnego urlopu rodzicielskiego (70%)."
+        ),
+        "details": [
+            "Matka: 20 tygodni urlopu macierzyńskiego (14 tygodni musi wykorzystać osobiście po porodzie).",
+            "Ojciec: może przejąć urlop po 14. tygodniu matki, ma też 14 dni urlopu ojcowskiego i 9 tyg. rodzicielskiego.",
+            "Sytuacje szczególne: ojciec może przejąć urlop wcześniej w razie hospitalizacji, niezdolności do egzystencji lub zgonu matki.",
+            "Opiekun / Rodzina zastępcza: przysługuje urlop na warunkach macierzyńskiego (minimum 9 tygodni gwarantowanych).",
+        ],
+        "legal_basis": "Art. 180 § 4-17, art. 182(1a) § 4 i art. 182(3) Kodeksu pracy",
+    },
+    "pole-l4-ciaza": {
+        "id": "pole-l4-ciaza",
+        "title": "Zwolnienie lekarskie w ciąży (kod „B” i 100% zasiłku)",
+        "summary": (
+            "Elektroniczne zwolnienie lekarskie e-ZLA z kodem „B” potwierdza niezdolność do pracy w okresie ciąży. "
+            "Zapewnia wypłatę 100% podstawy wymiaru oraz wydłużony okres zasiłkowy aż do 270 dni."
+        ),
+        "details": [
+            "Wysokość świadczenia: 100% podstawy wymiaru zasiłku (zamiast standardowych 80%).",
+            "Maksymalny okres pobierania: do 270 dni w okresie ciąży (standardowo 182 dni); długość zależy od trwałości niezdolności do pracy.",
+            "Kto płaci pracownikowi: pierwsze 33 dni w roku – pracodawca (wynagrodzenie chorobowe), od 34. dnia – ZUS (zasiłek).",
+            "Przejście na macierzyński: jeśli niezdolność trwa do porodu, od dnia narodzin automatycznie przysługuje zasiłek macierzyński.",
+        ],
+        "legal_basis": "Art. 8 ust. 2 i art. 11 ust. 2 pkt 1 ustawy zasiłkowej",
+    },
+    "pole-wczesniak-hospitalizacja": {
+        "id": "pole-wczesniak-hospitalizacja",
+        "title": "Wcześniak lub hospitalizacja noworodka (Uzupełniający urlop macierzyński)",
+        "summary": (
+            "Rodzicom dzieci urodzonych przedwcześnie lub hospitalizowanych po narodzinach przysługuje "
+            "prawo do dodatkowego, uzupełniającego urlopu macierzyńskiego, w 100% płatnego podstawy."
+        ),
+        "details": [
+            "Wcześniak skrajny (do 28. tyg. ciąży lub masa <= 1000g): do 15 tygodni uzupełniającego urlopu 100%.",
+            "Wcześniak umiarkowany (28-36. tydzień ciąży): do 8 tygodni uzupełniającego urlopu 100%.",
+            "Dziecko urodzone o czasie: tydzień urlopu za każdy pełny tydzień hospitalizacji (jeśli pobyt trwał min. 2 dni w okresie 8-28. dnia życia).",
+            "Wymagany dokument: zaświadczenie lekarskie ze szpitala o okresie pobytu noworodka.",
+        ],
+        "legal_basis": "Art. 180(1) i art. 180(2) Kodeksu pracy",
+    },
+    "pole-ustawa-za-zyciem": {
+        "id": "pole-ustawa-za-zyciem",
+        "title": "Zaświadczenie z Ustawy „Za życiem”",
+        "summary": (
+            "Zaświadczenie potwierdzające ciężkie i nieodwracalne upośledzenie albo nieuleczalną chorobę "
+            "zagrażającą życiu powstałą w prenatalnym okresie rozwoju dziecka uprawnia do wydłużonego urlopu rodzicielskiego. "
+            "Jednorazowe świadczenie z programu „Za życiem” jest osobnym świadczeniem i nie jest wypłacane przez ZUS automatycznie."
+        ),
+        "details": [
+            "Wydłużony urlop rodzicielski: do 65 tygodni (jedno dziecko) lub 67 tygodni (bliźnięta) – o 24 tygodnie dłużej.",
+            "Jednorazowe świadczenie: 4 000 zł wypłaca właściwa jednostka samorządu terytorialnego po odrębnym wniosku.",
+            "Kto wystawia: lekarz ubezpieczenia zdrowotnego ze specjalizacją II stopnia (położnictwo, perinatologia, neonatologia itp.).",
+            "Wniosek do ZUS: formularz ZAM wraz z dołączonym zaświadczeniem lekarskim.",
+        ],
+        "legal_basis": "Art. 4 ust. 3 ustawy „Za życiem” w zw. z art. 182(1a) § 2 Kodeksu pracy",
+    },
+    "pole-dochod-drugiego-rodzica": {
+        "id": "pole-dochod-drugiego-rodzica",
+        "title": "Wynagrodzenie drugiego rodzica i 9 tygodni ojca",
+        "summary": (
+            "Zgodnie z unijną dyrektywą Work-Life Balance, ojciec dziecka posiada wyłączne, 9-tygodniowe "
+            "prawo do urlopu rodzicielskiego. Zasiłek za ten okres naliczany jest z jego własnej pensji brutto (70%)."
+        ),
+        "details": [
+            "Stawka 70%: 9 tygodni taty jest płatne w wysokości 70% jego własnej podstawy wymiaru.",
+            "Urlop ojcowski: ojciec ma niezależne prawo do 14 dni urlopu ojcowskiego płatnego w 100%.",
+            "Brak możliwości przeniesienia: jeśli ojciec nie wykorzysta swoich 9 tygodni do końca 6. r.ż. dziecka, dni te bezpowrotnie przepadają.",
+            "Wspólne korzystanie: rodzice mogą przebywać na urlopie rodzicielskim w tym samym czasie.",
+        ],
+        "legal_basis": "Art. 182(1a) § 4 i § 5 oraz art. 182(3) Kodeksu pracy",
+    },
+    "pole-pol-etatu": {
+        "id": "pole-pol-etatu",
+        "title": "Łączenie urlopu rodzicielskiego z pracą na 1/2 etatu",
+        "summary": (
+            "Pracownik może łączyć korzystanie z urlopu rodzicielskiego z pracą u obecnego pracodawcy "
+            "w wymiarze do 1/2 pełnego etatu. Urlop rodzicielski ulega wtedy proporcjonalnemu wydłużeniu aż do 64 lub 82 tygodni!"
+        ),
+        "details": [
+            "Maksymalny wymiar: praca na nie więcej niż 1/2 etatu u dotychczasowego pracodawcy.",
+            "Wydłużenie urlopu: proporcjonalne (np. 32 tygodnie na 1/2 etatu = 64 tygodnie pobytu z dzieckiem).",
+            "Podwójny wpływ finansowy: pensja z pracy za przepracowaną część etatu + proporcjonalny zasiłek macierzyński z ZUS.",
+            "Wniosek: pracownik składa wniosek u pracodawcy min. 21 dni przed rozpoczęciem łączenia pracy z urlopem.",
+        ],
+        "legal_basis": "Art. 182(1e) i art. 182(1f) Kodeksu pracy",
+    },
+    "pole-zadluzenie-art2a": {
+        "id": "pole-zadluzenie-art2a",
+        "title": "Weryfikacja zadłużenia składkowego (art. 2a ustawy zasiłkowej)",
+        "summary": (
+            "Dla osób prowadzących działalność gospodarczą (JDG) zadłużenie z tytułu składek "
+            "przekraczające 1% minimalnego wynagrodzenia (w 2026 r. 48,06 zł) może spowodować wstrzymanie świadczenia. "
+            "Konkretny skutek zależy od terminu i sposobu uregulowania długu."
+        ),
+        "details": [
+            "Próg w 2026 r.: zaległość powyżej 48,06 zł może ograniczyć prawo do świadczeń.",
+            "Wypłata wstrzymana: ZUS może wstrzymać świadczenie do momentu uregulowania długu.",
+            "Spłata w ciągu 6 miesięcy: po uregulowaniu należności ZUS może wypłacić świadczenie za wchodzący w zakres prawa okres.",
+            "Brak spłaty po 6 miesiącach: prawo do świadczenia za ten okres może ulec przedawnieniu.",
+        ],
+        "legal_basis": "Art. 2a ustawy o świadczeniach pieniężnych z ubezpieczenia społecznego",
+    },
     "podstawa-wymiaru": {
         "id": "podstawa-wymiaru",
         "title": "Podstawa wymiaru zasiłku",
@@ -984,12 +1282,32 @@ class GeminiAssistantService:
         self.active_model = os.getenv("GEMINI_MODEL", DEFAULT_GEMINI_MODEL)
 
     def _resolve_api_key(self) -> str | None:
-        return (
+        key = (
             os.getenv("GEMINI_API_KEY")
             or os.getenv("GOOGLE_API_KEY")
             or os.getenv("GEMINI_KEY")
             or os.getenv("GOOGLE_AI_KEY")
         )
+        if not key:
+            for env_path in ["backend/.env", ".env", "../backend/.env", "../.env"]:
+                try:
+                    if os.path.exists(env_path):
+                        with open(env_path, "r", encoding="utf-8") as f:
+                            for line in f:
+                                line = line.strip()
+                                if line and not line.startswith("#") and "=" in line:
+                                    k, v = line.split("=", 1)
+                                    k = k.strip()
+                                    v = v.strip().strip("'\"")
+                                    if k in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "GEMINI_KEY", "GOOGLE_AI_KEY") and v:
+                                        os.environ[k] = v
+                                        key = v
+                                        break
+                        if key:
+                            break
+                except Exception:
+                    pass
+        return key
 
     def get_status(self) -> AssistantStatusResponse:
         key = self._resolve_api_key()
@@ -1183,18 +1501,17 @@ class GeminiAssistantService:
     def _build_refusal_response(self) -> AssistantAskResponse:
         return AssistantAskResponse(
             id=f"kb-{uuid.uuid4().hex[:8]}",
-            title="Zakres pomocy doradcy ZUS",
+            title="Zakres pomocy doradcy ZUS i kontakt z urzędem",
             summary=(
-                "Przepraszam, ale jestem wirtualnym doradcą ZUS i mogę pomagać wyłącznie "
-                "w sprawach związanych ze świadczeniami, zasiłkami oraz ubezpieczeniami "
-                "społecznymi dla rodziców. Nie mogę pomóc w tematach niezwiązanych z ZUS."
+                "Nie posiadam wystarczających informacji, aby wiążąco odpowiedzieć na to pytanie, "
+                "lub temat wykracza poza automatyczną interpretację przepisów o świadczeniach rodzicielskich. "
+                "W indywidualnych sprawach formalnych niezbędny jest kontakt z pracownikiem ZUS."
             ),
             details=[
-                "Zadaj pytanie dotyczące zasiłku macierzyńskiego, rodzicielskiego, "
-                "ojcowskiego lub chorobowego.",
-                "Pomagam w ustaleniu terminów wniosków (np. 21 dni po porodzie) i wymaganych "
-                "druków (Z-3, Z-15).",
-                "Wyjaśniam zasady wyliczania podstawy wymiaru oraz porównania wariantów zasiłku.",
+                "Infolinia Centrum Obsługi Telefonicznej ZUS (COT): zadzwoń pod numer 22 560 16 00 (pon.-pt. 7:00-18:00).",
+                "Wizyta osobista u pracownika ZUS: zarezerwuj e-wizytę lub udaj się do najbliższego Inspektoratu/Oddziału ZUS.",
+                "Portal PUE ZUS / eZUS: wyślij zapytanie do ZUS po zalogowaniu profilem zaufanym / mObywatelem.",
+                "Wirtualny doradca odpowiada wyłącznie na ogólne pytania dotyczące zasiłków macierzyńskich, rodzicielskich i chorobowych.",
             ],
             legal_basis=(
                 "Ustawa z dnia 13 października 1998 r. o systemie ubezpieczeń społecznych"
@@ -1205,8 +1522,9 @@ class GeminiAssistantService:
 
     def get_topic_explanation(self, topic_id: str) -> AssistantTopicResponse:
         normalized_id = topic_id.strip().lower()
-        if normalized_id in STATUTORY_GLOSSARY:
-            item = STATUTORY_GLOSSARY[normalized_id]
+        target_id = TOPIC_ALIASES.get(normalized_id, normalized_id)
+        if target_id in STATUTORY_GLOSSARY:
+            item = STATUTORY_GLOSSARY[target_id]
             return AssistantTopicResponse(
                 id=item["id"],
                 title=item["title"],
@@ -1267,6 +1585,7 @@ class GeminiAssistantService:
         self, request: AssistantAskRequest, api_key: str
     ) -> AssistantAskResponse | None:
         prompt_content = self._build_gemini_prompt(request)
+        is_bearer = api_key.startswith("AQ.") or api_key.startswith("ya29.")
 
         request_body = {
             "contents": [
@@ -1296,7 +1615,13 @@ class GeminiAssistantService:
 
         async with httpx.AsyncClient(timeout=10.0) as client:
             for model_name in models_to_try:
-                model_url = GEMINI_ENDPOINT_TEMPLATE.format(model=model_name, key=api_key)
+                if is_bearer:
+                    model_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent"
+                    headers = {"Authorization": f"Bearer {api_key}"}
+                else:
+                    model_url = GEMINI_ENDPOINT_TEMPLATE.format(model=model_name, key=api_key)
+                    headers = {}
+
                 model_body = json.loads(json.dumps(request_body))
 
                 if model_name.startswith(("gemini-3", "gemini-4")):
@@ -1310,7 +1635,7 @@ class GeminiAssistantService:
                 else:
                     model_body["generationConfig"].pop("thinkingConfig", None)
 
-                resp = await client.post(model_url, json=model_body)
+                resp = await client.post(model_url, json=model_body, headers=headers)
 
                 if resp.status_code != 200:
                     logger.warning(
@@ -1342,12 +1667,44 @@ class GeminiAssistantService:
             )
             if tab_name:
                 prompt_parts.append(
-                    f"KONTEKST PODSTRONY / FORMALNOŚCI: Obywatel znajduje się obecnie w dziale: "
+                    f"KONTEKST PODSTRONY / MODUŁU: Obywatel znajduje się obecnie w dziale: "
                     f"'{tab_name}'. Jeśli pytanie dotyczy tej sprawy, wyjaśnij ją ze "
                     f"szczególnym uwzględnieniem tej formalności."
                 )
+
+            req_topic = request.user_context.get("requested_topic")
+            req_title = request.user_context.get("requested_title")
+            req_basis = request.user_context.get("topic_legal_basis")
+            req_summary = request.user_context.get("topic_summary")
+            req_rules = request.user_context.get("topic_rules")
+            user_status = request.user_context.get("user_status")
+
+            if req_title or req_basis or req_summary or req_rules:
+                rules_fmt = (
+                    "\n• ".join(req_rules)
+                    if isinstance(req_rules, list) and req_rules
+                    else str(req_rules or "Brak dodatkowych reguł")
+                )
+                prompt_parts.append(
+                    f"SZCZEGÓŁOWY KONTEKST FORMALNO-PRAWNY ZAGADNIENIA ZUS (Z BAZY WIEDZY):\n"
+                    f"• Identyfikator pola/zagadnienia: {req_topic or 'nieokreślony'}\n"
+                    f"• Tytuł zagadnienia: {req_title or req_topic}\n"
+                    f"• Podstawa prawna: {req_basis or 'Kodeks pracy / Ustawa o świadczeniach pieniężnych'}\n"
+                    f"• Wstępna interpretacja: {req_summary or 'Brak'}\n"
+                    f"• Kluczowe warunki i zasady formalne:\n• {rules_fmt}\n\n"
+                    f"INSTRUKCJA EKSPERCKA DLA ASYSTENTA AI:\n"
+                    f"Obywatel kliknął 'Dopytaj Asystenta AI' przy tym konkretnym zagadnieniu. "
+                    f"Twoja odpowiedź musi być pogłębiona, konkretna i praktyczna. "
+                    f"Wskaż dokładne terminy, wymagane druki (np. Z-3, Z-3a, ZAM, Z-15, e-ZLA), "
+                    f"kroki postępowania u pracodawcy lub w ZUS PUE, potencjalne ryzyka kontroli oraz prawa ubezpieczonego w stanie prawnym na 2026 rok."
+                )
+
+            if user_status and isinstance(user_status, dict):
+                user_info = ", ".join(f"{k}: {v}" for k, v in user_status.items() if v is not None)
+                prompt_parts.append(f"DANE PROFILU UBEZPIECZONEGO (mObywatel/PUE ZUS): {user_info}")
+
             ctx_str = json.dumps(request.user_context, ensure_ascii=False)
-            prompt_parts.append(f"KONTEKST UŻYTKOWNIKA: {ctx_str}")
+            prompt_parts.append(f"PEŁNY METADATA KONTEKST: {ctx_str}")
 
         if request.history:
             history_str = "\n".join(
@@ -1396,17 +1753,57 @@ class GeminiAssistantService:
         msg_lower = request.message.lower()
         msg_norm = _normalize_text(msg_lower)
 
-        if request.topic_id and request.topic_id in STATUTORY_GLOSSARY:
-            item = STATUTORY_GLOSSARY[request.topic_id]
-            return AssistantAskResponse(
-                id=f"kb-{uuid.uuid4().hex[:8]}",
-                title=item["title"],
-                summary=item["summary"],
-                details=item.get("details", []),
-                legal_basis=item.get("legal_basis"),
-                model_used="statutory-knowledge-engine",
-                is_live_ai=False,
-            )
+        # 1. Jawny temat z requestu lub z kontekstu AiFieldExplainer
+        explicit_topic = request.topic_id
+        if not explicit_topic and isinstance(request.user_context, dict):
+            explicit_topic = request.user_context.get("requested_topic")
+
+        if explicit_topic:
+            norm_topic = TOPIC_ALIASES.get(str(explicit_topic).strip().lower(), str(explicit_topic).strip().lower())
+            req_title = request.user_context.get("requested_title") if isinstance(request.user_context, dict) else None
+            req_basis = request.user_context.get("topic_legal_basis") if isinstance(request.user_context, dict) else None
+            req_rules = request.user_context.get("topic_rules") if isinstance(request.user_context, dict) else None
+            req_summary = request.user_context.get("topic_summary") if isinstance(request.user_context, dict) else None
+
+            if norm_topic in STATUTORY_GLOSSARY:
+                item = STATUTORY_GLOSSARY[norm_topic]
+                extended_details = list(item.get("details", []))
+                if isinstance(req_rules, list):
+                    for r in req_rules:
+                        if r not in extended_details:
+                            extended_details.append(r)
+                extended_details.append("Zadbaj o zachowanie 21-dniowego terminu od dnia porodu na złożenie wniosku o zasiłek.")
+                extended_details.append("W razie wątpliwości skonsultuj sprawę przez PUE ZUS lub infolinię COT: 22 560 16 00.")
+                return AssistantAskResponse(
+                    id=f"kb-{uuid.uuid4().hex[:8]}",
+                    title=f"Analiza ekspercka ZUS: {item['title']}",
+                    summary=f"{item['summary']} W stanie prawnym 2026 r. prawidłowa interpretacja ma kluczowe znaczenie dla terminowej wypłaty świadczeń.",
+                    details=extended_details,
+                    legal_basis=item.get("legal_basis") or req_basis,
+                    model_used="statutory-knowledge-engine",
+                    is_live_ai=False,
+                )
+            else:
+                topic_summary = req_summary or f"Szczegółowa analiza formalno-prawna dla zagadnienia: {req_title or explicit_topic}."
+                extended_details = []
+                if isinstance(req_rules, list) and req_rules:
+                    extended_details.extend(req_rules)
+                else:
+                    extended_details.extend([
+                        "Świadczenie rozliczane w oparciu o stan prawny 2026 r.",
+                        "Wymagane terminowe złożenie dokumentów (np. Z-3 / Z-3a / ZAM) do właściwego oddziału ZUS.",
+                    ])
+                extended_details.append("Zadbaj o zachowanie wymaganych terminów kodeksowych i zasiłkowych.")
+                extended_details.append("W razie wątpliwości skonsultuj sprawę przez PUE ZUS lub infolinię COT: 22 560 16 00.")
+                return AssistantAskResponse(
+                    id=f"kb-{uuid.uuid4().hex[:8]}",
+                    title=f"Analiza ekspercka ZUS: {req_title or explicit_topic}",
+                    summary=f"{topic_summary} W stanie prawnym 2026 r. prawidłowa interpretacja ma kluczowe znaczenie dla terminowej wypłaty świadczeń.",
+                    details=extended_details,
+                    legal_basis=req_basis or "Ustawa z dnia 25 czerwca 1999 r. o świadczeniach pieniężnych z ubezpieczenia społecznego w razie choroby i macierzyństwa (Dz.U. 2026)",
+                    model_used="statutory-knowledge-engine",
+                    is_live_ai=False,
+                )
 
         best_match_key: str | None = None
         for patterns, key in KEYWORD_PATTERNS:
@@ -1426,7 +1823,9 @@ class GeminiAssistantService:
                 is_live_ai=False,
             )
 
-        if not self._is_zus_related(msg_lower) and not request.topic_id:
+        if not self._is_zus_related(msg_lower) and not request.topic_id and not (
+            isinstance(request.user_context, dict) and request.user_context.get("requested_topic")
+        ):
             return self._build_refusal_response()
 
         if isinstance(request.user_context, dict):
