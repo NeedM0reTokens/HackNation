@@ -27,6 +27,17 @@ import type {
   MaternityParentalInput,
   MaternityParentalResult,
 } from "@/types/maternity";
+import type {
+  ApplicationCategory,
+  ApplicationType,
+  ApplicationTemplateInfo,
+  ApplicationPrefillRequest,
+  ApplicationPrefillResponse,
+  ApplicationCreateRequest,
+  ApplicationDetailResponse,
+  SubmissionRequest,
+  SubmissionConfirmation,
+} from "@/types/applications";
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
 
