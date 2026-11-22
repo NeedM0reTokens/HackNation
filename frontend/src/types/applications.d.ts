@@ -1,4 +1,4 @@
-export type ApplicationCategory = 'EMPLOYER_LEAVE' | 'ZUS_BENEFIT';
+export type ApplicationCategory = 'EMPLOYER_LEAVE' | 'ZUS_BENEFIT' | 'USC_CIVIL_ACT';
 
 export type ApplicationType =
   | 'UNIFIED_MATERNITY_PARENTAL_81_5'
@@ -9,7 +9,9 @@ export type ApplicationType =
   | 'ZUS_ZAM'
   | 'ZUS_ZAS_53'
   | 'ZUS_Z3'
-  | 'ZUS_Z3A';
+  | 'ZUS_Z3A'
+  | 'USC_BIRTH_CERTIFICATE_SHORT'
+  | 'USC_BIRTH_CERTIFICATE_FULL';
 
 export interface RequiredAttachment {
   code: string;

@@ -835,6 +835,56 @@ export async function fetchApplicationTemplates(
         is_custom_designed: false,
         official_form_number: 'ZAS-53',
       },
+      {
+        type: 'USC_BIRTH_CERTIFICATE_SHORT',
+        category: 'USC_CIVIL_ACT',
+        title: 'Wniosek o wydanie odpisu skróconego aktu urodzenia dziecka (Rejestr Stanu Cywilnego)',
+        legal_basis: 'Art. 44 i 45 ustawy z dnia 28 listopada 2014 r. - Prawo o aktach stanu cywilnego w zw. z art. 2 ust. 1 pkt 1 lit. c ustawy o opłacie skarbowej',
+        recipient_type: 'USC',
+        deadline_description: 'W dowolnym momencie po sporządzeniu aktu (kluczowy do wniosku ZAM)',
+        description: 'Elektroniczny wniosek przez portal gov.pl / ePUAP o wydanie odpisu skróconego aktu urodzenia z centralnego Rejestru Stanu Cywilnego. Bezpłatnie (0 zł) na cele zasiłkowe ZUS.',
+        required_attachments: [
+          {
+            code: 'IDENTITY_VERIFICATION',
+            title: 'Elektroniczna weryfikacja tożsamości rodzica (Profil Zaufany / mObywatel)',
+            description: 'Potwierdzenie uprawnienia rodzica do pobrania odpisu (art. 45 PASC).',
+            is_mandatory: true,
+            is_provided: true,
+            legal_basis: 'Art. 45 ustawy - Prawo o aktach stanu cywilnego',
+          },
+          {
+            code: 'FEE_EXEMPTION_DECLARATION',
+            title: 'Wskazanie ustawowego zwolnienia z opłaty skarbowej (0 zł)',
+            description: 'Zwolnienie na cele świadczeń socjalnych i zasiłków ZUS.',
+            is_mandatory: true,
+            is_provided: true,
+            legal_basis: 'Art. 2 ust. 1 pkt 1 lit. c ustawy o opłacie skarbowej',
+          },
+        ],
+        is_custom_designed: false,
+        official_form_number: 'USC-RSC-SKR',
+      },
+      {
+        type: 'USC_BIRTH_CERTIFICATE_FULL',
+        category: 'USC_CIVIL_ACT',
+        title: 'Wniosek o wydanie odpisu zupełnego aktu urodzenia dziecka (Rejestr Stanu Cywilnego)',
+        legal_basis: 'Art. 44 i 45 ustawy z dnia 28 listopada 2014 r. - Prawo o aktach stanu cywilnego w zw. z art. 2 ust. 1 pkt 1 lit. c ustawy o opłacie skarbowej',
+        recipient_type: 'USC',
+        deadline_description: 'W dowolnym momencie po sporządzeniu aktu (pełna treść ze wzmiankami)',
+        description: 'Wniosek o odpis zupełny zawierający pełną treść aktu urodzenia wraz ze wzmiankami marginesowymi. Wydawany bez opłaty skarbowej (0 zł) na cele ubezpieczeniowe.',
+        required_attachments: [
+          {
+            code: 'IDENTITY_VERIFICATION',
+            title: 'Elektroniczna weryfikacja tożsamości rodzica (Profil Zaufany / mObywatel)',
+            description: 'Potwierdzenie uprawnienia rodzica do pobrania odpisu.',
+            is_mandatory: true,
+            is_provided: true,
+            legal_basis: 'Art. 45 ustawy - Prawo o aktach stanu cywilnego',
+          },
+        ],
+        is_custom_designed: false,
+        official_form_number: 'USC-RSC-ZUP',
+      },
     ]
   }
 }

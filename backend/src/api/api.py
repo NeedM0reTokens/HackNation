@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .routers.admin import AdminRouter
 from .routers.adoption import AdoptionRouter
-from .routers.assistant import AssistantRouter
 from .routers.applications import ApplicationsRouter
+from .routers.assistant import AssistantRouter
 from .routers.auth import AuthRouter
 from .routers.calculator import CalculatorRouter
 from .routers.cases import CasesRouter

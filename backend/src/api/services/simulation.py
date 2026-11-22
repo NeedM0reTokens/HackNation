@@ -107,6 +107,15 @@ def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
     Statutory limits and thresholds are loaded dynamically from JSON config.
     """
     clean_pesel = pesel.strip()
+    slug_to_pesel = {
+        "anna-kowalska": "92011501234",
+        "piotr-kowalski": "89032005678",
+        "karolina-nowak": "95081012345",
+        "piotr-chojnicki": "85040398765",
+        "agnieszka-poznanska": "99010155555",
+        "alicja-chojnicka": "92011501234",
+    }
+    clean_pesel = slug_to_pesel.get(clean_pesel, clean_pesel)
     cfg = config_service.get_config()
     statutory_debt_limit = cfg.benefit_amounts.zus_debt_limit
 
@@ -124,7 +133,7 @@ def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
         overdue_blocks = overdue_amt > statutory_debt_limit
 
         return UserProfileResponse(
-            user_id=clean_pesel,
+            user_id=pesel.strip(),
             pesel=str(raw["pesel"]),
             first_name=str(raw["first_name"]),
             last_name=str(raw["last_name"]),
@@ -209,6 +218,15 @@ def get_citizen_ezla_service(pesel: str) -> EzlaCitizenResponse:
     Simulates retrieval of e-ZLA incapacity certificates from the ZUS medical registry.
     """
     clean_pesel = pesel.strip()
+    slug_to_pesel = {
+        "anna-kowalska": "92011501234",
+        "piotr-kowalski": "89032005678",
+        "karolina-nowak": "95081012345",
+        "piotr-chojnicki": "85040398765",
+        "agnieszka-poznanska": "99010155555",
+        "alicja-chojnicka": "92011501234",
+    }
+    clean_pesel = slug_to_pesel.get(clean_pesel, clean_pesel)
     cfg = config_service.get_config()
 
     if clean_pesel in PREDEFINED_PROFILES:
@@ -282,6 +300,15 @@ def get_citizen_debt_certificate_service(
     suspend right to benefits. Threshold is loaded dynamically from JSON config.
     """
     clean_pesel = pesel.strip()
+    slug_to_pesel = {
+        "anna-kowalska": "92011501234",
+        "piotr-kowalski": "89032005678",
+        "karolina-nowak": "95081012345",
+        "piotr-chojnicki": "85040398765",
+        "agnieszka-poznanska": "99010155555",
+        "alicja-chojnicka": "92011501234",
+    }
+    clean_pesel = slug_to_pesel.get(clean_pesel, clean_pesel)
     cfg = config_service.get_config()
     statutory_debt_limit = cfg.benefit_amounts.zus_debt_limit
 
