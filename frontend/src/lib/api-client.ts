@@ -632,6 +632,7 @@ export async function getAssistantStatus(): Promise<AssistantStatus> {
 export async function askAssistantApi(
   message: string,
   history?: { role: string; content: string }[],
+  userContext?: Record<string, any>,
 ): Promise<Explanation> {
   if (!message.trim()) {
     throw new Error("Brak treści pytania");
@@ -643,6 +644,7 @@ export async function askAssistantApi(
       body: JSON.stringify({
         message,
         history: history?.map((h) => ({ role: h.role, content: h.content })),
+        user_context: userContext,
       }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

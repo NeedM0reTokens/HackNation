@@ -23,9 +23,7 @@ import { checkHealth } from './lib/api-client';
 import './App.css';
 
 const AppContent: React.FC = () => {
-  const { user, login, logout, calmMode, setCalmMode } = useAppState();
-
-  const [activeTab, setActiveTab] = useState<string>('start');
+  const { user, login, logout, calmMode, setCalmMode, activeTab, setActiveTab } = useAppState();
   const [isPueModalOpen, setIsPueModalOpen] = useState(false);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isHighContrast, setIsHighContrast] = useState(false);

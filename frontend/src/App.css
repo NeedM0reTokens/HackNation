@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    ZASIŁKOWY PRZEWODNIK PRZYSZŁEGO RODZICA - DESIGN SYSTEM (ZUS.PL STYLE)
    Czysty CSS (Pure CSS) bez Tailwind CSS i bibliotek zewnętrznych
    ========================================================================== */
@@ -2800,4 +2800,415 @@ button {
     width: 100%;
     justify-content: flex-start;
   }
+}
+
+/* ==========================================================================
+   ASYSTENT AI ZUS - PRZYCISK FAB I PANEL CZATU (ZUS DESIGN SYSTEM)
+   ========================================================================== */
+
+/* 1. Przycisk pływający (FAB) - przyklejony na stałe do prawego dolnego rogu ekranu */
+.zus-assistant-fab {
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  z-index: 9999 !important;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--zus-green, #007834);
+  color: #FFFFFF !important;
+  border: 2px solid #FFFFFF;
+  border-radius: 9999px;
+  padding: 12px 22px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  box-shadow: 0 4px 18px rgba(0, 120, 52, 0.42);
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.zus-assistant-fab:hover {
+  background-color: var(--zus-green-hover, #005c27);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 120, 52, 0.55);
+}
+
+.zus-assistant-fab:focus-visible {
+  box-shadow: 0 0 0 4px rgba(0, 120, 52, 0.35);
+}
+
+.zus-assistant-fab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+}
+
+.zus-assistant-fab-text {
+  letter-spacing: -0.01em;
+}
+
+/* 2. Brak zaciemnienia/blurowania tła */
+.zus-assistant-backdrop {
+  display: none !important;
+}
+
+/* 3. Pływające okno czatu z zaokrąglonymi rogami */
+.zus-assistant-drawer {
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  top: auto !important;
+  left: auto !important;
+  width: 390px;
+  max-width: calc(100vw - 32px);
+  height: 560px;
+  max-height: calc(100vh - 48px);
+  background-color: #FFFFFF;
+  z-index: 10001 !important;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px !important;
+  overflow: hidden;
+  border: 1px solid var(--zus-border, #CBD5E1);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.22);
+  animation: zusDrawerPopIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes zusDrawerPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 4. Nagłówek czatu ZUS */
+.zus-assistant-header {
+  background-color: var(--zus-green, #007834);
+  color: #FFFFFF;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--zus-green-dark, #00441c);
+}
+
+.zus-assistant-header-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.zus-assistant-header-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+}
+
+.zus-assistant-header-titles h2 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.2;
+  color: #FFFFFF;
+}
+
+.zus-assistant-header-titles p {
+  font-size: 0.78rem;
+  margin: 2px 0 0;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.zus-assistant-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zus-assistant-model-pill {
+  background-color: #e6f4ec;
+  color: #00441c;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  border: 1px solid #99d2af;
+}
+
+.zus-assistant-close-btn {
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s;
+}
+
+.zus-assistant-close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 5. Pasek kontekstu bieżącej podstrony */
+.zus-assistant-context-bar {
+  background-color: var(--zus-green-light, #e6f4ec);
+  border-bottom: 1px solid var(--zus-green-border, #99d2af);
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+
+.zus-assistant-context-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.zus-assistant-context-label {
+  color: var(--zus-green-dark, #00441c);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.zus-assistant-context-badge {
+  background-color: #FFFFFF;
+  color: var(--zus-green, #007834);
+  border: 1px solid var(--zus-green-border, #99d2af);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 6. Obszar wiadomości */
+.zus-assistant-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px;
+  background-color: #F8FAFC;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.zus-assistant-msg-row {
+  display: flex;
+  width: 100%;
+}
+
+.zus-assistant-msg-row.user {
+  justify-content: flex-end;
+}
+
+.zus-assistant-msg-row.assistant {
+  justify-content: flex-start;
+}
+
+.zus-assistant-bubble-user {
+  max-width: 86%;
+  background-color: var(--zus-green, #007834);
+  color: #FFFFFF;
+  padding: 12px 16px;
+  border-radius: 14px 14px 2px 14px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  box-shadow: 0 2px 6px rgba(0, 120, 52, 0.2);
+  word-break: break-word;
+}
+
+.zus-assistant-bubble-bot {
+  max-width: 90%;
+  background-color: #FFFFFF;
+  color: var(--zus-text-main, #1A1A1A);
+  border: 1px solid var(--zus-border, #E2E8F0);
+  border-left: 4px solid var(--zus-green, #007834);
+  padding: 14px 16px;
+  border-radius: 4px 14px 14px 14px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.zus-assistant-bubble-bot h4 {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--zus-green-dark, #00441c);
+  margin: 0 0 6px 0;
+}
+
+.zus-assistant-details-list {
+  margin: 8px 0 0 0;
+  padding-left: 18px;
+  color: var(--zus-text-secondary, #4A4A4A);
+  font-size: 0.88rem;
+}
+
+.zus-assistant-details-list li {
+  margin-bottom: 4px;
+}
+
+.zus-assistant-legal-chip {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--zus-green-light, #e6f4ec);
+  border: 1px solid var(--zus-green-border, #99d2af);
+  color: var(--zus-green-dark, #00441c);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 4px;
+}
+
+.zus-assistant-pending {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--zus-text-secondary, #4A4A4A);
+  font-size: 0.88rem;
+  padding: 8px;
+}
+
+/* 7. Sugestie dopasowane do bieżącej formalności - część scrollowanej historii czatu */
+.zus-assistant-suggestions-section {
+  padding: 10px 0 4px;
+  background-color: transparent;
+  border-top: 1px dashed var(--zus-border, #CBD5E1);
+  margin-top: 10px;
+}
+
+.zus-assistant-suggestions-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--zus-text-secondary, #4A4A4A);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zus-assistant-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.zus-assistant-chip-btn {
+  background-color: #FFFFFF;
+  border: 1px solid var(--zus-green-border, #99d2af);
+  color: var(--zus-green-dark, #00441c);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  line-height: 1.3;
+}
+
+.zus-assistant-chip-btn:hover {
+  background-color: var(--zus-green, #007834);
+  color: #FFFFFF;
+  border-color: var(--zus-green, #007834);
+  transform: translateY(-1px);
+}
+
+.zus-assistant-chip-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 8. Stopka i pole wprowadzania pytania */
+.zus-assistant-footer {
+  padding: 12px 18px 16px;
+  background-color: #FFFFFF;
+  border-top: 1px solid var(--zus-border-light, #F1F5F9);
+}
+
+.zus-assistant-form {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.zus-assistant-textarea {
+  flex: 1;
+  border: 1px solid var(--zus-border, #E2E8F0);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  resize: none;
+  outline: none;
+  min-height: 44px;
+  max-height: 100px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.zus-assistant-textarea:focus {
+  border-color: var(--zus-green, #007834);
+  box-shadow: 0 0 0 3px rgba(0, 120, 52, 0.15);
+}
+
+.zus-assistant-send-btn {
+  background-color: var(--zus-green, #007834);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.1s ease;
+  flex-shrink: 0;
+}
+
+.zus-assistant-send-btn:hover:not(:disabled) {
+  background-color: var(--zus-green-hover, #005c27);
+  transform: translateY(-1px);
+}
+
+.zus-assistant-send-btn:disabled {
+  background-color: #CBD5E1;
+  cursor: not-allowed;
+}
+
+.zus-assistant-disclaimer {
+  margin-top: 8px;
+  font-size: 0.72rem;
+  color: var(--zus-text-muted, #6B7280);
+  text-align: center;
+  line-height: 1.3;
 }

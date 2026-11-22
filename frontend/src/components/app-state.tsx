@@ -9,12 +9,14 @@ type AppState = {
   logout: () => void
   dataSource: DataSource
   setDataSource: (source: DataSource) => void
+  activeTab: string
+  setActiveTab: (tab: string) => void
   assistantOpen: boolean
   setAssistantOpen: (open: boolean) => void
   messages: AssistantMessage[]
   assistantPending: boolean
   explainTopic: (topicId: string, title: string) => Promise<void>
-  sendMessage: (text: string) => Promise<void>
+  sendMessage: (text: string, contextOverride?: Record<string, any>) => Promise<void>
   calmMode: boolean
   setCalmMode: (calm: boolean) => void
 }
@@ -46,6 +48,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<InsuredUser | null>(null)
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [dataSource, setDataSource] = useState<DataSource>('pue')
+  const [activeTab, setActiveTab] = useState<string>('start')
   const [assistantOpen, setAssistantOpen] = useState(false)
   const [messages, setMessages] = useState<AssistantMessage[]>([welcomeMessage])
   const [assistantPending, setAssistantPending] = useState(false)
@@ -90,11 +93,28 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   )
 
   const sendMessage = useCallback(
-    (text: string) => {
+    (text: string, contextOverride?: Record<string, any>) => {
       const history = messages.slice(-6).map((m) => ({ role: m.role, content: m.content }))
-      return runAssistant(text, () => askAssistantApi(text, history))
+      const tabNames: Record<string, string> = {
+        start: 'Katalog świadczeń ZUS (Strona główna)',
+        kalkulator: 'Zintegrowany Kalkulator Zasiłkowy (Macierzyński / Rodzicielski)',
+        chorobowy: 'Zasiłek chorobowy w ciąży (kod B i e-ZLA)',
+        macierzynski: 'Urlopy dla ojca (ojcowski 14 dni, rodzicielski 9 tyg., transfer)',
+        wnioski: 'Wnioski, terminy i prawa pracownicze (Z-3, 21 dni na 81,5%)',
+        'trudne-sytuacje': 'Sytuacje szczególne (Wcześniak, Za życiem, Strata dziecka)',
+        'strefa-pdf': 'Strefa Testowa PDF (Analiza pism i decyzji ZUS)',
+        admin: 'Panel Administratora ZUS',
+      }
+      const userContext = {
+        active_tab: activeTab,
+        tab_name: tabNames[activeTab] || activeTab,
+        is_logged_in: Boolean(user),
+        user_name: user ? `${user.firstName} ${user.lastName}` : null,
+        ...contextOverride,
+      }
+      return runAssistant(text, () => askAssistantApi(text, history, userContext))
     },
-    [runAssistant, messages],
+    [runAssistant, messages, activeTab, user],
   )
 
   const value = useMemo<AppState>(
@@ -105,6 +125,8 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       logout,
       dataSource,
       setDataSource,
+      activeTab,
+      setActiveTab,
       assistantOpen,
       setAssistantOpen,
       messages,
@@ -114,7 +136,21 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       calmMode,
       setCalmMode,
     }),
-    [user, isLoggingIn, login, logout, dataSource, assistantOpen, messages, assistantPending, explainTopic, sendMessage, calmMode],
+    [
+      user,
+      isLoggingIn,
+      login,
+      logout,
+      dataSource,
+      activeTab,
+      setActiveTab,
+      assistantOpen,
+      messages,
+      assistantPending,
+      explainTopic,
+      sendMessage,
+      calmMode,
+    ],
   )
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>
