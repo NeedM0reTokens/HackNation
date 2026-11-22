@@ -588,7 +588,7 @@ export const moreKnowledge: { id: string; title: string; body: string }[] = [
   {
     id: 'variants',
     title: '100% + 70% czy 81,5% przez cały rok?',
-    body: 'Wariant jednolity 81,5% za cały okres przysługuje przy złożeniu tzw. długiego wniosku do 21 dni po porodzie. Wariant zmienny (100% macierzyński, 70% rodzicielski) daje wyższe środki na początku. Część 9 tygodni dla ojca zawsze wynosi 70%.',
+    body: 'Wariant ujednolicony 81,5% za cały okres przysługuje po złożeniu wniosku ZAM o wybór wariantu ujednoliconego do 21 dni po porodzie. Wariant zmienny (100% macierzyński, 70% rodzicielski) daje wyższe środki na początku. Część 9 tygodni dla ojca zawsze wynosi 70%.',
   },
   {
     id: 'part-time',

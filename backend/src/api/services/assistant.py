@@ -46,8 +46,8 @@ ZUS_ASSISTANT_SYSTEM_INSTRUCTION = (
     "   14 tyg. obowiązkowo dla matki; po 14 tyg. resztę może przejąć ojciec.\n"
     "5. Urlop rodzicielski: 41 tyg. (1 dziecko), 43 tyg. (bliźnięta).\n"
     "   W tym 9 tygodni nieprzenoszalnych wyłącznie dla drugiego rodzica (art. 182(1a) § 4 KP).\n"
-    "6. Warianty zasiłku: 81,5% stałe (długi wniosek w 21 dni) LUB 100% macierzyński i 70% "
-    "rodzicielski. 9 tyg. ojca zawsze 70%.\n"
+    "6. Warianty zasiłku: 81,5% ujednolicone (wniosek ZAM o wariant ujednolicony "
+    "w 21 dni) LUB 100% macierzyński i 70% rodzicielski. 9 tyg. ojca zawsze 70%.\n"
     "7. Urlop ojcowski: 14 dni, 100% podstawy, do 12 mies. życia dziecka (art. 182(3) KP).\n"
     "8. Zaświadczenie 'Za życiem': wydłużony urlop rodzicielski do 65/67 tyg. i 4 000 zł.\n"
     "9. Wcześniak / hospitalizacja noworodka: uzupełniający urlop macierzyński 100% (do 15 tyg.).\n"
@@ -143,7 +143,8 @@ STATUTORY_GLOSSARY: dict[str, dict[str, Any]] = {
             "Suma wypłaconych świadczeń w obu opcjach jest zbliżona."
         ),
         "details": [
-            "Wniosek o stawkę 81,5% należy złożyć w ciągu 21 dni po porodzie (długi wniosek).",
+            "Wniosek o stawkę 81,5% należy złożyć w ciągu 21 dni po porodzie ",
+            "(wniosek ZAM o wariant ujednolicony).",
             "Zapewnia stałe, równe wpływy na konto przez cały rok opieki nad dzieckiem.",
             "9 tygodni urlopu nieprzenoszalnego dla drugiego rodzica jest zawsze płatne 70%.",
         ],
@@ -322,7 +323,7 @@ STATUTORY_GLOSSARY: dict[str, dict[str, Any]] = {
                 "Zlecenie i JDG: ubezpieczenie jest dobrowolne; opłacona składka daje "
                 "prawo do zasiłku."
             ),
-            "Umowa o dzieło: brak ubezpieczeń, przysługuje kosiniakowe 1000 zł netto z MOPS/GOPS.",
+            "Umowa o dzieło: brak ubezpieczeń, przysługuje świadczenie rodzicielskie 1000 zł netto z MOPS/GOPS.",
             "Zleceniobiorcy i przedsiębiorcy wnioski składają bezpośrednio do ZUS.",
         ],
         "legal_basis": "Art. 6, 11 i 29 ustawy o systemie ubezpieczeń społecznych",
@@ -534,9 +535,9 @@ STATUTORY_GLOSSARY: dict[str, dict[str, Any]] = {
         ],
         "legal_basis": "Art. 15b ustawy o świadczeniach rodzinnych",
     },
-    "kosiniakowe": {
-        "id": "kosiniakowe",
-        "title": "Świadczenie rodzicielskie (tzw. Kosiniakowe)",
+    "swiadczenie-rodzicielskie": {
+        "id": "swiadczenie-rodzicielskie",
+        "title": "Świadczenie rodzicielskie z MOPS/GOPS",
         "summary": (
             "Świadczenie rodzicielskie przysługuje rodzicom, którzy nie mają prawa do zasiłku "
             "macierzyńskiego (np. studentom, osobom bezrobotnym, pracującym na umowę o dzieło)."
@@ -687,7 +688,7 @@ KEYWORD_PATTERNS: list[tuple[list[str], str]] = [
             "świadczenie rodzicielskie dla bezrobotnych",
             "swiadczenie rodzicielskie",
         ],
-        "kosiniakowe",
+        "swiadczenie-rodzicielskie",
     ),
     (
         [
@@ -857,7 +858,7 @@ KEYWORD_PATTERNS: list[tuple[list[str], str]] = [
             "100% i 70%",
             "100% + 70%",
             "100 i 70%",
-            "długi wniosek",
+            "wniosek ZAM o wariant ujednolicony",
             "dlugi wniosek",
             "wariant",
             "stałe czy 100%",

@@ -135,7 +135,7 @@ export const ALL_BENEFITS: BenefitItem[] = [
     order: 6,
     title: 'Zasiłek macierzyński po porodzie (urlop macierzyński)',
     shortDescription: 'Podstawowe świadczenie pieniężne dla matki po narodzinach dziecka, gwarantujące płatny okres regeneracji i opieki.',
-    rate: '100% lub uśrednione 81,5% (tzw. długi wniosek)',
+    rate: '100% lub ujednolicone 81,5% (wniosek ZAM o wariant ujednolicony)',
     duration: 'Od 20 tygodni (jedno dziecko) do 37 tygodni (pięcioraczki)',
     disbursingEntity: 'ZUS lub pracodawca',
     legalBasis: 'Art. 180 Kodeksu pracy oraz art. 29 i 31 Ustawy zasiłkowej',

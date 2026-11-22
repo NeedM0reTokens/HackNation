@@ -226,7 +226,7 @@ TEMPLATES_CATALOG: dict[ApplicationType, ApplicationTemplateInfo] = {
         category=ApplicationCategory.EMPLOYER_LEAVE,
         title=(
             "Wniosek pracownicy o udzielenie urlopu macierzyńskiego "
-            "i rodzicielskiego w pełnym wymiarze (tzw. długi wniosek)"
+            "i rodzicielskiego w pełnym wymiarze (wniosek ZAM o wariant ujednolicony)"
         ),
         legal_basis=(
             "Art. 179[1] Kodeksu pracy w zw. z art. 30a ustawy z dnia 25 czerwca 1999 r. "

@@ -52,7 +52,7 @@ export const DocumentsView: React.FC = () => {
               <div className="zus-timeline-badge">21 DNI</div>
               <div>
                 <strong>Wniosek o zasiłek macierzyński i rodzicielski w pełnym wymiarze (art. 30a)</strong>
-                <p>Termin 21 dni liczy się od dnia porodu. Złożenie tzw. „długiego wniosku” (ZAM) gwarantuje wypłatę uśrednionego zasiłku w wysokości <strong>81,5%</strong> za cały okres urlopu macierzyńskiego i rodzicielskiego matki.</p>
+                <p>Termin 21 dni liczy się od dnia porodu. Złożenie wniosku ZAM o wariant ujednolicony gwarantuje wypłatę uśrednionego zasiłku w wysokości <strong>81,5%</strong> za cały okres urlopu macierzyńskiego i rodzicielskiego matki.</p>
               </div>
             </div>
 

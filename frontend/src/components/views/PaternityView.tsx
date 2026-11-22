@@ -695,7 +695,7 @@ export const PaternityView: React.FC = () => {
                     onChange={(e) => setWorkRate(Number(e.target.value) as any)}
                   >
                     <option value={70}>70% podstawy (wariant standardowy)</option>
-                    <option value={81.5}>81,5% podstawy (długi wniosek w 21 dni)</option>
+                    <option value={81.5}>81,5% podstawy (wniosek ZAM o wariant ujednolicony w 21 dni)</option>
                   </select>
                 </div>
               </div>
