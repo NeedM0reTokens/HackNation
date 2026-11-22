@@ -988,7 +988,6 @@ export async function updateAdminConfig(payload: any) {
   }
 }
 
-<<<<<<< HEAD
 // 11. Asystent i wyjaśnienia AI (Google Gemini API)
 export interface AssistantStatus {
   is_configured: boolean
@@ -1061,19 +1060,6 @@ export async function getExplanation(topicId: string): Promise<Explanation> {
   } catch (err) {
     console.warn('Backend explain endpoint offline, using local glossary', err)
   }
-=======
-// 16. Asystent i baza wiedzy
-export async function askAssistantApi(message: string): Promise<Explanation> {
-  if (!message.trim()) {
-    throw new Error('Brak treści pytania')
-  }
-  await delay(400)
-  return findExplanationForQuestion(message)
-}
-
-export async function getExplanation(topicId: string): Promise<Explanation> {
-  await delay(200)
->>>>>>> 232ab09fab1a4d83f601236637d93c2e83982d62
   return glossary[topicId] ?? fallbackExplanation
 }
 
