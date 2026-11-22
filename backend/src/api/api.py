@@ -4,12 +4,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from .routers.admin import AdminRouter
 from .routers.adoption import AdoptionRouter
 from .routers.applications import ApplicationsRouter
+from .routers.assistant import AssistantRouter
 from .routers.auth import AuthRouter
 from .routers.calculator import CalculatorRouter
 from .routers.cases import CasesRouter
 from .routers.health import HealthRouter
 from .routers.maternity import MaternityRouter
-from .routers.mock import MockRouter, SimulationRouter, ZusRouter
+from .routers.mock import MockRouter, ZusRouter
 from .routers.parental_work import ParentalWorkRouter
 from .routers.paternity import PaternityRouter
 from .routers.pdf import PdfRouter
@@ -99,7 +100,7 @@ OPENAPI_TAGS = [
         "name": "Symulacje zewnętrznych serwisów (Mock)",
         "description": (
             "Środowisko mockowe symulujące integrację z zewnętrznymi rejestrami państwowymi "
-            "i usługami rządowymi (mObywatel, PUE ZUS / eZUS) na potrzeby demonstracji i testów."
+            "i usługami rządowymi (mObywatel, rejestry ZUS) na potrzeby demonstracji i testów."
         ),
     },
     {
@@ -156,7 +157,6 @@ class MainAPI(FastAPI):
         self.pdf_router = PdfRouter()
         self.cases_router = CasesRouter()
         self.mock_router = MockRouter()
-        self.simulation_router = SimulationRouter()
         self.zus_router = ZusRouter()
         self.admin_router = AdminRouter()
         self.pregnancy_router = PregnancyRouter()
@@ -166,6 +166,7 @@ class MainAPI(FastAPI):
         self.parental_work_router = ParentalWorkRouter()
         self.adoption_router = AdoptionRouter()
         self.applications_router = ApplicationsRouter()
+        self.assistant_router = AssistantRouter()
 
         self.include_router(self.auth_router, prefix="/api")
         self.include_router(self.health_router)
@@ -173,7 +174,6 @@ class MainAPI(FastAPI):
         self.include_router(self.pdf_router, prefix="/api")
         self.include_router(self.cases_router, prefix="/api")
         self.include_router(self.mock_router, prefix="/api")
-        self.include_router(self.simulation_router, prefix="/api")
         self.include_router(self.zus_router, prefix="/api")
         self.include_router(self.admin_router, prefix="/api")
         self.include_router(self.pregnancy_router, prefix="/api")
@@ -183,6 +183,7 @@ class MainAPI(FastAPI):
         self.include_router(self.parental_work_router, prefix="/api")
         self.include_router(self.adoption_router, prefix="/api")
         self.include_router(self.applications_router, prefix="/api")
+        self.include_router(self.assistant_router, prefix="/api")
 
 
 app = MainAPI()

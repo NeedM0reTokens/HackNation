@@ -69,9 +69,7 @@ class TestCalculatorService(unittest.TestCase):
             m for m in result.milestones if "urlop ojcowski" in m.title.lower()
         )
         self.assertEqual(first_bday_milestone.milestone_date, date(2025, 2, 28))
-        six_year_milestone = next(
-            m for m in result.milestones if "rodzicielski" in m.title.lower()
-        )
+        six_year_milestone = next(m for m in result.milestones if "rodzicielski" in m.title.lower())
         self.assertEqual(six_year_milestone.milestone_date, date(2030, 12, 31))
 
     def test_integrated_minimum_wage_floor(self) -> None:
@@ -85,12 +83,8 @@ class TestCalculatorService(unittest.TestCase):
             father_employment_type=MaternityEmploymentType.EMPLOYMENT_CONTRACT,
         )
         result = calculate_integrated_parental_service(input_data)
-        mother_period = next(
-            p for p in result.timeline_periods if "macierzynski" in p.name.lower()
-        )
-        expected_mother_daily = round(
-            round(expected_min_net / 30.0, 2) * (81.5 / 100.0), 2
-        )
+        mother_period = next(p for p in result.timeline_periods if "macierzynski" in p.name.lower())
+        expected_mother_daily = round(round(expected_min_net / 30.0, 2) * (81.5 / 100.0), 2)
         expected_period_amount = round(expected_mother_daily * mother_period.days, 2)
         self.assertEqual(mother_period.total_benefit_net, expected_period_amount)
 
@@ -130,9 +124,7 @@ class TestCalculatorService(unittest.TestCase):
         )
         result = calculate_integrated_parental_service(input_data)
         self.assertTrue(result.is_eligible)
-        adoption_milestone = next(
-            m for m in result.milestones if "14 lat" in m.title.lower()
-        )
+        adoption_milestone = next(m for m in result.milestones if "14 lat" in m.title.lower())
         self.assertEqual(adoption_milestone.milestone_date, date(2040, 12, 31))
 
     def test_integrated_prenatal_sick_leave(self) -> None:
@@ -144,9 +136,7 @@ class TestCalculatorService(unittest.TestCase):
         )
         result = calculate_integrated_parental_service(input_data)
         self.assertLess(result.timeline_start_date, date(2026, 7, 1))
-        prenatal_period = next(
-            p for p in result.timeline_periods if "ciazy" in p.name.lower()
-        )
+        prenatal_period = next(p for p in result.timeline_periods if "ciazy" in p.name.lower())
         self.assertEqual(prenatal_period.days, 40)
         self.assertGreater(prenatal_period.total_benefit_net, 0)
 
