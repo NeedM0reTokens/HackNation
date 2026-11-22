@@ -126,7 +126,7 @@ def get_mock_user_profile_service(user_id_or_pesel: str) -> UserProfileResponse:
         overdue_blocks = overdue_amt > statutory_debt_limit
 
         return UserProfileResponse(
-            user_id=clean_pesel,
+            user_id=normalized_id,
             pesel=str(raw["pesel"]),
             first_name=str(raw["first_name"]),
             last_name=str(raw["last_name"]),
