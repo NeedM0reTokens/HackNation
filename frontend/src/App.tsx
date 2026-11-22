@@ -1,4 +1,3 @@
-import { ViewHeader } from "./components/common/ViewHeader";
 import React, { useState, useEffect } from "react";
 import { Header } from "./components/Header";
 import { Navbar } from "./components/Navbar";
@@ -12,11 +11,9 @@ import { TooltipProvider } from "./components/ui/tooltip";
 import { AppStateProvider, useAppState } from "./components/app-state";
 import { AssistantPanel } from "./components/assistant/assistant-panel";
 import { AssistantFab } from "./components/assistant/assistant-fab";
-import { GuideFlow } from "./components/guide/guide-flow";
+import { CalculationHub } from "./components/calculation-hub/CalculationHub";
 import { BenefitsCatalogSection } from "./components/benefits/BenefitsCatalogSection";
 
-import { PregnancyView } from "./components/views/PregnancyView";
-import { PaternityView } from "./components/views/PaternityView";
 import { DocumentsView } from "./components/views/DocumentsView";
 import { SpecialCasesView } from "./components/views/SpecialCasesView";
 import { PdfZoneView } from "./components/views/PdfZoneView";
@@ -260,18 +257,14 @@ const AppContent: React.FC = () => {
           </>
         )}
 
-        {activeTab === "kalkulator" && (
-          <div className="zus-view-container">
-            <ViewHeader
-              title="Zintegrowany Kalkulator Zasiłkowy"
-              description="Wprowadź swoje dane, wybierz rodzaj umowy i sprawdź kwoty zasiłku macierzyńskiego, rodzicielskiego oraz terminy składania wniosków."
-            />
-            <GuideFlow />
-          </div>
+        {(activeTab === 'kalkulator' || activeTab === 'chorobowy' || activeTab === 'macierzynski') && (
+          <CalculationHub
+            initialTab={
+              activeTab === 'chorobowy' ? 'sickness' :
+              activeTab === 'macierzynski' ? 'leaves' : 'guide'
+            }
+          />
         )}
-
-        {activeTab === 'chorobowy' && <PregnancyView />}
-        {activeTab === 'macierzynski' && <PaternityView />}
         {activeTab === 'wnioski' && <DocumentsView />}
         {activeTab === 'trudne-sytuacje' && <SpecialCasesView />}
         {activeTab === 'strefa-pdf' && <PdfZoneView />}
