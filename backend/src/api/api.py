@@ -1,8 +1,6 @@
-from .api import MainAPI, app
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-<<<<<<< HEAD
-__all__ = ["MainAPI", "app"]
-=======
 from .routers.admin import AdminRouter
 from .routers.adoption import AdoptionRouter
 from .routers.auth import AuthRouter
@@ -176,4 +174,3 @@ class MainAPI(FastAPI):
 
 
 app = MainAPI()
->>>>>>> 232ab09fab1a4d83f601236637d93c2e83982d62
