@@ -1,3 +1,4 @@
+import { ViewHeader } from "../common/ViewHeader";
 import { useAppState } from "../app-state";
 import React, { useState, useMemo, useEffect } from 'react';
 import {
@@ -38,6 +39,9 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
+
+  // Wymóg wypełnienia pól obowiązkowych (Rola i Zatrudnienie)
+  const hasRequiredFields = isLoggedIn || (Boolean(role) && Boolean(employment));
 
   // Przełączanie formy zatrudnienia (kliknięcie zaznacza lub odznacza)
   const handleEmploymentChange = (newEmp: EmploymentType) => {
@@ -136,16 +140,11 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
   };
 
   return (
-    <section className="zus-benefits-catalog-section" id="katalog-swiadczen">
-      <div className="zus-container">
-        {/* NAGŁÓWEK SEKCJI */}
-        <div className="zus-catalog-header">
-          <h2 className="zus-catalog-title">Twoje uprawnienia i świadczenia</h2>
-          <p className="zus-catalog-subtitle">
-            Interaktywny katalog 16 świadczeń społecznych i rodzicielskich ZUS. Sprawdź na jakie wsparcie możesz
-            liczyć, jakie warunki musisz spełnić oraz jaka jest dokładna podstawa prawna.
-          </p>
-        </div>
+    <div className="zus-view-container" id="katalog-swiadczen">
+      <ViewHeader
+        title="Twoje uprawnienia i świadczenia"
+        description="Interaktywny katalog 16 świadczeń społecznych i rodzicielskich ZUS. Sprawdź na jakie wsparcie możesz liczyć, jakie warunki musisz spełnić oraz jaka jest dokładna podstawa prawna."
+      />
 
         {/* 1. TRYB DLA ZALOGOWANEGO: BELKA INFORMACYJNA */}
         {isLoggedIn ? (
@@ -444,13 +443,21 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
         {/* PASEK STATYSTYK, WYSZUKIWANIA I PRZEŁĄCZNIKÓW WIDOKU */}
         <div className="zus-catalog-toolbar">
           <div className="zus-toolbar-summary">
-            <span className="zus-toolbar-result-badge">
-              Kwalifikujesz się do <strong>{eligibleCount}</strong> z 16 świadczeń
-            </span>
-            {notEligibleCount > 0 && (
-              <span className="zus-toolbar-sub-badge">
-                ({notEligibleCount} obecnie niespełnione lub niedotyczące profilu)
+            {!hasRequiredFields ? (
+              <span className="zus-toolbar-result-badge">
+                Wypełnij formularz powyżej (Krok 1 i 2), aby sprawdzić kwalifikację do 16 świadczeń
               </span>
+            ) : (
+              <>
+                <span className="zus-toolbar-result-badge">
+                  Kwalifikujesz się do <strong>{eligibleCount}</strong> z 16 świadczeń
+                </span>
+                {notEligibleCount > 0 && (
+                  <span className="zus-toolbar-sub-badge">
+                    ({notEligibleCount} obecnie niespełnione lub niedotyczące profilu)
+                  </span>
+                )}
+              </>
             )}
           </div>
 
@@ -469,14 +476,14 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
                 className={`zus-filter-tab-btn eligible ${statusFilter === 'eligible' ? 'active' : ''}`}
                 onClick={() => setStatusFilter('eligible')}
               >
-                ✓ Kwalifikujesz się ({eligibleCount})
+                ✓ Kwalifikujesz się {hasRequiredFields ? `(${eligibleCount})` : ''}
               </button>
               <button
                 type="button"
                 className={`zus-filter-tab-btn not-eligible ${statusFilter === 'not_eligible' ? 'active' : ''}`}
                 onClick={() => setStatusFilter('not_eligible')}
               >
-                ✕ Nie kwalifikujesz się ({notEligibleCount})
+                ✕ Nie kwalifikujesz się {hasRequiredFields ? `(${notEligibleCount})` : ''}
               </button>
             </div>
 
@@ -526,11 +533,16 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
           <div className="zus-benefits-grid">
             {visibleBenefits.map((item) => {
               const isExpanded = Boolean(expandedCards[item.id]);
+              const cardStatus = !hasRequiredFields
+                ? 'pending'
+                : item.isEligible
+                  ? 'eligible'
+                  : 'not_eligible';
 
               return (
                 <article
                   key={item.id}
-                  className={`zus-benefit-card ${item.isEligible ? 'is-eligible' : 'is-not-eligible'}`}
+                  className={`zus-benefit-card ${cardStatus === 'eligible' ? 'is-eligible' : cardStatus === 'pending' ? 'is-pending' : 'is-not-eligible'}`}
                 >
                   {/* Górny pasek karty: Kategoria i numer */}
                   <div className="zus-card-top-row">
@@ -544,8 +556,34 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
 
                   {/* Plakietka kwalifikacji + uzasadnienie */}
                   <div className="zus-card-qualification-box">
-                    <div className={`zus-badge-qualification ${item.isEligible ? 'badge-green' : 'badge-red'}`}>
-                      {item.isEligible ? (
+                    <div
+                      className={`zus-badge-qualification ${
+                        cardStatus === 'eligible'
+                          ? 'badge-green'
+                          : cardStatus === 'pending'
+                            ? 'badge-pending'
+                            : 'badge-gray'
+                      }`}
+                    >
+                      {cardStatus === 'pending' ? (
+                        <>
+                          <svg
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                          </svg>
+                          <span>Wypełnij dane</span>
+                        </>
+                      ) : item.isEligible ? (
                         <>
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
@@ -562,8 +600,22 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
                       )}
                     </div>
                     {/* 1 krótkie zdanie wyjaśniające dlaczego */}
-                    <p className={`zus-card-reason-text ${item.isEligible ? 'text-eligible' : 'text-not-eligible'}`}>
-                      {item.reason}
+                    <p
+                      className={`zus-card-reason-text ${
+                        cardStatus === 'eligible'
+                          ? 'text-eligible'
+                          : cardStatus === 'pending'
+                            ? 'text-pending'
+                            : 'text-not-eligible'
+                      }`}
+                    >
+                      {cardStatus === 'pending'
+                        ? (!role && !employment
+                            ? "Wybierz rolę oraz formę zatrudnienia powyżej, aby sprawdzić kwalifikację."
+                            : !role
+                              ? "Wybierz rolę wnioskodawcy powyżej, aby zweryfikować uprawnienia."
+                              : "Wybierz formę zatrudnienia powyżej, aby zweryfikować uprawnienia.")
+                        : item.reason}
                     </p>
                   </div>
 
@@ -639,7 +691,6 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
             })}
           </div>
         )}
-      </div>
-    </section>
+    </div>
   );
 };

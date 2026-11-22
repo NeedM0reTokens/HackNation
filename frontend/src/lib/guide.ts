@@ -76,7 +76,7 @@ export function qualify(input: GuideInput): Qualification {
   if (!input.role || !input.employment || input.grossSalary === undefined || input.grossSalary === null || Number(input.grossSalary) < 0) {
     return {
       eligible: false,
-      headline: 'Wprowadź dane do kalkulacji',
+      headline: 'Wypełnij dane',
       reason: 'Wybierz rolę wnioskodawcy, tytuł ubezpieczenia oraz podaj wynagrodzenie brutto, aby zweryfikować uprawnienia.',
     }
   }
