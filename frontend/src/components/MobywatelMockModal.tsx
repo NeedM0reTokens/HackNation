@@ -1,4 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import {
+  ShieldCheck,
+  Smartphone,
+  X,
+  ArrowRight,
+  Loader2,
+  User,
+  AlertTriangle,
+  Building2,
+  FileText,
+} from 'lucide-react';
 import { getMobywatelIdentities, type MobywatelIdentity } from '@/lib/api-client';
 
 interface MobywatelMockModalProps {
@@ -11,22 +22,26 @@ interface MobywatelMockModalProps {
 interface PersonaDetails {
   scenarioTitle: string;
   badgeText: string;
-  badgeBg: string;
-  badgeColor: string;
-  avatarBg: string;
   employmentLabel: string;
   benefitStatus: string;
   specialCase: string;
   description: string;
 }
 
+// Ujednolicony styl kart użytkowników zgodny z portalem ZUS
+const UNIFIED_STYLE = {
+  avatarBg: '#003B6F', // Granat instytucjonalny ZUS
+  avatarColor: '#FFFFFF',
+  badgeBg: '#E8F1F8',
+  badgeColor: '#003B6F',
+  badgeBorder: '#BAD7F0',
+  benefitColor: '#007834',
+};
+
 const PERSONA_METADATA: Record<string, PersonaDetails> = {
   '92011501234': {
     scenarioTitle: 'Przyszła Matka — Etat (UoP) + Ciąża',
     badgeText: 'UoP • CIĄŻA • 100%',
-    badgeBg: '#064e3b',
-    badgeColor: '#34d399',
-    avatarBg: '#059669',
     employmentLabel: 'Umowa o pracę (TechPol Sp. z o.o.)',
     benefitStatus: '100% podstawy (kod B - ciąża)',
     specialCase: 'Aktywne e-ZLA (30 dni), karencja spełniona',
@@ -36,9 +51,6 @@ const PERSONA_METADATA: Record<string, PersonaDetails> = {
   '89032005678': {
     scenarioTitle: 'Przyszły Ojciec — Urlop Ojcowski',
     badgeText: 'UoP • OJCOWSKI • 14 DNI',
-    badgeBg: '#1e3a8a',
-    badgeColor: '#60a5fa',
-    avatarBg: '#2563eb',
     employmentLabel: 'Umowa o pracę (Logistics Pro S.A.)',
     benefitStatus: '100% zasiłku ojcowskiego (14 dni)',
     specialCase: '9 tygodni nieprzenoszalnego urlopu dla ojca',
@@ -48,9 +60,6 @@ const PERSONA_METADATA: Record<string, PersonaDetails> = {
   '95081012345': {
     scenarioTitle: 'Zleceniobiorca — Ubezpieczenie Dobrowolne',
     badgeText: 'ZLECENIE • KARENCJA 90 DNI',
-    badgeBg: '#581c87',
-    badgeColor: '#c084fc',
-    avatarBg: '#7c3aed',
     employmentLabel: 'Umowa zlecenie (Creative Media Sp. z o.o.)',
     benefitStatus: 'Dobrowolne chorobowe zgłoszone',
     specialCase: 'Karencja 90 dni spełniona (staż: 180 dni)',
@@ -59,12 +68,9 @@ const PERSONA_METADATA: Record<string, PersonaDetails> = {
   },
   '85040398765': {
     scenarioTitle: 'Przedsiębiorca (JDG) — Zadłużenie w ZUS',
-    badgeText: '⚠️ JDG • BLOKADA ART. 2A',
-    badgeBg: '#7f1d1d',
-    badgeColor: '#f87171',
-    avatarBg: '#dc2626',
+    badgeText: 'JDG • BLOKADA ART. 2A',
     employmentLabel: 'Działalność gospodarcza (JDG B2B)',
-    benefitStatus: 'WSTRZYMANIE WYPŁATY ŚWIADCZEŃ',
+    benefitStatus: 'Wstrzymanie wypłaty świadczeń (dług > limit)',
     specialCase: 'Dług 1 250,00 zł > limit 48,06 zł (art. 2a)',
     description:
       'Scenariusz weryfikacji zadłużenia: zaległość składkowa przekraczająca 1% minimalnego wynagrodzenia blokuje wypłatę zasiłków w myśl art. 2a ustawy zasiłkowej (6 m-cy na spłatę).',
@@ -72,9 +78,6 @@ const PERSONA_METADATA: Record<string, PersonaDetails> = {
   '99010155555': {
     scenarioTitle: 'Obywatelka bez Ubezpieczenia',
     badgeText: 'BRAK UBEZP. • KOSINIAKOWE',
-    badgeBg: '#334155',
-    badgeColor: '#94a3b8',
-    avatarBg: '#475569',
     employmentLabel: 'Brak aktywnego tytułu do ubezpieczeń',
     benefitStatus: 'Brak prawa do zasiłku z FUS/ZUS',
     specialCase: 'Alternatywa: Świadczenie rodzicielskie (1000 zł)',
@@ -84,9 +87,6 @@ const PERSONA_METADATA: Record<string, PersonaDetails> = {
   '80051209876': {
     scenarioTitle: 'Inspektor ZUS — Administrator Systemu',
     badgeText: 'ADMIN • PANEL ZARZĄDCZY',
-    badgeBg: '#134e4a',
-    badgeColor: '#2dd4bf',
-    avatarBg: '#0d9488',
     employmentLabel: 'Centrala ZUS / Departament Zasiłków',
     benefitStatus: 'Rola administratora (uprawnienia RBAC)',
     specialCase: 'Dostęp do konfiguracji wskaźników prawnych',
@@ -98,9 +98,6 @@ const PERSONA_METADATA: Record<string, PersonaDetails> = {
 const DEFAULT_PERSONA: PersonaDetails = {
   scenarioTitle: 'Profil Obywatela (Symulacja dynamiczna)',
   badgeText: 'PROFIL MOCK • ZUS',
-  badgeBg: '#1e293b',
-  badgeColor: '#93c5fd',
-  avatarBg: '#3b82f6',
   employmentLabel: 'Umowa o pracę (standard)',
   benefitStatus: 'Standardowe prawo do zasiłku',
   specialCase: 'Generowane dynamicznie na podstawie PESEL',
@@ -154,102 +151,73 @@ export const MobywatelMockModal: React.FC<MobywatelMockModalProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        backgroundColor: 'rgba(5, 10, 20, 0.88)',
-        backdropFilter: 'blur(8px)',
+        backgroundColor: 'rgba(15, 23, 42, 0.65)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '16px',
         overflowY: 'auto',
       }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isLoggingIn) {
+          onClose();
+        }
+      }}
     >
       <div
         style={{
           width: '100%',
-          maxWidth: '1100px',
+          maxWidth: '1120px',
           maxHeight: '92vh',
-          backgroundColor: '#0b1120',
-          border: '2px solid #38bdf8',
-          borderRadius: '16px',
-          boxShadow: '0 0 40px rgba(56, 189, 248, 0.25), 0 25px 50px -12px rgba(0, 0, 0, 0.8)',
+          backgroundColor: '#FFFFFF',
+          borderRadius: '10px',
+          borderTop: '5px solid #007834',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
           display: 'flex',
           flexDirection: 'column',
-          color: '#f8fafc',
-          fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          color: '#1A1A1A',
+          fontFamily: "'Segoe UI', Roboto, 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif",
           overflow: 'hidden',
+          border: '1px solid #E2E8F0',
         }}
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* NAGŁÓWEK MOCKOWY (DEV / SANDBOX STYLE) */}
+        {/* NAGŁÓWEK W STYLU PORTALU ZUS & mOBYWATEL */}
         <div
           style={{
-            backgroundColor: '#030712',
-            borderBottom: '2px solid #1e293b',
-            padding: '16px 24px',
+            backgroundColor: '#F8FAFC',
+            borderBottom: '1px solid #E2E8F0',
+            padding: '18px 24px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             position: 'relative',
           }}
         >
-          {/* Ozdobny pasek "DEV TESTBED" */}
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '4px',
-              background: 'linear-gradient(90deg, #f59e0b, #38bdf8, #a855f7, #10b981)',
-            }}
-          />
-
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <span
-                style={{
-                  backgroundColor: '#f59e0b',
-                  color: '#000000',
-                  fontWeight: 900,
-                  fontSize: '0.72rem',
-                  letterSpacing: '0.08em',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  textTransform: 'uppercase',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                }}
-              >
-                <span>⚠️</span> SYMULATOR IDP (MOCK)
-              </span>
-              <span
-                style={{
-                  backgroundColor: '#1e293b',
-                  color: '#38bdf8',
-                  fontFamily: 'monospace',
-                  fontSize: '0.75rem',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  border: '1px solid #334155',
-                }}
-              >
-                LOGIN.GOV.PL / mOBYWATEL WĘZEŁ KRAJOWY
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
+              
+            
             </div>
+
             <h2
               id="mock-modal-title"
               style={{
-                fontSize: '1.35rem',
+                fontSize: '1.3rem',
                 fontWeight: 800,
-                color: '#ffffff',
-                margin: '6px 0 2px 0',
+                color: '#1A1A1A',
+                margin: '4px 0 2px 0',
                 letterSpacing: '-0.02em',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
               }}
             >
-              Wybierz tożsamość testową obywatela
+              Wybierz tożsamość obywatela do logowania
             </h2>
-            <p style={{ fontSize: '0.84rem', color: '#94a3b8', margin: 0 }}>
-              Środowisko symulujące zewnętrzną bramkę mObywatel. Kliknij osobę, aby wywołać autentykację i załadować profil ZUS.
+            <p style={{ fontSize: '0.86rem', color: '#4A4A4A', margin: 0 }}>
+              Wybierz profil demonstracyjny, aby zasymulować logowanie mObywatel i załadować profil ZUS.
             </p>
           </div>
 
@@ -257,32 +225,33 @@ export const MobywatelMockModal: React.FC<MobywatelMockModalProps> = ({
             type="button"
             onClick={onClose}
             disabled={isLoggingIn}
-            title="Zamknij symulator i wróć do portalu"
+            title="Zamknij okno"
             style={{
-              background: '#1e293b',
-              border: '1px solid #475569',
-              color: '#cbd5e1',
-              borderRadius: '8px',
+              background: '#FFFFFF',
+              border: '1px solid #CBD5E1',
+              color: '#4A4A4A',
+              borderRadius: '6px',
               width: '36px',
               height: '36px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '1.4rem',
               cursor: isLoggingIn ? 'not-allowed' : 'pointer',
-              lineHeight: 1,
               transition: 'all 0.15s ease',
+              flexShrink: 0,
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#ef4444';
-              e.currentTarget.style.color = '#ffffff';
+              e.currentTarget.style.backgroundColor = '#F1F5F9';
+              e.currentTarget.style.color = '#1A1A1A';
+              e.currentTarget.style.borderColor = '#94A3B8';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#1e293b';
-              e.currentTarget.style.color = '#cbd5e1';
+              e.currentTarget.style.backgroundColor = '#FFFFFF';
+              e.currentTarget.style.color = '#4A4A4A';
+              e.currentTarget.style.borderColor = '#CBD5E1';
             }}
           >
-            &times;
+            <X size={18} />
           </button>
         </div>
 
@@ -293,31 +262,62 @@ export const MobywatelMockModal: React.FC<MobywatelMockModalProps> = ({
             overflowY: 'auto',
             display: 'flex',
             flexDirection: 'column',
-            gap: '18px',
+            gap: '16px',
+            backgroundColor: '#FFFFFF',
           }}
         >
-          {/* BANER OSTRZEGAWCZY O MOCKU */}
+          {/* DUŻY, WYRAŹNY DISCLAIMER HACKNATION */}
           <div
             style={{
-              backgroundColor: '#172554',
-              border: '1px solid #2563eb',
-              borderRadius: '10px',
-              padding: '12px 16px',
+              backgroundColor: '#FFFBEB',
+              border: '2px solid #F59E0B',
+              borderRadius: '8px',
+              padding: '16px 20px',
               display: 'flex',
               alignItems: 'flex-start',
-              gap: '12px',
+              gap: '14px',
+              boxShadow: '0 2px 4px rgba(245, 158, 11, 0.1)',
             }}
           >
-            <div style={{ fontSize: '1.3rem', lineHeight: 1, marginTop: '2px' }}>ℹ️</div>
-            <div style={{ fontSize: '0.82rem', color: '#bfdbfe', lineHeight: 1.45 }}>
-              <strong style={{ color: '#ffffff' }}>Informacja dla Kapituły HackNation:</strong> Ten ekran celowo posiada odmienną stylistykę konsoli deweloperskiej, aby jednoznacznie odróżnić symulację zewnętrznego dostawcy tożsamości (Węzeł Krajowy Login.gov.pl / mObywatel) od właściwego interfejsu portalu ZUS. Wybór profilu wywoła endpoint <code>POST /api/auth/mobywatel/login</code> oraz zasili kalkulatory danymi ze składek i e-ZLA.
+            <div
+            >
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  flexWrap: 'wrap',
+                  marginBottom: '4px',
+                }}
+              >
+                <span
+                  style={{
+                    backgroundColor: '#B45309',
+                    color: '#FFFFFF',
+                    fontWeight: 800,
+                    fontSize: '0.72rem',
+                    letterSpacing: '0.05em',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Disclaimer HackNation 2026
+                </span>
+                <strong style={{ fontSize: '0.98rem', color: '#92400E', fontWeight: 800 }}>
+                  ŚRODOWISKO DEMONSTRACYJNE WYŁĄCZNIE NA POTRZEBY KONKURSU HACKNATION
+                </strong>
+              </div>
             </div>
           </div>
 
-          {/* GRID OSÓB */}
+          {/* GRID OSÓB — WSZYSCY W IDENTYCZNYCH, SPÓJNYCH KOLORACH */}
           {loadingList ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
-              Ładowanie listy profili obywateli...
+            <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>
+              <Loader2 size={28} className="animate-spin" style={{ margin: '0 auto 8px', color: '#007834' }} />
+              <div>Ładowanie profili obywateli...</div>
             </div>
           ) : (
             <div
@@ -345,83 +345,82 @@ export const MobywatelMockModal: React.FC<MobywatelMockModalProps> = ({
                       }
                     }}
                     style={{
-                      backgroundColor: '#111827',
-                      border: isSelected ? '2px solid #38bdf8' : '1px solid #1f2937',
-                      borderRadius: '12px',
+                      backgroundColor: isSelected ? '#E6F4EC' : '#FFFFFF',
+                      border: isSelected ? '2px solid #007834' : '1.5px solid #E2E8F0',
+                      borderRadius: '8px',
                       padding: '16px',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between',
                       cursor: isLoggingIn ? 'wait' : 'pointer',
-                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      transition: 'all 0.18s ease-in-out',
                       position: 'relative',
                       boxShadow: isSelected
-                        ? '0 0 20px rgba(56, 189, 248, 0.4)'
-                        : '0 4px 6px -1px rgba(0, 0, 0, 0.3)',
+                        ? '0 4px 12px rgba(0, 120, 52, 0.15)'
+                        : '0 1px 3px rgba(0, 0, 0, 0.05)',
                     }}
                     onMouseEnter={(e) => {
-                      if (!isLoggingIn) {
-                        e.currentTarget.style.borderColor = '#38bdf8';
-                        e.currentTarget.style.backgroundColor = '#172033';
+                      if (!isLoggingIn && !isSelected) {
+                        e.currentTarget.style.borderColor = '#007834';
+                        e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 120, 52, 0.12)';
                         e.currentTarget.style.transform = 'translateY(-2px)';
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (!isLoggingIn) {
-                        e.currentTarget.style.borderColor = isSelected ? '#38bdf8' : '#1f2937';
-                        e.currentTarget.style.backgroundColor = '#111827';
+                      if (!isLoggingIn && !isSelected) {
+                        e.currentTarget.style.borderColor = '#E2E8F0';
+                        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
                         e.currentTarget.style.transform = 'translateY(0)';
                       }
                     }}
                   >
                     <div>
-                      {/* GÓRNY PASEK KARTY: AVATAR + IMIĘ I NAZWISKO + ROLA BADGE */}
+                      {/* GÓRNY PASEK KARTY: IDENTYCZNY AWATAR (ZUS NAVY) + IMIĘ I NAZWISKO + IDENTYCZNY BADGE */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
                         <div
                           style={{
-                            width: '44px',
-                            height: '44px',
-                            borderRadius: '10px',
-                            backgroundColor: meta.avatarBg,
-                            color: '#ffffff',
+                            width: '42px',
+                            height: '42px',
+                            borderRadius: '8px',
+                            backgroundColor: UNIFIED_STYLE.avatarBg,
+                            color: UNIFIED_STYLE.avatarColor,
                             fontWeight: 800,
-                            fontSize: '1rem',
+                            fontSize: '0.98rem',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             flexShrink: 0,
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                           }}
                         >
                           {initials}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                            <h3
-                              style={{
-                                fontSize: '1.05rem',
-                                fontWeight: 800,
-                                color: '#ffffff',
-                                margin: 0,
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                              }}
-                            >
-                              {item.first_name} {item.last_name}
-                            </h3>
-                          </div>
+                          <h3
+                            style={{
+                              fontSize: '1.05rem',
+                              fontWeight: 700,
+                              color: '#1A1A1A',
+                              margin: 0,
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                          >
+                            {item.first_name} {item.last_name}
+                          </h3>
                           <span
                             style={{
-                              backgroundColor: meta.badgeBg,
-                              color: meta.badgeColor,
+                              backgroundColor: UNIFIED_STYLE.badgeBg,
+                              color: UNIFIED_STYLE.badgeColor,
+                              border: `1px solid ${UNIFIED_STYLE.badgeBorder}`,
                               fontSize: '0.68rem',
                               fontWeight: 700,
-                              padding: '2px 6px',
+                              padding: '2px 7px',
                               borderRadius: '4px',
                               display: 'inline-block',
                               marginTop: '3px',
-                              letterSpacing: '0.04em',
+                              letterSpacing: '0.03em',
                             }}
                           >
                             {meta.badgeText}
@@ -432,24 +431,28 @@ export const MobywatelMockModal: React.FC<MobywatelMockModalProps> = ({
                       {/* PESEL + DANE PODSTAWOWE */}
                       <div
                         style={{
-                          backgroundColor: '#0a0f1d',
-                          border: '1px solid #1e293b',
-                          borderRadius: '8px',
-                          padding: '8px 10px',
+                          backgroundColor: '#F8FAFC',
+                          border: '1px solid #E2E8F0',
+                          borderRadius: '6px',
+                          padding: '7px 10px',
                           marginBottom: '10px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
-                          fontSize: '0.78rem',
+                          fontSize: '0.8rem',
                         }}
                       >
-                        <span style={{ color: '#64748b' }}>PESEL:</span>
+                        <span style={{ color: '#64748B', fontWeight: 600 }}>PESEL:</span>
                         <code
                           style={{
-                            color: '#38bdf8',
+                            color: '#0F172A',
                             fontWeight: 700,
                             fontFamily: 'monospace',
-                            fontSize: '0.86rem',
+                            fontSize: '0.88rem',
+                            backgroundColor: '#FFFFFF',
+                            padding: '1px 6px',
+                            borderRadius: '3px',
+                            border: '1px solid #E2E8F0',
                           }}
                         >
                           {item.pesel}
@@ -457,95 +460,99 @@ export const MobywatelMockModal: React.FC<MobywatelMockModalProps> = ({
                       </div>
 
                       {/* SZCZEGÓŁY SCENARIUSZA */}
-                      <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginBottom: '8px', lineHeight: 1.4 }}>
-                        <div style={{ color: '#94a3b8', fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 700, marginBottom: '2px' }}>
+                      <div style={{ fontSize: '0.8rem', color: '#334155', marginBottom: '8px', lineHeight: 1.45 }}>
+                        <div
+                          style={{
+                            color: '#64748B',
+                            fontSize: '0.7rem',
+                            textTransform: 'uppercase',
+                            fontWeight: 700,
+                            letterSpacing: '0.04em',
+                            marginBottom: '2px',
+                          }}
+                        >
                           Scenariusz testowy:
                         </div>
-                        <div style={{ fontWeight: 600, color: '#f1f5f9' }}>{meta.scenarioTitle}</div>
-                        <p style={{ margin: '4px 0 0 0', color: '#94a3b8', fontSize: '0.75rem' }}>
+                        <div style={{ fontWeight: 700, color: '#1A1A1A' }}>{meta.scenarioTitle}</div>
+                        <p style={{ margin: '4px 0 0 0', color: '#4A4A4A', fontSize: '0.78rem' }}>
                           {meta.description}
                         </p>
                       </div>
 
-                      {/* STATUSY / BADGE CECHY */}
+                      {/* STATUSY / CECHY */}
                       <div
                         style={{
                           display: 'flex',
                           flexDirection: 'column',
-                          gap: '4px',
-                          fontSize: '0.74rem',
-                          borderTop: '1px solid #1f2937',
-                          paddingTop: '8px',
-                          marginTop: '8px',
-                          color: '#94a3b8',
+                          gap: '5px',
+                          fontSize: '0.78rem',
+                          borderTop: '1px solid #F1F5F9',
+                          paddingTop: '9px',
+                          marginTop: '9px',
+                          color: '#4A4A4A',
                         }}
                       >
-                        <div>
-                          <strong style={{ color: '#e2e8f0' }}>Forma:</strong> {meta.employmentLabel}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <Building2 size={13} color="#64748B" />
+                          <strong style={{ color: '#1A1A1A' }}>Forma:</strong> {meta.employmentLabel}
                         </div>
-                        <div>
-                          <strong style={{ color: '#e2e8f0' }}>Zasiłek:</strong>{' '}
-                          <span style={{ color: meta.badgeColor }}>{meta.benefitStatus}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <FileText size={13} color="#64748B" />
+                          <strong style={{ color: '#1A1A1A' }}>Zasiłek:</strong>{' '}
+                          <span style={{ color: '#1A1A1A', fontWeight: 600 }}>
+                            {meta.benefitStatus}
+                          </span>
                         </div>
-                        <div style={{ color: '#cbd5e1' }}>
+                        <div style={{ color: '#334155', fontWeight: 500, fontSize: '0.76rem', paddingLeft: '2px' }}>
                           • {meta.specialCase}
                         </div>
                       </div>
                     </div>
 
-                    {/* PRZYCISK ZALOGUJ */}
+                    {/* PRZYCISK ZALOGUJ W STYLU ZUS */}
                     <button
                       type="button"
                       disabled={isLoggingIn}
                       style={{
                         marginTop: '14px',
                         width: '100%',
-                        backgroundColor: isSelected ? '#0284c7' : '#1e293b',
-                        border: '1px solid #38bdf8',
-                        color: '#ffffff',
+                        backgroundColor: isSelected ? '#005C27' : '#007834',
+                        border: 'none',
+                        color: '#FFFFFF',
                         fontWeight: 700,
-                        fontSize: '0.84rem',
-                        padding: '9px 14px',
-                        borderRadius: '8px',
+                        fontSize: '0.86rem',
+                        padding: '10px 14px',
+                        borderRadius: '6px',
                         cursor: isLoggingIn ? 'wait' : 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '8px',
                         transition: 'all 0.15s ease',
+                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
                       }}
                       onMouseEnter={(e) => {
                         if (!isLoggingIn) {
-                          e.currentTarget.style.backgroundColor = '#38bdf8';
-                          e.currentTarget.style.color = '#000000';
+                          e.currentTarget.style.backgroundColor = '#005C27';
+                          e.currentTarget.style.boxShadow = '0 3px 6px rgba(0, 0, 0, 0.15)';
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (!isLoggingIn) {
-                          e.currentTarget.style.backgroundColor = isSelected ? '#0284c7' : '#1e293b';
-                          e.currentTarget.style.color = '#ffffff';
+                          e.currentTarget.style.backgroundColor = isSelected ? '#005C27' : '#007834';
+                          e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
                         }
                       }}
                     >
                       {isSelected ? (
                         <>
-                          <span
-                            style={{
-                              display: 'inline-block',
-                              width: '14px',
-                              height: '14px',
-                              border: '2px solid #ffffff',
-                              borderTopColor: 'transparent',
-                              borderRadius: '50%',
-                              animation: 'spin 0.8s linear infinite',
-                            }}
-                          />
-                          <span>Uwierzytelnianie w mObywatelu...</span>
+                          <Loader2 size={16} className="animate-spin" />
+                          <span>Logowanie do profilu...</span>
                         </>
                       ) : (
                         <>
                           <span>Zaloguj jako {item.first_name}</span>
-                          <span style={{ fontSize: '1rem', lineHeight: 1 }}>&rarr;</span>
+                          <ArrowRight size={15} />
                         </>
                       )}
                     </button>
@@ -555,96 +562,53 @@ export const MobywatelMockModal: React.FC<MobywatelMockModalProps> = ({
             </div>
           )}
 
-          {/* DOLNA SEKCJA: WPROWADZENIE WŁASNEGO NUMERU PESEL */}
-          <div
-            style={{
-              backgroundColor: '#0a0f1d',
-              border: '1px dashed #334155',
-              borderRadius: '12px',
-              padding: '16px',
-              marginTop: '4px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <span style={{ color: '#38bdf8', fontWeight: 800, fontSize: '0.85rem' }}>⚡ TESTOWANIE WŁASNEGO NUMERU PESEL:</span>
-              <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                System automatycznie wyznaczy datę urodzenia i płeć z sumy kontrolnej.
-              </span>
-            </div>
-
-            <form
-              onSubmit={handleCustomSubmit}
-              style={{
-                display: 'flex',
-                gap: '10px',
-                flexWrap: 'wrap',
-              }}
-            >
-              <input
-                type="text"
-                value={customPesel}
-                onChange={(e) => setCustomPesel(e.target.value)}
-                maxLength={11}
-                placeholder="Wpisz 11 cyfr PESEL (np. 92051203456)"
-                style={{
-                  flex: '1 1 240px',
-                  backgroundColor: '#111827',
-                  border: '1px solid #374151',
-                  borderRadius: '8px',
-                  color: '#ffffff',
-                  fontFamily: 'monospace',
-                  fontSize: '0.92rem',
-                  padding: '9px 12px',
-                  outline: 'none',
-                }}
-              />
-              <button
-                type="submit"
-                disabled={isLoggingIn || customPesel.trim().length !== 11}
-                style={{
-                  backgroundColor: '#3b82f6',
-                  color: '#ffffff',
-                  fontWeight: 700,
-                  fontSize: '0.84rem',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '9px 18px',
-                  cursor: isLoggingIn || customPesel.trim().length !== 11 ? 'not-allowed' : 'pointer',
-                  opacity: customPesel.trim().length === 11 ? 1 : 0.6,
-                }}
-              >
-                Zaloguj wpisany PESEL
-              </button>
-            </form>
-          </div>
+          
         </div>
 
-        {/* STOPKA MODALU */}
+        {/* STOPKA MODALU W STYLU ZUS */}
         <div
           style={{
-            backgroundColor: '#030712',
-            borderTop: '1px solid #1e293b',
-            padding: '12px 24px',
+            backgroundColor: '#F8FAFC',
+            borderTop: '1px solid #E2E8F0',
+            padding: '14px 24px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            fontSize: '0.78rem',
-            color: '#64748b',
+            fontSize: '0.82rem',
+            color: '#64748B',
           }}
         >
-          <div>
-            HackNation 2026 • Moduł Symulacji Integracji mObywatel / Rejestrów ZUS
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>HackNation 2026</span>
+            <span>•</span>
+            <span>Zakład Ubezpieczeń Społecznych & Węzeł Krajowy Login.gov.pl</span>
           </div>
           <button
             type="button"
             onClick={onClose}
+            disabled={isLoggingIn}
             style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#94a3b8',
-              cursor: 'pointer',
+              backgroundColor: '#FFFFFF',
+              border: '1.5px solid #CBD5E0',
+              borderRadius: '4px',
+              color: '#334155',
               fontWeight: 600,
-              padding: '4px 8px',
+              padding: '7px 16px',
+              fontSize: '0.84rem',
+              cursor: isLoggingIn ? 'not-allowed' : 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => {
+              if (!isLoggingIn) {
+                e.currentTarget.style.backgroundColor = '#F1F5F9';
+                e.currentTarget.style.borderColor = '#94A3B8';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isLoggingIn) {
+                e.currentTarget.style.backgroundColor = '#FFFFFF';
+                e.currentTarget.style.borderColor = '#CBD5E0';
+              }
             }}
           >
             Anuluj i zamknij

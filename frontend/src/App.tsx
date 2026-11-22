@@ -261,7 +261,6 @@ const AppContent: React.FC = () => {
         {activeTab === "kalkulator" && (
           <div className="zus-view-container">
             <div className="zus-view-header">
-              <span className="zus-official-pill">Krok po kroku</span>
               <h1 className="zus-view-title">
                 Zintegrowany Kalkulator Zasiłkowy
               </h1>

@@ -64,9 +64,56 @@ export const AdminView: React.FC = () => {
   }
 
   return (
+    
     <div className="zus-view-container">
       <div className="zus-view-header">
-        <div className="zus-official-pill">Panel Administracyjny ZUS – Moduł BE-03</div>
+      
+        <div
+            style={{
+              backgroundColor: '#FFFBEB',
+              border: '2px solid #F59E0B',
+              borderRadius: '8px',
+              padding: '16px 20px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '14px',
+              boxShadow: '0 2px 4px rgba(245, 158, 11, 0.1)',
+            }}
+          >
+            <div
+            >
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  flexWrap: 'wrap',
+                  marginBottom: '4px',
+                }}
+              >
+                <span
+                  style={{
+                    backgroundColor: '#B45309',
+                    color: '#FFFFFF',
+                    fontWeight: 800,
+                    fontSize: '0.72rem',
+                    letterSpacing: '0.05em',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Disclaimer HackNation 2026
+                </span>
+                <strong style={{ fontSize: '0.98rem', color: '#92400E', fontWeight: 800 }}>
+                  ŚRODOWISKO DEMONSTRACYJNE WYŁĄCZNIE NA POTRZEBY KONKURSU HACKNATION
+                </strong>
+              </div>
+            </div>
+          </div>
+          <br />
         <h1 className="zus-view-title">Zarządzanie Parametrami Ustawowymi w Locie</h1>
         <p className="zus-view-desc">
           Zgodnie z wymaganiami wyzwania ZUS, aplikacja umożliwia administratorom modyfikację stóp procentowych świadczeń i wymiarów urlopów bez restartu serwera (np. w przypadku zmian w Kodeksie pracy).

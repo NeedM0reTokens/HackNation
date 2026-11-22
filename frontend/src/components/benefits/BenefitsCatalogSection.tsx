@@ -141,7 +141,6 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
         {/* NAGŁÓWEK SEKCJI */}
         <div className="zus-catalog-header">
           <div className="zus-catalog-header-top">
-            <span className="zus-official-pill">Katalog Zasiłków i Praw 2026</span>
             <div className="zus-catalog-auth-status">
               <span className={`zus-status-dot ${isLoggedIn ? 'online' : 'manual'}`}></span>
               <span className="zus-status-mode-label">
