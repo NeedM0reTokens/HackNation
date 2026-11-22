@@ -221,6 +221,41 @@ class TestZusInsuranceSimulation(unittest.TestCase):
         self.assertEqual(data["token_type"], "bearer")
         self.assertEqual(data["user"]["pesel"], "92011501234")
 
+    # --- Testy symulacji Rejestru Stanu Cywilnego (USC) ---
+    def test_api_endpoint_mock_usc_birth_certificate_get(self) -> None:
+        res = self.client.get("/api/mock/usc/birth-certificate")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data["status"], "WYDANY_ELEKTRONICZNIE")
+        self.assertEqual(data["certificate_type"], "Odpis skrócony aktu urodzenia")
+        self.assertIn("USC", data["certificate_id"])
+        self.assertEqual(
+            data["official_portal_url"], "https://www.gov.pl/web/cyfryzacja/rejestr-stanu-cywilnego"
+        )
+
+    def test_api_endpoint_mock_usc_birth_certificate_post(self) -> None:
+        payload = {
+            "child_first_name": "Zofia",
+            "child_last_name": "Kowalska",
+            "child_date_of_birth": "2026-06-01",
+            "child_place_of_birth": "Kraków",
+            "child_gender": "Kobieta",
+            "applicant_first_name": "Anna",
+            "applicant_last_name": "Kowalska",
+            "applicant_pesel": "92011501234",
+            "applicant_role": "Matka",
+            "certificate_type": "ZUPEŁNY",
+        }
+        res = self.client.post("/api/mock/usc/birth-certificate", json=payload)
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data["child_first_name"], "Zofia")
+        self.assertEqual(data["child_last_name"], "Kowalska")
+        self.assertEqual(data["certificate_type"], "Odpis zupełny aktu urodzenia")
+        self.assertEqual(data["child_gender"], "Kobieta")
+        self.assertEqual(data["child_place_of_birth"], "Kraków")
+        self.assertEqual(len(data["child_pesel"]), 11)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -11,10 +11,13 @@ class ApplicationCategory(StrEnum):
       zgodnie z Kodeksem Pracy i pomocniczym Rozporządzeniem MRPiPS z 11 marca 2025 r.).
     - ZUS_BENEFIT: Wniosek do ZUS o świadczenie / zasiłek (oficjalne sztywne druki
       dostępne na www.zus.pl, np. ZAM, ZAS-53, Z-3, Z-3a).
+    - USC_CIVIL_ACT: Wniosek do Urzędu Stanu Cywilnego o wydanie odpisu aktu urodzenia
+      dziecka z centralnego Rejestru Stanu Cywilnego (gov.pl / ePUAP).
     """
 
     EMPLOYER_LEAVE = "EMPLOYER_LEAVE"
     ZUS_BENEFIT = "ZUS_BENEFIT"
+    USC_CIVIL_ACT = "USC_CIVIL_ACT"
 
 
 class ApplicationType(StrEnum):
@@ -36,6 +39,10 @@ class ApplicationType(StrEnum):
     - ZUS_ZAS_53: Wniosek o zasiłek chorobowy / macierzyński dla przedsiębiorców (JDG).
     - ZUS_Z3: Zaświadczenie płatnika składek dla pracowników (składane przez pracodawcę).
     - ZUS_Z3A: Zaświadczenie płatnika składek dla zleceniobiorców.
+
+    Wnioski do Urzędu Stanu Cywilnego / Rejestru Stanu Cywilnego (gov.pl):
+    - USC_BIRTH_CERTIFICATE_SHORT: Wniosek o wydanie odpisu skróconego aktu urodzenia dziecka.
+    - USC_BIRTH_CERTIFICATE_FULL: Wniosek o wydanie odpisu zupełnego aktu urodzenia dziecka.
     """
 
     UNIFIED_MATERNITY_PARENTAL_81_5 = "UNIFIED_MATERNITY_PARENTAL_81_5"
@@ -48,6 +55,9 @@ class ApplicationType(StrEnum):
     ZUS_ZAS_53 = "ZUS_ZAS_53"
     ZUS_Z3 = "ZUS_Z3"
     ZUS_Z3A = "ZUS_Z3A"
+
+    USC_BIRTH_CERTIFICATE_SHORT = "USC_BIRTH_CERTIFICATE_SHORT"
+    USC_BIRTH_CERTIFICATE_FULL = "USC_BIRTH_CERTIFICATE_FULL"
 
 
 class ApplicantData(BaseModel):

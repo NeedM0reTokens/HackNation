@@ -53,8 +53,8 @@ ZUS_ASSISTANT_SYSTEM_INSTRUCTION = (
     "9. Wcześniak / hospitalizacja noworodka: uzupełniający urlop macierzyński 100% (do 15 tyg.).\n"
     "10. Łączenie rodzicielskiego z pracą: max 1/2 etatu, proporcjonalne wydłużenie urlopu.\n"
     "11. Adopcja: urlop na warunkach macierzyńskiego do 7 lat (10/14 lat), min. 9 tyg.\n\n"
-    "Zwróć odpowiedź WYŁĄCZNIE jako JSON: {\"title\": \"...\", \"summary\": \"...\", "
-    "\"details\": [\"...\"], \"legal_basis\": \"...\"}"
+    'Zwróć odpowiedź WYŁĄCZNIE jako JSON: {"title": "...", "summary": "...", '
+    '"details": ["..."], "legal_basis": "..."}'
 )
 
 def _normalize_text(text: str) -> str:

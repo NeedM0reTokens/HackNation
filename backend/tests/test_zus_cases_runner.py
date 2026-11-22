@@ -170,9 +170,7 @@ def _get_sprawy_pdf_paths() -> list[Path]:
     ]
     for c in candidates:
         if c.exists() and c.is_dir():
-            files = sorted(
-                [p for p in c.rglob("*") if p.is_file() and p.suffix.lower() == ".pdf"]
-            )
+            files = sorted([p for p in c.rglob("*") if p.is_file() and p.suffix.lower() == ".pdf"])
             if files:
                 return files
     return []
