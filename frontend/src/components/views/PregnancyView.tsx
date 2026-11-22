@@ -39,7 +39,6 @@ export const PregnancyView: React.FC = () => {
   return (
     <div className="zus-view-container">
       <div className="zus-view-header">
-        <div className="zus-official-pill">Moduł e-ZLA i Zasiłek Chorobowy w Ciąży</div>
         <h1 className="zus-view-title">Kwalifikator i Kalkulator Zasiłku Chorobowego (Kod B)</h1>
         <p className="zus-view-desc">
           Zwolnienie lekarskie z kodem literowym <strong>„B”</strong> przysługuje kobiecie w okresie ciąży i jest płatne w wysokości <strong>100% podstawy wymiaru</strong>. Okres zasiłkowy wynosi aż <strong>270 dni</strong> (zamiast standardowych 182 dni).

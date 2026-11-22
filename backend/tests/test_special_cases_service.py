@@ -1,11 +1,11 @@
 import unittest
 
-from ..api.models.maternity import MaternityEmploymentType
-from ..api.models.special_cases import (
+from src.api.models.maternity import MaternityEmploymentType
+from src.api.models.special_cases import (
     SpecialCasesInput,
     SpecialCaseType,
 )
-from ..api.services.special_cases import calculate_special_cases
+from src.api.services.special_cases import calculate_special_cases
 
 
 class TestSpecialCasesService(unittest.TestCase):

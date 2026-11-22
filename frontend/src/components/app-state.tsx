@@ -5,8 +5,11 @@ import type { AssistantMessage, DataSource, Explanation, InsuredUser } from '@/l
 type AppState = {
   user: InsuredUser | null
   isLoggingIn: boolean
-  login: () => Promise<void>
+  login: (pesel?: string) => Promise<void>
   logout: () => void
+  isMockSelectorOpen: boolean
+  openMockSelector: () => void
+  closeMockSelector: () => void
   dataSource: DataSource
   setDataSource: (source: DataSource) => void
   activeTab: string
@@ -47,6 +50,7 @@ function toAssistantMessage(explanation: Explanation): AssistantMessage {
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<InsuredUser | null>(null)
   const [isLoggingIn, setIsLoggingIn] = useState(false)
+  const [isMockSelectorOpen, setIsMockSelectorOpen] = useState(false)
   const [dataSource, setDataSource] = useState<DataSource>('pue')
   const [activeTab, setActiveTab] = useState<string>('start')
   const [assistantOpen, setAssistantOpen] = useState(false)
@@ -58,17 +62,28 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.classList.toggle('calm', calmMode)
   }, [calmMode])
 
-  const login = useCallback(async () => {
+  const openMockSelector = useCallback(() => {
+    setIsMockSelectorOpen(true)
+  }, [])
+
+  const closeMockSelector = useCallback(() => {
+    setIsMockSelectorOpen(false)
+  }, [])
+
+  const login = useCallback(async (pesel: string = '92011501234') => {
     setIsLoggingIn(true)
     try {
-      const { user: loggedUser } = await loginWithMObywatel()
+      const { user: loggedUser } = await loginWithMObywatel(pesel)
       setUser(loggedUser)
+      setIsMockSelectorOpen(false)
     } finally {
       setIsLoggingIn(false)
     }
   }, [])
 
-  const logout = useCallback(() => setUser(null), [])
+  const logout = useCallback(() => {
+    setUser(null)
+  }, [])
 
   const runAssistant = useCallback(async (userText: string, load: () => Promise<Explanation>) => {
     setAssistantOpen(true)
@@ -78,8 +93,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       const explanation = await load()
       setMessages((current) => [...current, toAssistantMessage(explanation)])
     } catch {
-      setMessages((current) => [
-        ...current,
+      setMessages((current) => [        ...current,
         { id: nextId(), role: 'assistant', content: 'Nie udało się pobrać odpowiedzi. Spróbuj ponownie za chwilę.' },
       ])
     } finally {
@@ -123,6 +137,9 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       isLoggingIn,
       login,
       logout,
+      isMockSelectorOpen,
+      openMockSelector,
+      closeMockSelector,
       dataSource,
       setDataSource,
       activeTab,
@@ -141,9 +158,10 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       isLoggingIn,
       login,
       logout,
+      isMockSelectorOpen,
+      openMockSelector,
+      closeMockSelector,
       dataSource,
-      activeTab,
-      setActiveTab,
       assistantOpen,
       messages,
       assistantPending,

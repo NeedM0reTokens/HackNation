@@ -1,3 +1,4 @@
+import { useAppState } from "../app-state";
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   evaluateBenefits,
@@ -19,6 +20,7 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
   onLoginToggle,
   onOpenPdfModal,
 }) => {
+  const { user } = useAppState();
   // Stan filtrów ręcznych (dla niezalogowanego - domyślnie wszystko odznaczone/false)
   const [role, setRole] = useState<UserRole | null>(null);
   const [employment, setEmployment] = useState<EmploymentType | null>(null);
@@ -139,7 +141,6 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
         {/* NAGŁÓWEK SEKCJI */}
         <div className="zus-catalog-header">
           <div className="zus-catalog-header-top">
-            <span className="zus-official-pill">Katalog Zasiłków i Praw 2026</span>
             <div className="zus-catalog-auth-status">
               <span className={`zus-status-dot ${isLoggedIn ? 'online' : 'manual'}`}></span>
               <span className="zus-status-mode-label">
@@ -171,7 +172,7 @@ export const BenefitsCatalogSection: React.FC<BenefitsCatalogSectionProps> = ({
                 <span className="zus-auth-verified-pill">Dane zweryfikowane w czasie rzeczywistym</span>
               </div>
               <p className="zus-auth-summary-desc">
-                Zalogowano jako: <strong>Anna Kowalska</strong> (PESEL: 920512•••••) • Płatnik składek:{' '}
+                Zalogowano jako: <strong>{user ? `${user.firstName} ${user.lastName}` : "Anna Kowalska"}</strong> (PESEL: {user ? user.peselMasked : "920512•••••"}) • Płatnik składek:{' '}
                 <strong>TechSolutions Sp. z o.o.</strong>
               </p>
 

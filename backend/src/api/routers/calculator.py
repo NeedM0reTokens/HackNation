@@ -8,8 +8,11 @@ from ..models.calculator import (
     IntegratedCalculatorInput,
     IntegratedCalculatorResult,
     PresetsListResponse,
+    RiskAnalysisRequest,
+    RiskAnalysisResponse,
 )
 from ..services.calculator import (
+    analyze_risks_service,
     calculate_integrated_parental_service,
     get_allowance_rates_service,
     get_preset_by_key_service,
@@ -101,6 +104,16 @@ class CalculatorRouter(APIRouter):
             response_description="Kompletny harmonogram z osią czasu i kwotami PLN",
         )
 
+        self.add_api_route(
+            "/calculator/risks",
+            self.analyze_risks_route,
+            methods=["POST"],
+            response_model=RiskAnalysisResponse,
+            summary="Analiza ryzyk kontrolnych i czerwonych flag ZUS",
+            description="Automatyczna weryfikacja ciągłości ubezpieczenia, pozorności umów, okresów karencji oraz zadłużenia.",
+            response_description="Lista wykrytych ryzyk prawnych i kontrolnych ZUS z poziomem istotności",
+        )
+
     def get_allowance_rates_route(self) -> AllowanceRatesResponse:
         return get_allowance_rates_service()
 
@@ -121,6 +134,11 @@ class CalculatorRouter(APIRouter):
         self, payload: IntegratedCalculatorInput
     ) -> IntegratedCalculatorResult:
         return calculate_integrated_parental_service(payload)
+
+    def analyze_risks_route(
+        self, payload: RiskAnalysisRequest
+    ) -> RiskAnalysisResponse:
+        return analyze_risks_service(payload)
 
 
 router = CalculatorRouter()

@@ -1,19 +1,19 @@
 import unittest
 from datetime import date
 
-from ..api.models.calculator import (
+from src.api.models.calculator import (
     IntegratedCalculatorInput,
     IntegratedParentalSharing,
     IntegratedWorkCombination,
 )
-from ..api.models.maternity import BenefitPaymentVariant, MaternityEmploymentType
-from ..api.services.calculator import (
+from src.api.models.maternity import BenefitPaymentVariant, MaternityEmploymentType
+from src.api.services.calculator import (
     calculate_integrated_parental_service,
     get_allowance_rates_service,
     get_preset_by_key_service,
     get_presets_service,
 )
-from ..constants import MIN_WAGE_2026, SOCIAL_CONTRIBUTIONS_RATE
+from src.constants import MIN_WAGE_2026, SOCIAL_CONTRIBUTIONS_RATE
 
 
 class TestCalculatorService(unittest.TestCase):

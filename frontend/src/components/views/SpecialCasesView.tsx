@@ -30,7 +30,6 @@ export const SpecialCasesView: React.FC = () => {
   return (
     <div className="zus-view-container">
       <div className="zus-view-header">
-        <div className="zus-official-pill">Wsparcie w Sytuacjach Kryzysowych i Skomplikowanych</div>
         <h1 className="zus-view-title">Kalkulator Przypadków Szczególnych i Pomoc ZUS</h1>
         <p className="zus-view-desc">
           ZUS zapewnia szczególne mechanizmy ochronne i wydłużone urlopy w przypadku narodzin wcześniaka, hospitalizacji noworodka, orzeczenia „Za życiem” oraz w najtrudniejszych chwilach straty dziecka.

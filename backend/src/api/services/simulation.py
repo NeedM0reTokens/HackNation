@@ -3,6 +3,7 @@ from datetime import date
 from fastapi import HTTPException, status
 
 from ..data import (
+    NAME_TO_PESEL,
     PREDEFINED_EZLA,
     PREDEFINED_EZLA_BY_DOC,
     PREDEFINED_PROFILES,
@@ -97,14 +98,15 @@ def _parse_pesel_details(pesel: str) -> tuple[str, str]:
     return "1992-01-01", "Kobieta"
 
 
-def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
+def get_mock_user_profile_service(user_id_or_pesel: str) -> UserProfileResponse:
     """
-    Returns simulated ZUS insurance profile for a person by their PESEL.
-    If the PESEL is recognized in the predefined scenarios, returns specific data.
+    Returns simulated ZUS insurance profile for a person by their PESEL or user_id alias.
+    If the PESEL/alias is recognized in the predefined scenarios, returns specific data.
     If an unknown PESEL is given, generates a realistic, legally compliant default profile.
     Statutory limits and thresholds are loaded dynamically from JSON config.
     """
-    clean_pesel = pesel.strip()
+    normalized_id = user_id_or_pesel.strip().lower()
+    clean_pesel = NAME_TO_PESEL.get(normalized_id, normalized_id)
     cfg = config_service.get_config()
     statutory_debt_limit = cfg.benefit_amounts.zus_debt_limit
 
@@ -167,6 +169,7 @@ def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
 
     return UserProfileResponse(
         pesel=clean_pesel,
+        user_id=clean_pesel,
         first_name=first_name,
         last_name=last_name,
         date_of_birth=dob,
@@ -201,10 +204,11 @@ def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
 
 def get_citizen_ezla_service(pesel: str) -> EzlaCitizenResponse:
     """
-    Returns electronic sick leave certificates (e-ZLA) for a citizen by PESEL.
+    Returns electronic sick leave certificates (e-ZLA) for a citizen by PESEL or user_id.
     Simulates retrieval of e-ZLA incapacity certificates from the ZUS medical registry.
     """
-    clean_pesel = pesel.strip()
+    clean = pesel.strip().lower()
+    clean_pesel = NAME_TO_PESEL.get(clean, pesel.strip())
     cfg = config_service.get_config()
 
     if clean_pesel in PREDEFINED_PROFILES:
@@ -277,7 +281,8 @@ def get_citizen_debt_certificate_service(
     Crucial for self-employed individuals (JDG/B2B) where arrears > 1% minimum wage
     suspend right to benefits. Threshold is loaded dynamically from JSON config.
     """
-    clean_pesel = pesel.strip()
+    clean = pesel.strip().lower()
+    clean_pesel = NAME_TO_PESEL.get(clean, pesel.strip())
     cfg = config_service.get_config()
     statutory_debt_limit = cfg.benefit_amounts.zus_debt_limit
 

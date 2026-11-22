@@ -26,6 +26,7 @@ function AccordionItem({ className, ...props }: AccordionPrimitive.Item.Props) {
 function AccordionTrigger({
   className,
   children,
+  style,
   ...props
 }: AccordionPrimitive.Trigger.Props) {
   return (
@@ -38,6 +39,7 @@ function AccordionTrigger({
         )}
         style={{
           display: 'flex',
+          flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
           width: '100%',
@@ -46,13 +48,14 @@ function AccordionTrigger({
           background: 'none',
           padding: '10px 0',
           gap: '12px',
+          ...style,
         }}
         {...props}
       >
         <div style={{ flex: 1, textAlign: 'left' }}>{children}</div>
 
         {/* Zamiast zwykłej strzałki – klikalny przycisk/etykieta 'Więcej' / 'Mniej' */}
-        <span className="zus-accordion-toggle" aria-hidden="true">
+        <span className="zus-accordion-toggle" aria-hidden="true" style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
           <span className="zus-label-more">Więcej ▾</span>
           <span className="zus-label-less">Mniej ▴</span>
         </span>

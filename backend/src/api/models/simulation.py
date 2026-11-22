@@ -184,6 +184,10 @@ class UserProfileResponse(BaseModel):
 
     # Identifiers
     pesel: str = Field(..., description="Numer PESEL ubezpieczonego")
+    user_id: str | None = Field(
+        default=None,
+        description="Identyfikator profilu ubezpieczonego (np. anna-kowalska)",
+    )
     first_name: str = Field(..., description="Imię")
     last_name: str = Field(..., description="Nazwisko")
     date_of_birth: str = Field(..., description="Data urodzenia (YYYY-MM-DD)")

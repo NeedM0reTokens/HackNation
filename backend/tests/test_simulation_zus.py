@@ -1,9 +1,8 @@
 import unittest
 
 from fastapi.testclient import TestClient
-
-from ..api.api import app
-from ..api.services.simulation import (
+from src.api.api import app
+from src.api.services.simulation import (
     _parse_pesel_details,
     get_citizen_debt_certificate_service,
     get_citizen_ezla_service,
