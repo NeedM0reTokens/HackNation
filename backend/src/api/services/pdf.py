@@ -347,10 +347,7 @@ def _extract_claim_data(text: str, doc_type: DocumentType) -> BenefitClaimData:
     if "WCZEŚNIAK" in text_upper or "WCZESNIAK" in text_upper or "HOSPITALIZAC" in text_upper:
         claim.is_premature_or_hospitalized = True
 
-    if any(
-        k in text_upper
-        for k in ("TROJACZKI", "3 DZIECI", "TROJE DZIECI", "TROJGA DZIECI")
-    ):
+    if any(k in text_upper for k in ("TROJACZKI", "3 DZIECI", "TROJE DZIECI", "TROJGA DZIECI")):
         claim.children_count = 3
     elif any(
         k in text_upper

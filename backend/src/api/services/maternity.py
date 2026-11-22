@@ -1,20 +1,4 @@
-from ...constants import (
-    FULL_MATERNITY_RATE,
-    LONG_APPLICATION_DEADLINE_DAYS,
-    MANDATORY_MOTHER_MATERNITY_WEEKS,
-    MATERNITY_WEEKS_BY_CHILD_COUNT,
-    MAX_CHILD_AGE_PARENTAL_LEAVE_YEARS,
-    MAX_PARENTAL_LEAVE_PARTS,
-    MIN_WAGE_2026,
-    NON_TRANSFERABLE_PARENTAL_WEEKS,
-    PARENTAL_WEEKS_MULTIPLE_BIRTH,
-    PARENTAL_WEEKS_STANDARD,
-    PARENTAL_WEEKS_ZA_ZYCIEM_MULTIPLE,
-    PARENTAL_WEEKS_ZA_ZYCIEM_SINGLE,
-    SOCIAL_CONTRIBUTIONS_RATE,
-    STANDARD_PARENTAL_RATE,
-    UNIFIED_BENEFIT_RATE,
-)
+from ..models.admin import LeaveDurations
 from ..models.maternity import (
     BenefitPaymentVariant,
     MaternityEmploymentType,
@@ -22,36 +6,62 @@ from ..models.maternity import (
     MaternityParentalResult,
     PeriodBreakdown,
 )
+from .admin import config_service
+
+MAX_CHILD_AGE_PARENTAL_LEAVE_YEARS = 6
 
 
-def _calculate_net_base(gross: float) -> float:
-    return round(gross * (1 - SOCIAL_CONTRIBUTIONS_RATE / 100), 2)
+def _calculate_net_base(gross: float, social_rate: float | None = None) -> float:
+    if social_rate is None:
+        social_rate = config_service.get_config().benefit_rates.social_contributions_rate
+    return round(gross * (1.0 - social_rate / 100.0), 2)
 
 
-def get_maternity_weeks(children_count: int) -> int:
+def get_maternity_weeks(children_count: int, durations: LeaveDurations | None = None) -> int:
     if children_count <= 0:
         return 0
-    return MATERNITY_WEEKS_BY_CHILD_COUNT.get(
-        children_count,
-        MATERNITY_WEEKS_BY_CHILD_COUNT[5],
-    )
+    if durations is None:
+        durations = config_service.get_config().leave_durations
+    mapping = {
+        1: durations.maternity_weeks_single_child,
+        2: durations.maternity_weeks_twins,
+        3: durations.maternity_weeks_triplets,
+        4: durations.maternity_weeks_quadruplets,
+    }
+    return mapping.get(children_count, durations.maternity_weeks_quintuplets_plus)
 
 
-def get_parental_weeks(children_count: int, has_za_zyciem: bool) -> int:
+def get_parental_weeks(
+    children_count: int,
+    has_za_zyciem: bool,
+    durations: LeaveDurations | None = None,
+) -> int:
     if children_count <= 0:
         return 0
+    if durations is None:
+        durations = config_service.get_config().leave_durations
     if has_za_zyciem:
         return (
-            PARENTAL_WEEKS_ZA_ZYCIEM_SINGLE
+            durations.parental_weeks_za_zyciem_single
             if children_count == 1
-            else PARENTAL_WEEKS_ZA_ZYCIEM_MULTIPLE
+            else durations.parental_weeks_za_zyciem_multiple
         )
-    return PARENTAL_WEEKS_STANDARD if children_count == 1 else PARENTAL_WEEKS_MULTIPLE_BIRTH
+    return (
+        durations.parental_weeks_standard
+        if children_count == 1
+        else durations.parental_weeks_multiple_birth
+    )
 
 
 def calculate_maternity_parental_benefit(
     data: MaternityParentalInput,
 ) -> MaternityParentalResult:
+    cfg = config_service.get_config()
+    rates = cfg.benefit_rates
+    amounts = cfg.benefit_amounts
+    durations = cfg.leave_durations
+    limits = cfg.periods_and_limits
+
     refusal_reasons: list[str] = []
     warning_notes: list[str] = []
     required_documents: list[str] = []
@@ -84,16 +94,16 @@ def calculate_maternity_parental_benefit(
             ],
         )
 
-    maternity_total_weeks = get_maternity_weeks(data.children_born_count)
+    maternity_total_weeks = get_maternity_weeks(data.children_born_count, durations)
     parental_total_weeks = get_parental_weeks(
-        data.children_born_count, data.has_za_zyciem_certificate
+        data.children_born_count, data.has_za_zyciem_certificate, durations
     )
     grand_total_weeks = maternity_total_weeks + parental_total_weeks
 
-    if data.mother_maternity_weeks < MANDATORY_MOTHER_MATERNITY_WEEKS:
+    if data.mother_maternity_weeks < durations.mandatory_mother_maternity_weeks:
         refusal_reasons.append(
-            f"Matka musi wykorzystać co najmniej {MANDATORY_MOTHER_MATERNITY_WEEKS} tygodni "
-            + "urlopu macierzyńskiego osobiście (art. 180 § 4 KP)."
+            f"Matka musi wykorzystać co najmniej {durations.mandatory_mother_maternity_weeks} "
+            + "tygodni urlopu macierzyńskiego osobiście (art. 180 § 4 KP)."
         )
 
     if data.mother_maternity_weeks > maternity_total_weeks:
@@ -104,17 +114,19 @@ def calculate_maternity_parental_benefit(
 
     father_maternity_weeks = max(0, maternity_total_weeks - data.mother_maternity_weeks)
 
-    shared_pool_limit = parental_total_weeks - NON_TRANSFERABLE_PARENTAL_WEEKS
+    shared_pool_limit = parental_total_weeks - durations.non_transferable_parental_weeks
     if data.mother_parental_weeks > shared_pool_limit:
         refusal_reasons.append(
             f"Maksymalna pula rodzicielskiego dla jednego rodzica to {shared_pool_limit} tyg. "
-            + f"(z puli {parental_total_weeks} tyg., 9 tyg. jest wyłączne dla drugiego rodzica)."
+            + f"(z puli {parental_total_weeks} tyg., {durations.non_transferable_parental_weeks} "
+            + "tyg. jest wyłączne dla drugiego rodzica)."
         )
 
     if data.father_parental_weeks > shared_pool_limit:
         refusal_reasons.append(
             f"Maksymalna pula rodzicielskiego dla ojca to {shared_pool_limit} tyg. "
-            + f"(z puli {parental_total_weeks} tyg., 9 tyg. jest wyłączne dla drugiego rodzica)."
+            + f"(z puli {parental_total_weeks} tyg., {durations.non_transferable_parental_weeks} "
+            + "tyg. jest wyłączne dla drugiego rodzica)."
         )
 
     if (data.mother_parental_weeks + data.father_parental_weeks) > parental_total_weeks:
@@ -124,9 +136,10 @@ def calculate_maternity_parental_benefit(
             + f"{data.mother_parental_weeks + data.father_parental_weeks} tyg.)."
         )
 
-    if data.parental_leave_parts_count > MAX_PARENTAL_LEAVE_PARTS:
+    if data.parental_leave_parts_count > durations.max_parental_leave_parts:
         refusal_reasons.append(
-            f"Urlop rodzicielski można podzielić na maksymalnie {MAX_PARENTAL_LEAVE_PARTS} części."
+            f"Urlop rodzicielski można podzielić na maksymalnie "
+            f"{durations.max_parental_leave_parts} części."
         )
 
     if data.child_age_years > MAX_CHILD_AGE_PARENTAL_LEAVE_YEARS:
@@ -152,19 +165,22 @@ def calculate_maternity_parental_benefit(
             refusal_reasons=refusal_reasons,
         )
 
-    calculation_base = _calculate_net_base(data.gross_monthly_income)
+    calculation_base = _calculate_net_base(
+        data.gross_monthly_income, rates.social_contributions_rate
+    )
     if data.employment_type == MaternityEmploymentType.EMPLOYMENT_CONTRACT:
-        min_base = _calculate_net_base(MIN_WAGE_2026)
+        min_base = amounts.min_benefit_base_uop
         calculation_base = max(calculation_base, min_base)
 
-    daily_rate = round(calculation_base / 30, 2)
+    daily_rate = round(calculation_base / 30.0, 2)
 
     active_variant = data.chosen_variant
     if active_variant == BenefitPaymentVariant.UNIFIED_81_5 and not data.applied_within_21_days:
         active_variant = BenefitPaymentVariant.VARIABLE_100_70
         warning_notes.append(
-            f"Wniosek złożony po terminie {LONG_APPLICATION_DEADLINE_DAYS} dni po porodzie. "
-            + "Automatycznie zastosowano wariant zmienny (100% / 70%)."
+            f"Wniosek złożony po terminie {limits.long_application_deadline_days} dni po porodzie. "
+            + f"Automatycznie zastosowano wariant zmienny ({rates.full_maternity_rate:.0f}% / "
+            + f"{rates.standard_parental_rate:.0f}%)."
         )
 
     total_parental_pool_taken = data.mother_parental_weeks + data.father_parental_weeks
@@ -172,8 +188,8 @@ def calculate_maternity_parental_benefit(
     var_maternity_days = maternity_total_weeks * 7
     var_parental_days = total_parental_pool_taken * 7
     variable_total = round(
-        (daily_rate * var_maternity_days * FULL_MATERNITY_RATE / 100)
-        + (daily_rate * var_parental_days * STANDARD_PARENTAL_RATE / 100),
+        (daily_rate * var_maternity_days * rates.full_maternity_rate / 100.0)
+        + (daily_rate * var_parental_days * rates.standard_parental_rate / 100.0),
         2,
     )
 
@@ -182,8 +198,8 @@ def calculate_maternity_parental_benefit(
     ) * 7
     father_guaranteed_days = data.father_parental_weeks * 7
     unified_total = round(
-        (daily_rate * mother_pool_days * UNIFIED_BENEFIT_RATE / 100)
-        + (daily_rate * father_guaranteed_days * STANDARD_PARENTAL_RATE / 100),
+        (daily_rate * mother_pool_days * rates.unified_benefit_rate / 100.0)
+        + (daily_rate * father_guaranteed_days * rates.standard_parental_rate / 100.0),
         2,
     )
 
@@ -195,10 +211,15 @@ def calculate_maternity_parental_benefit(
                 name="Urlop macierzyński matki (wariant uśredniony)",
                 weeks=data.mother_maternity_weeks,
                 days=data.mother_maternity_weeks * 7,
-                rate_percentage=UNIFIED_BENEFIT_RATE,
-                monthly_amount=round(daily_rate * 30 * UNIFIED_BENEFIT_RATE / 100, 2),
+                rate_percentage=rates.unified_benefit_rate,
+                monthly_amount=round(daily_rate * 30.0 * rates.unified_benefit_rate / 100.0, 2),
                 total_amount=round(
-                    daily_rate * data.mother_maternity_weeks * 7 * UNIFIED_BENEFIT_RATE / 100, 2
+                    daily_rate
+                    * data.mother_maternity_weeks
+                    * 7
+                    * rates.unified_benefit_rate
+                    / 100.0,
+                    2,
                 ),
                 taken_by="Matka",
             )
@@ -209,10 +230,15 @@ def calculate_maternity_parental_benefit(
                     name="Przejęta część urlopu macierzyńskiego",
                     weeks=father_maternity_weeks,
                     days=father_maternity_weeks * 7,
-                    rate_percentage=UNIFIED_BENEFIT_RATE,
-                    monthly_amount=round(daily_rate * 30 * UNIFIED_BENEFIT_RATE / 100, 2),
+                    rate_percentage=rates.unified_benefit_rate,
+                    monthly_amount=round(daily_rate * 30.0 * rates.unified_benefit_rate / 100.0, 2),
                     total_amount=round(
-                        daily_rate * father_maternity_weeks * 7 * UNIFIED_BENEFIT_RATE / 100, 2
+                        daily_rate
+                        * father_maternity_weeks
+                        * 7
+                        * rates.unified_benefit_rate
+                        / 100.0,
+                        2,
                     ),
                     taken_by="Ojciec",
                 )
@@ -223,10 +249,15 @@ def calculate_maternity_parental_benefit(
                     name="Urlop rodzicielski matki (wariant uśredniony)",
                     weeks=data.mother_parental_weeks,
                     days=data.mother_parental_weeks * 7,
-                    rate_percentage=UNIFIED_BENEFIT_RATE,
-                    monthly_amount=round(daily_rate * 30 * UNIFIED_BENEFIT_RATE / 100, 2),
+                    rate_percentage=rates.unified_benefit_rate,
+                    monthly_amount=round(daily_rate * 30.0 * rates.unified_benefit_rate / 100.0, 2),
                     total_amount=round(
-                        daily_rate * data.mother_parental_weeks * 7 * UNIFIED_BENEFIT_RATE / 100, 2
+                        daily_rate
+                        * data.mother_parental_weeks
+                        * 7
+                        * rates.unified_benefit_rate
+                        / 100.0,
+                        2,
                     ),
                     taken_by="Matka",
                 )
@@ -234,13 +265,22 @@ def calculate_maternity_parental_benefit(
         if data.father_parental_weeks > 0:
             periods.append(
                 PeriodBreakdown(
-                    name="Część urlopu rodzicielskiego ojca (9 tyg.)",
+                    name=(
+                        f"Część urlopu rodzicielskiego ojca "
+                        f"({durations.non_transferable_parental_weeks} tyg.)"
+                    ),
                     weeks=data.father_parental_weeks,
                     days=data.father_parental_weeks * 7,
-                    rate_percentage=STANDARD_PARENTAL_RATE,
-                    monthly_amount=round(daily_rate * 30 * STANDARD_PARENTAL_RATE / 100, 2),
+                    rate_percentage=rates.standard_parental_rate,
+                    monthly_amount=round(
+                        daily_rate * 30.0 * rates.standard_parental_rate / 100.0, 2
+                    ),
                     total_amount=round(
-                        daily_rate * data.father_parental_weeks * 7 * STANDARD_PARENTAL_RATE / 100,
+                        daily_rate
+                        * data.father_parental_weeks
+                        * 7
+                        * rates.standard_parental_rate
+                        / 100.0,
                         2,
                     ),
                     taken_by="Ojciec",
@@ -250,13 +290,18 @@ def calculate_maternity_parental_benefit(
     else:
         periods.append(
             PeriodBreakdown(
-                name="Urlop macierzyński matki (wariant 100%)",
+                name=f"Urlop macierzyński matki (wariant {rates.full_maternity_rate:.0f}%)",
                 weeks=data.mother_maternity_weeks,
                 days=data.mother_maternity_weeks * 7,
-                rate_percentage=FULL_MATERNITY_RATE,
-                monthly_amount=round(daily_rate * 30 * FULL_MATERNITY_RATE / 100, 2),
+                rate_percentage=rates.full_maternity_rate,
+                monthly_amount=round(daily_rate * 30.0 * rates.full_maternity_rate / 100.0, 2),
                 total_amount=round(
-                    daily_rate * data.mother_maternity_weeks * 7 * FULL_MATERNITY_RATE / 100, 2
+                    daily_rate
+                    * data.mother_maternity_weeks
+                    * 7
+                    * rates.full_maternity_rate
+                    / 100.0,
+                    2,
                 ),
                 taken_by="Matka",
             )
@@ -264,13 +309,16 @@ def calculate_maternity_parental_benefit(
         if father_maternity_weeks > 0:
             periods.append(
                 PeriodBreakdown(
-                    name="Przejęta część urlopu macierzyńskiego (100%)",
+                    name=(
+                        f"Przejęta część urlopu macierzyńskiego ({rates.full_maternity_rate:.0f}%)"
+                    ),
                     weeks=father_maternity_weeks,
                     days=father_maternity_weeks * 7,
-                    rate_percentage=FULL_MATERNITY_RATE,
-                    monthly_amount=round(daily_rate * 30 * FULL_MATERNITY_RATE / 100, 2),
+                    rate_percentage=rates.full_maternity_rate,
+                    monthly_amount=round(daily_rate * 30.0 * rates.full_maternity_rate / 100.0, 2),
                     total_amount=round(
-                        daily_rate * father_maternity_weeks * 7 * FULL_MATERNITY_RATE / 100, 2
+                        daily_rate * father_maternity_weeks * 7 * rates.full_maternity_rate / 100.0,
+                        2,
                     ),
                     taken_by="Ojciec",
                 )
@@ -278,13 +326,19 @@ def calculate_maternity_parental_benefit(
         if data.mother_parental_weeks > 0:
             periods.append(
                 PeriodBreakdown(
-                    name="Urlop rodzicielski matki (70%)",
+                    name=f"Urlop rodzicielski matki ({rates.standard_parental_rate:.0f}%)",
                     weeks=data.mother_parental_weeks,
                     days=data.mother_parental_weeks * 7,
-                    rate_percentage=STANDARD_PARENTAL_RATE,
-                    monthly_amount=round(daily_rate * 30 * STANDARD_PARENTAL_RATE / 100, 2),
+                    rate_percentage=rates.standard_parental_rate,
+                    monthly_amount=round(
+                        daily_rate * 30.0 * rates.standard_parental_rate / 100.0, 2
+                    ),
                     total_amount=round(
-                        daily_rate * data.mother_parental_weeks * 7 * STANDARD_PARENTAL_RATE / 100,
+                        daily_rate
+                        * data.mother_parental_weeks
+                        * 7
+                        * rates.standard_parental_rate
+                        / 100.0,
                         2,
                     ),
                     taken_by="Matka",
@@ -293,13 +347,19 @@ def calculate_maternity_parental_benefit(
         if data.father_parental_weeks > 0:
             periods.append(
                 PeriodBreakdown(
-                    name="Urlop rodzicielski ojca (70%)",
+                    name=f"Urlop rodzicielski ojca ({rates.standard_parental_rate:.0f}%)",
                     weeks=data.father_parental_weeks,
                     days=data.father_parental_weeks * 7,
-                    rate_percentage=STANDARD_PARENTAL_RATE,
-                    monthly_amount=round(daily_rate * 30 * STANDARD_PARENTAL_RATE / 100, 2),
+                    rate_percentage=rates.standard_parental_rate,
+                    monthly_amount=round(
+                        daily_rate * 30.0 * rates.standard_parental_rate / 100.0, 2
+                    ),
                     total_amount=round(
-                        daily_rate * data.father_parental_weeks * 7 * STANDARD_PARENTAL_RATE / 100,
+                        daily_rate
+                        * data.father_parental_weeks
+                        * 7
+                        * rates.standard_parental_rate
+                        / 100.0,
                         2,
                     ),
                     taken_by="Ojciec",
@@ -318,11 +378,13 @@ def calculate_maternity_parental_benefit(
         required_documents.append("Zaświadczenie ze szpitala / lekarza ('Za życiem')")
 
     legal_notes.append(
-        f"Każdemu rodzicowi przysługuje nieprzenoszalne prawo do {NON_TRANSFERABLE_PARENTAL_WEEKS} "
-        + "tygodni urlopu rodzicielskiego (art. 1821a § 4 KP)."
+        f"Każdemu rodzicowi przysługuje nieprzenoszalne prawo do "
+        f"{durations.non_transferable_parental_weeks} tygodni urlopu rodzicielskiego "
+        "(art. 1821a § 4 KP)."
     )
     legal_notes.append(
-        "Niewykorzystanie 9 tygodni przez ojca powoduje bezpowrotne przepadnięcie tej części."
+        f"Niewykorzystanie {durations.non_transferable_parental_weeks} tygodni przez ojca "
+        "powoduje bezpowrotne przepadnięcie tej części."
     )
 
     mother_total_weeks = data.mother_maternity_weeks + data.mother_parental_weeks

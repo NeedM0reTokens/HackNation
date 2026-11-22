@@ -3,13 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .routers.admin import AdminRouter
 from .routers.adoption import AdoptionRouter
+from .routers.assistant import AssistantRouter
 from .routers.applications import ApplicationsRouter
 from .routers.auth import AuthRouter
 from .routers.calculator import CalculatorRouter
 from .routers.cases import CasesRouter
 from .routers.health import HealthRouter
 from .routers.maternity import MaternityRouter
-from .routers.mock import MockRouter, SimulationRouter, ZusRouter
+from .routers.mock import MockRouter, ZusRouter
 from .routers.parental_work import ParentalWorkRouter
 from .routers.paternity import PaternityRouter
 from .routers.pdf import PdfRouter
@@ -99,7 +100,7 @@ OPENAPI_TAGS = [
         "name": "Symulacje zewnętrznych serwisów (Mock)",
         "description": (
             "Środowisko mockowe symulujące integrację z zewnętrznymi rejestrami państwowymi "
-            "i usługami rządowymi (mObywatel, PUE ZUS / eZUS) na potrzeby demonstracji i testów."
+            "i usługami rządowymi (mObywatel, rejestry ZUS) na potrzeby demonstracji i testów."
         ),
     },
     {
@@ -156,7 +157,7 @@ class MainAPI(FastAPI):
         self.pdf_router = PdfRouter()
         self.cases_router = CasesRouter()
         self.mock_router = MockRouter()
-        self.simulation_router = SimulationRouter()
+        self.simulation_router = MockRouter(prefix="/simulation")
         self.zus_router = ZusRouter()
         self.admin_router = AdminRouter()
         self.pregnancy_router = PregnancyRouter()
@@ -165,6 +166,7 @@ class MainAPI(FastAPI):
         self.paternity_router = PaternityRouter()
         self.parental_work_router = ParentalWorkRouter()
         self.adoption_router = AdoptionRouter()
+        self.assistant_router = AssistantRouter()
         self.applications_router = ApplicationsRouter()
 
         self.include_router(self.auth_router, prefix="/api")
@@ -182,6 +184,7 @@ class MainAPI(FastAPI):
         self.include_router(self.paternity_router, prefix="/api")
         self.include_router(self.parental_work_router, prefix="/api")
         self.include_router(self.adoption_router, prefix="/api")
+        self.include_router(self.assistant_router, prefix="/api")
         self.include_router(self.applications_router, prefix="/api")
 
 

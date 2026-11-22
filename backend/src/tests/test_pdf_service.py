@@ -264,9 +264,7 @@ class TestPdfService(unittest.TestCase):
         self.assertEqual(res.insurance_status, "WARNING_DEBT")
 
     @patch("src.api.services.pdf.ocr_pdf_with_gemini")
-    def test_parse_scanned_pdf_without_gemini_api_key(
-        self, mock_ocr: MagicMock
-    ) -> None:
+    def test_parse_scanned_pdf_without_gemini_api_key(self, mock_ocr: MagicMock) -> None:
         mock_ocr.return_value = None
         pdf_raw = _build_pdf_stream([])
         res = parse_and_validate_pdf(pdf_raw, "scan.pdf")
@@ -276,9 +274,7 @@ class TestPdfService(unittest.TestCase):
         self.assertIn("GEMINI_API_KEY", res.eligibility.summary)
 
     @patch("src.api.services.pdf.ocr_pdf_with_gemini")
-    def test_parse_scanned_pdf_with_gemini_ocr_success(
-        self, mock_ocr: MagicMock
-    ) -> None:
+    def test_parse_scanned_pdf_with_gemini_ocr_success(self, mock_ocr: MagicMock) -> None:
         mock_ocr.return_value = {
             "document_type": "Z-3",
             "document_title": "ZAŚWIADCZENIE PŁATNIKA SKŁADEK Z-3",
@@ -328,9 +324,7 @@ class TestPdfService(unittest.TestCase):
                 {
                     "content": {
                         "parts": [
-                            {
-                                "text": '{"document_type": "Z-3", "gross_monthly_income": 5000.0}'
-                            }
+                            {"text": '{"document_type": "Z-3", "gross_monthly_income": 5000.0}'}
                         ]
                     }
                 }
