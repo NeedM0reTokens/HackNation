@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .routers.admin import AdminRouter
 from .routers.adoption import AdoptionRouter
 from .routers.assistant import AssistantRouter
+from .routers.applications import ApplicationsRouter
 from .routers.auth import AuthRouter
 from .routers.calculator import CalculatorRouter
 from .routers.cases import CasesRouter
@@ -102,6 +103,15 @@ OPENAPI_TAGS = [
             "i usługami rządowymi (mObywatel, rejestry ZUS) na potrzeby demonstracji i testów."
         ),
     },
+    {
+        "name": "Wnioski o Urlopy i Świadczenia (MRPiPS / ZUS)",
+        "description": (
+            "Moduł symulacji wypełniania wniosków o urlopy pracownicze (składane do pracodawcy wg "
+            "Kodeksu Pracy i Rozporządzenia MRPiPS z 11 marca 2025 r.) oraz wniosków o zasiłki "
+            "(oficjalne druki ZUS ze strony www.zus.pl, np. ZAM, ZAS-53, Z-3, Z-3a) wraz z "
+            "generowaniem pism, eksportem PDF i symulacją doręczenia."
+        ),
+    },
 ]
 
 
@@ -157,6 +167,7 @@ class MainAPI(FastAPI):
         self.parental_work_router = ParentalWorkRouter()
         self.adoption_router = AdoptionRouter()
         self.assistant_router = AssistantRouter()
+        self.applications_router = ApplicationsRouter()
 
         self.include_router(self.auth_router, prefix="/api")
         self.include_router(self.health_router)
@@ -174,6 +185,7 @@ class MainAPI(FastAPI):
         self.include_router(self.parental_work_router, prefix="/api")
         self.include_router(self.adoption_router, prefix="/api")
         self.include_router(self.assistant_router, prefix="/api")
+        self.include_router(self.applications_router, prefix="/api")
 
 
 app = MainAPI()
