@@ -1685,12 +1685,8 @@ button {
   text-align: left;
   padding: 10px 14px;
   border-radius: var(--zus-radius-sm);
-  cursor: pointer;
+  cursor: default;
   transition: all 0.2s ease;
-}
-
-.zus-step-item:hover:not(:disabled) {
-  background-color: var(--zus-card-alt);
 }
 
 .zus-step-item.active {

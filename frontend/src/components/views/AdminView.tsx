@@ -896,13 +896,8 @@ export const AdminView: React.FC = () => {
         >
           <div>
             <h1 className="zus-view-title" style={{ margin: "0 0 6px 0" }}>
-              Zarządzanie Parametrami Ustawowymi w Locie
+              Zarządzanie Parametrami Ustawowymi
             </h1>
-            <p className="zus-view-desc" style={{ margin: 0 }}>
-              Pełny zestaw 51 parametrów prawnych udostępnionych przez backend
-              ZUS. Możesz swobodnie modyfikować dowolne stawki, limity i wymiary
-              urlopów.
-            </p>
           </div>
 
           {/* Quick Stats & Action shortcuts */}
