@@ -60,3 +60,7 @@ Thumbs.db
 
 # Zed agents
 skills/
+
+# Local test datasets (PDFs)
+/data/
+/backend/src/api/data/Sprawy*/

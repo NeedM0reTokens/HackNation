@@ -237,7 +237,18 @@ def _calculate_premature_hospitalization(
         can_interrupt_maternity_for_hospitalization=True,
         min_mandatory_mother_maternity_weeks=MIN_MATERNITY_WEEKS_BEFORE_HOSPITAL_INTERRUPTION,
         periods=periods,
-        description=f"{rule_description} Dodano {supplementary_weeks} tyg. uzupełniającego urlopu.",
+        description=(
+            (
+                "Uzupełniający urlop macierzyński na mocy art. 180(2) Kodeksu pracy - "
+                f"płatny 100% podstawy. {rule_description} "
+                f"Dodano {supplementary_weeks} tyg. uzupełniającego urlopu."
+            )
+            if hosp_weeks > 0
+            else (
+                "Uzupełniający urlop macierzyński na mocy art. 180(2) Kodeksu pracy - "
+                f"płatny 100% podstawy. {rule_description}"
+            )
+        ),
         legal_basis=[
             "Art. 180(1) i 180(2) Kodeksu Pracy (uzupełniający urlop macierzyński)",
             (

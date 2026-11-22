@@ -3,8 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .routers.admin import AdminRouter
 from .routers.adoption import AdoptionRouter
+from .routers.assistant import AssistantRouter
 from .routers.auth import AuthRouter
 from .routers.calculator import CalculatorRouter
+from .routers.cases import CasesRouter
 from .routers.health import HealthRouter
 from .routers.maternity import MaternityRouter
 from .routers.mock import MockRouter, ZusRouter
@@ -143,6 +145,7 @@ class MainAPI(FastAPI):
         self.health_router = HealthRouter()
         self.calculator_router = CalculatorRouter()
         self.pdf_router = PdfRouter()
+        self.cases_router = CasesRouter()
         self.mock_router = MockRouter()
         self.zus_router = ZusRouter()
         self.admin_router = AdminRouter()
@@ -152,11 +155,13 @@ class MainAPI(FastAPI):
         self.paternity_router = PaternityRouter()
         self.parental_work_router = ParentalWorkRouter()
         self.adoption_router = AdoptionRouter()
+        self.assistant_router = AssistantRouter()
 
         self.include_router(self.auth_router, prefix="/api")
         self.include_router(self.health_router)
         self.include_router(self.calculator_router, prefix="/api")
         self.include_router(self.pdf_router, prefix="/api")
+        self.include_router(self.cases_router, prefix="/api")
         self.include_router(self.mock_router, prefix="/api")
         self.include_router(self.zus_router, prefix="/api")
         self.include_router(self.admin_router, prefix="/api")
@@ -166,6 +171,7 @@ class MainAPI(FastAPI):
         self.include_router(self.paternity_router, prefix="/api")
         self.include_router(self.parental_work_router, prefix="/api")
         self.include_router(self.adoption_router, prefix="/api")
+        self.include_router(self.assistant_router, prefix="/api")
 
 
 app = MainAPI()

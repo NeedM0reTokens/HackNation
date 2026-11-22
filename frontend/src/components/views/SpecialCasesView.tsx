@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { calculateSpecialCases, SpecialCasesPayload } from '@/lib/api-client';
+import { calculateSpecialCases } from '@/lib/api-client';
+import type { SpecialCasesInput, SpecialCasesResult } from '@/types/special_cases';
 
 export const SpecialCasesView: React.FC = () => {
-  const [caseType, setCaseType] = useState<SpecialCasesPayload['case_type']>('PREMATURE_HOSPITALIZATION');
+  const [caseType, setCaseType] = useState<SpecialCasesInput['case_type']>('PREMATURE_HOSPITALIZATION');
   const [income, setIncome] = useState(7000);
   const [birthWeek, setBirthWeek] = useState(26);
   const [weight, setWeight] = useState(950);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<SpecialCasesResult | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleCalculate = async () => {
@@ -15,9 +16,10 @@ export const SpecialCasesView: React.FC = () => {
       const res = await calculateSpecialCases({
         case_type: caseType,
         gross_monthly_income: income,
-        child_birth_week: birthWeek,
-        birth_weight_grams: weight,
+        child_birth_week: caseType === 'PREMATURE_HOSPITALIZATION' ? birthWeek : undefined,
+        birth_weight_grams: caseType === 'PREMATURE_HOSPITALIZATION' ? weight : undefined,
         has_za_zyciem_certificate: caseType === 'ZA_ZYCIEM',
+        is_stillbirth: caseType === 'STILLBIRTH_OR_DEATH',
       });
       setResult(res);
     } finally {
@@ -107,12 +109,18 @@ export const SpecialCasesView: React.FC = () => {
           <h2 className="zus-card-header-title">Przysługujące świadczenia i dokumentacja</h2>
           {result ? (
             <div className="zus-results-box">
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
                 <span className="zus-badge success">
-                  {result.benefit_rate_percent ? `${result.benefit_rate_percent}% PODSTAWY` : 'ŚWIADCZENIE GWARANTOWANE'}
+                  {result.case_type === 'PREMATURE_HOSPITALIZATION'
+                    ? `UZUPEŁNIAJĄCY URLOP: +${result.supplementary_maternity_weeks} TYG.`
+                    : (result.case_type === 'ZA_ZYCIEM' ? `ŁĄCZNIE: ${result.total_leave_weeks} TYG.` : '8 TYGODNI URLOPU (100%)')}
                 </span>
-                {result.funeral_allowance_amount && (
-                  <span className="zus-badge info">Zasiłek pogrzebowy: {result.funeral_allowance_amount} zł</span>
+                {result.one_time_grant_pln > 0 && (
+                  <span className="zus-badge info">
+                    {result.case_type === 'ZA_ZYCIEM'
+                      ? `Jednorazowe wsparcie „Za życiem”: ${result.one_time_grant_pln} zł`
+                      : `Zasiłek pogrzebowy: ${result.one_time_grant_pln} zł`}
+                  </span>
                 )}
               </div>
 
@@ -120,7 +128,26 @@ export const SpecialCasesView: React.FC = () => {
                 <div style={{ fontWeight: 700, color: '#00441c' }}>{result.description}</div>
               </div>
 
-              {result.required_documents && (
+              <div className="zus-stat-grid" style={{ marginBottom: '16px' }}>
+                <div className="zus-stat-item">
+                  <div className="zus-stat-label">Podstawa netto (po 13,71%)</div>
+                  <div className="zus-stat-value">{result.calculation_base_net} zł</div>
+                </div>
+                <div className="zus-stat-item">
+                  <div className="zus-stat-label">Stawka dzienna zasiłku</div>
+                  <div className="zus-stat-value">{result.daily_rate} zł</div>
+                </div>
+                <div className="zus-stat-item">
+                  <div className="zus-stat-label">Wymiar urlopu macierzyńskiego</div>
+                  <div className="zus-stat-value">{result.total_maternity_weeks} tyg.</div>
+                </div>
+                <div className="zus-stat-item">
+                  <div className="zus-stat-label">Łączny zasiłek macierzyński</div>
+                  <div className="zus-stat-value" style={{ color: '#007834' }}>{result.total_benefit_amount} zł</div>
+                </div>
+              </div>
+
+              {result.required_documents && result.required_documents.length > 0 && (
                 <div>
                   <h3 style={{ fontSize: '0.92rem', fontWeight: 700, marginBottom: '8px' }}>Wymagane dokumenty:</h3>
                   <ul className="zus-list">
