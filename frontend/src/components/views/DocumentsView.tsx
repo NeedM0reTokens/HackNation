@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { ApplicationSimulator } from './ApplicationSimulator';
 
 export const DocumentsView: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState<'forms' | 'protection' | 'deadlines' | 'risks'>('deadlines');
+  const [activeCategory, setActiveCategory] = useState<'simulator' | 'deadlines' | 'forms' | 'protection' | 'risks'>('simulator');
 
   return (
     <div className="zus-view-container">
@@ -15,6 +16,17 @@ export const DocumentsView: React.FC = () => {
 
       {/* Zakładki kategorii */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '2px solid #E2E8F0', flexWrap: 'wrap' }}>
+        <button
+          type="button"
+          className={`zus-tab-btn ${activeCategory === 'simulator' ? 'active' : ''}`}
+          onClick={() => setActiveCategory('simulator')}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
+        >
+          <span style={{ backgroundColor: '#DCFCE7', color: '#166534', padding: '2px 6px', borderRadius: '4px', fontSize: '0.72rem' }}>
+            INTERAKTYWNY
+          </span>
+          Symulator Wniosków (ZAM / Urlopowy)
+        </button>
         <button
           type="button"
           className={`zus-tab-btn ${activeCategory === 'deadlines' ? 'active' : ''}`}
@@ -44,6 +56,9 @@ export const DocumentsView: React.FC = () => {
           Zagrożenia i Ryzyka Utraty Praw
         </button>
       </div>
+
+      {/* 0. INTERAKTYWNY SYMULATOR WNIOSKÓW */}
+      {activeCategory === 'simulator' && <ApplicationSimulator />}
 
       {/* 1. TERMINY */}
       {activeCategory === 'deadlines' && (
@@ -95,7 +110,38 @@ export const DocumentsView: React.FC = () => {
 
       {/* 2. FORMULARZE */}
       {activeCategory === 'forms' && (
-        <div className="zus-view-grid">
+        <>
+          <div style={{
+            backgroundColor: '#F0FDF4',
+            border: '1px solid #86EFAC',
+            borderRadius: '8px',
+            padding: '16px 20px',
+            marginBottom: '20px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '12px',
+          }}>
+            <div>
+              <strong style={{ color: '#166534', fontSize: '0.95rem' }}>
+                Chcesz wygenerować gotowy wniosek (PDF) i zasymulować wysyłkę?
+              </strong>
+              <p style={{ margin: '3px 0 0 0', fontSize: '0.85rem', color: '#15803D' }}>
+                Przejdź do naszego Kreatora: pobierz dane z profilu mObywatel, wygeneruj formalne pismo z podpisami i odbierz Urzędowe Poświadczenie Odbioru (UPO).
+              </p>
+            </div>
+            <button
+              type="button"
+              className="zus-btn zus-btn-primary"
+              style={{ padding: '8px 18px', fontSize: '0.88rem' }}
+              onClick={() => setActiveCategory('simulator')}
+            >
+              Uruchom Symulator Wniosków &rarr;
+            </button>
+          </div>
+
+          <div className="zus-view-grid">
           <div className="zus-card">
             <h2 className="zus-card-header-title">Dla Pracowników (Umowa o Pracę)</h2>
             <div style={{ marginBottom: '14px', padding: '10px', backgroundColor: '#E8F1F8', borderRadius: '6px', fontSize: '0.85rem', color: '#003B6F' }}>
@@ -124,7 +170,8 @@ export const DocumentsView: React.FC = () => {
               <li><strong>ZAS-53:</strong> Wniosek o zasiłek chorobowy składany przez osoby prowadzące pozarolniczą działalność gospodarczą.</li>
             </ul>
           </div>
-        </div>
+          </div>
+        </>
       )}
 
       {/* 3. OCHRONA */}
