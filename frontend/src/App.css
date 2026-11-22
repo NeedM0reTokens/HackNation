@@ -165,9 +165,10 @@ button, input, select, textarea {
 }
 
 .zus-logo-svg {
-  height: 38px;
+  height: 44px;
   width: auto;
   display: block;
+  object-fit: contain;
 }
 
 .zus-brand-divider {

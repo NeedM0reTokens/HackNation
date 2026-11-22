@@ -33,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
           title="ZUS - Strona główna przewodnika"
         >
           {/* Oficjalne logo ZUS */}
-          <img src="/logo_zus.svg" alt="Logo ZUS" className="zus-logo-svg" />
+          <img src="/logo_zus.png" alt="Logo ZUS" className="zus-logo-svg" />
 
           <div className="zus-brand-divider" aria-hidden="true"></div>
 
