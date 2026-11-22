@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface NavbarProps {
   activeTab: string;
@@ -12,6 +12,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenPdfModal,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.classList.add('zus-mobile-menu-open');
+    } else {
+      document.body.classList.remove('zus-mobile-menu-open');
+    }
+    return () => {
+      document.body.classList.remove('zus-mobile-menu-open');
+    };
+  }, [isMobileMenuOpen]);
 
   const navItems = [
     { id: 'start', label: 'Start' },

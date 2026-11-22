@@ -76,6 +76,10 @@
   padding: 0;
 }
 
+html, body {
+  overflow-x: clip;
+}
+
 body {
   font-family: var(--font-family);
   font-size: var(--font-size-base);
@@ -1282,6 +1286,10 @@ button, input, select, textarea {
 
 /* Ekrany mobilne (< 768px) */
 @media (max-width: 768px) {
+  .zus-navbar {
+    display: none;
+  }
+
   .zus-topbar-inner {
     grid-template-columns: 1fr;
     gap: 14px;
@@ -1530,6 +1538,35 @@ main {
   box-shadow: 0 0 0 3px rgba(0, 120, 52, 0.15);
 }
 
+/* Przyciski i pasek zakładek wyników - przyklejony na pełną szerokość ekranu (Full-Width Sticky) */
+.zus-results-tabs-wrapper {
+  position: sticky;
+  top: 49px; /* tuż pod przyklejonym paskiem nawigacji na desktopie */
+  z-index: 25;
+  background-color: var(--zus-bg, #FFFFFF);
+  border-bottom: 2px solid var(--zus-border, #E2E8F0);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+  /* Rozciągnięcie na pełną szerokość ekranu (100vw edge-to-edge) */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+.zus-results-tabs-inner {
+  max-width: var(--container-max-width, 1240px);
+  margin: 0 auto;
+  padding: 8px 20px 0 20px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.zus-results-tabs-inner::-webkit-scrollbar {
+  display: none;
+}
+
 .zus-input.is-invalid {
   border-color: #DC2626 !important;
   background-color: #FFFFFF !important;
@@ -1551,6 +1588,10 @@ main {
   background: none;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .zus-tab-btn:hover {
@@ -1561,6 +1602,109 @@ main {
   color: var(--zus-green);
   border-bottom-color: var(--zus-green);
   font-weight: 700;
+}
+
+.zus-tab-icon {
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.zus-tab-btn:hover .zus-tab-icon {
+  transform: scale(1.08);
+}
+
+.zus-tab-text-desktop {
+  display: inline;
+}
+
+.zus-tab-text-mobile {
+  display: none;
+}
+
+.zus-tab-badge-desktop {
+  display: inline-flex;
+  background-color: #DC2626;
+  color: #FFFFFF;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  padding: 2px 7px;
+  line-height: 1;
+  margin-left: 6px;
+}
+
+.zus-tab-badge-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .zus-results-tabs-wrapper {
+    top: 0; /* na urządzeniach mobilnych przykleja się do samej góry ekranu */
+    box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.1);
+  }
+
+  .zus-results-tabs-inner {
+    padding: 6px 4px 0 4px;
+    gap: 0;
+    overflow-x: visible; /* bez scrolla - wszystkie 4 elementy mieszczą się idealnie */
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    width: 100%;
+  }
+
+  .zus-tab-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 2px 7px;
+    gap: 3px;
+    font-size: 0.72rem;
+    line-height: 1.1;
+    width: 100%;
+  }
+
+  .zus-tab-icon {
+    width: 19px;
+    height: 19px;
+  }
+
+  .zus-tab-text-desktop {
+    display: none;
+  }
+
+  .zus-tab-text-mobile {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .zus-tab-btn.active .zus-tab-text-mobile {
+    font-weight: 700;
+    color: var(--zus-green);
+  }
+
+  .zus-tab-badge-desktop {
+    display: none;
+  }
+
+  .zus-tab-badge-mobile {
+    position: absolute;
+    top: -4px;
+    right: -8px;
+    background-color: #DC2626;
+    color: #FFFFFF;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: 9999px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
 }
 
 /* Statystyki i kwoty */
@@ -3085,6 +3229,317 @@ main {
 }
 
 /* ==========================================================================
+   MOBILNA NAWIGACJA DOLNA (STICKY BOTTOM NAV) & DRAWER
+   ========================================================================== */
+
+.zus-mobile-bottom-nav {
+  display: none;
+}
+
+.zus-mobile-drawer-backdrop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Odstęp od dołu strony, by pasek nawigacyjny nie zasłaniał treści */
+  .zus-app-wrapper {
+    padding-bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Przesunięcie Asystenta AI powyżej dolnego paska nawigacji */
+  .zus-assistant-fab {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .zus-mobile-bottom-nav {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: #FFFFFF;
+    border-top: 1px solid var(--zus-border);
+    box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.08);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .zus-mobile-bottom-nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 60px;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 4px;
+  }
+
+  .zus-mobile-nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 100%;
+    background: none;
+    border: none;
+    color: var(--zus-text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 6px 2px;
+    position: relative;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .zus-mobile-nav-btn:active {
+    transform: scale(0.95);
+  }
+
+  .zus-mobile-nav-btn.active {
+    color: var(--zus-green);
+    font-weight: 700;
+  }
+
+  .zus-mobile-nav-btn.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 3px;
+    background-color: var(--zus-green);
+    border-radius: 0 0 3px 3px;
+  }
+
+  .zus-mobile-nav-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    height: 22px;
+  }
+
+  .zus-mobile-nav-badge-dot {
+    position: absolute;
+    top: -2px;
+    right: -3px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--zus-green);
+    border: 1.5px solid #FFFFFF;
+  }
+
+  .zus-mobile-nav-label {
+    font-size: 0.72rem;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+
+  /* DRAWER Z WIĘCEJ OPCJAMI */
+  .zus-mobile-drawer-backdrop {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(2px);
+    z-index: 1050;
+    align-items: flex-end;
+    justify-content: center;
+    animation: zusFadeIn 0.2s ease-out;
+  }
+
+  .zus-mobile-drawer {
+    width: 100%;
+    max-width: 540px;
+    background-color: #FFFFFF;
+    border-radius: 18px 18px 0 0;
+    border-top: 4px solid var(--zus-green);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.25);
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: zusSlideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .zus-mobile-drawer-header {
+    padding: 12px 20px 10px;
+    border-bottom: 1px solid var(--zus-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #F8FAFC;
+  }
+
+  .zus-mobile-drawer-handle {
+    width: 40px;
+    height: 4px;
+    background-color: #CBD5E1;
+    border-radius: 2px;
+    margin-bottom: 10px;
+  }
+
+  .zus-mobile-drawer-title-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .zus-mobile-drawer-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--zus-text-main);
+  }
+
+  .zus-mobile-drawer-close {
+    background: none;
+    border: none;
+    color: var(--zus-text-muted);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+  }
+
+  .zus-mobile-drawer-body {
+    padding: 18px 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .zus-mobile-drawer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .zus-mobile-drawer-section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--zus-text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  .zus-mobile-drawer-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .zus-mobile-drawer-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--zus-radius-md);
+    border: 1px solid var(--zus-border);
+    background-color: var(--zus-card-alt);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+  }
+
+  .zus-mobile-drawer-item:hover,
+  .zus-mobile-drawer-item:active {
+    border-color: var(--zus-green-border);
+    background-color: #FFFFFF;
+  }
+
+  .zus-mobile-drawer-item.active {
+    background-color: var(--zus-green-light);
+    border-color: var(--zus-green);
+  }
+
+  .zus-mobile-drawer-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background-color: #E8F1F8;
+    color: var(--zus-navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .zus-mobile-drawer-item.active .zus-mobile-drawer-icon-box {
+    background-color: var(--zus-green);
+    color: #FFFFFF;
+  }
+
+  .zus-mobile-drawer-item-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .zus-mobile-drawer-item-label {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--zus-text-main);
+  }
+
+  .zus-mobile-drawer-item-desc {
+    font-size: 0.76rem;
+    color: var(--zus-text-muted);
+  }
+
+  .zus-mobile-drawer-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .zus-mobile-drawer-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 16px;
+    border-radius: var(--zus-radius-sm);
+    border: 1.5px solid var(--zus-border);
+    background-color: #FFFFFF;
+    color: var(--zus-text-main);
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .zus-mobile-drawer-action-btn:hover {
+    background-color: var(--zus-card-alt);
+    border-color: var(--zus-text-muted);
+  }
+
+  .zus-mobile-drawer-action-btn.zus-btn-mobywatel-action {
+    background-color: var(--zus-orange);
+    border-color: var(--zus-orange);
+    color: #1A1A1A;
+  }
+
+  .zus-mobile-drawer-action-btn.zus-btn-mobywatel-action:hover {
+    background-color: var(--zus-orange-hover);
+  }
+}
+
+@keyframes zusSlideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
    ASYSTENT AI ZUS - PRZYCISK FAB I PANEL CZATU (ZUS DESIGN SYSTEM)
    ========================================================================== */
 
@@ -3168,6 +3623,36 @@ main {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+}
+
+/* Pozycjonowanie Asystenta AI powyżej dolnego menu na urządzeniach mobilnych */
+@media (max-width: 768px) {
+  .zus-assistant-fab {
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 16px !important;
+    padding: 10px 18px !important;
+    font-size: 0.88rem !important;
+  }
+
+  .zus-assistant-drawer {
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 12px !important;
+    left: 12px !important;
+    width: auto !important;
+    max-width: none !important;
+    height: calc(100vh - 120px) !important;
+    max-height: calc(100vh - 90px) !important;
+  }
+}
+
+/* Ukrycie przycisku i okna czatu AI podczas otwartego menu mobilnego */
+body.zus-mobile-menu-open .zus-assistant-fab,
+body.zus-mobile-menu-open .zus-assistant-drawer,
+body:has(.zus-mobile-drawer-backdrop) .zus-assistant-fab,
+body:has(.zus-mobile-drawer-backdrop) .zus-assistant-drawer,
+body:has(.zus-mobile-menu.open) .zus-assistant-fab,
+body:has(.zus-mobile-menu.open) .zus-assistant-drawer {
+  display: none !important;
 }
 
 /* 4. Nagłówek czatu ZUS */

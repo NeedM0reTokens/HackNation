@@ -12,12 +12,6 @@ export const AssistantFab: React.FC = () => {
       type="button"
       onClick={() => setAssistantOpen(true)}
       className="zus-assistant-fab"
-      style={{
-        position: 'fixed',
-        bottom: '24px',
-        right: '24px',
-        zIndex: 9999,
-      }}
       aria-label="Otwórz Asystenta AI ZUS"
       title="Zadaj pytanie asystentowi AI"
     >
