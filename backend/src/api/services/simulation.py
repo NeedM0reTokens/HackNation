@@ -9,6 +9,8 @@ from ..data import (
 )
 from ..models.simulation import (
     ActiveEzlaInfo,
+    BirthCertificateRequest,
+    BirthCertificateResponse,
     ContributionDebtCertificateResponse,
     ContributionDebtItem,
     EzlaCertificateResponse,
@@ -122,6 +124,7 @@ def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
         overdue_blocks = overdue_amt > statutory_debt_limit
 
         return UserProfileResponse(
+            user_id=clean_pesel,
             pesel=str(raw["pesel"]),
             first_name=str(raw["first_name"]),
             last_name=str(raw["last_name"]),
@@ -166,6 +169,7 @@ def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
     contributions = _generate_monthly_contributions(gross)
 
     return UserProfileResponse(
+        user_id=clean_pesel,
         pesel=clean_pesel,
         first_name=first_name,
         last_name=last_name,
@@ -411,3 +415,109 @@ def get_citizen_debt_certificate_service(
         ),
         legal_instruction=legal_instruction,
     )
+
+
+def simulate_birth_certificate_service(req: BirthCertificateRequest) -> BirthCertificateResponse:
+    """
+    Simulates requesting and issuing an official electronic copy of a birth certificate
+    from the Central Civil Registry (Rejestr Stanu Cywilnego / USC) via gov.pl / ePUAP / mObywatel.
+    Pursuant to Art. 44 & 45 of the Civil Status Records Act, this official excerpt is required
+    to apply for maternity benefits in ZUS and parental leaves at an employer.
+    """
+    import hashlib
+    import random
+
+    today_iso = date.today().isoformat()
+    birth_iso = req.child_date_of_birth or "2026-05-15"
+
+    if req.child_pesel and len(req.child_pesel) == 11:
+        child_pesel = req.child_pesel
+    else:
+        try:
+            parts = birth_iso.split("-")
+            yy = parts[0][2:]
+            mm = int(parts[1]) + 20
+            dd = parts[2]
+            gender_digit = "1" if req.child_gender == "Mężczyzna" else "2"
+            r1, r2, r3 = random.randint(10, 99), random.randint(1, 9), random.randint(1, 9)
+            random_part = f"{r1}{r2}{gender_digit}{r3}"
+            child_pesel = f"{yy}{mm:02d}{dd}{random_part}"
+        except Exception:
+            child_pesel = "26251508912"
+
+    raw_hash = (
+        hashlib.sha256(f"{child_pesel}-{req.applicant_pesel}-{today_iso}".encode())
+        .hexdigest()
+        .upper()
+    )
+    act_num = f"1465011/00/AU/{birth_iso[:4]}/{raw_hash[:6]}"
+    cert_id = f"USC/1465011/{birth_iso[:4]}/URO/{raw_hash[6:12]}"
+    ver_code = f"VER-USC-{raw_hash[12:20]}"
+
+    cert_type_label = (
+        "Odpis zupełny aktu urodzenia"
+        if req.certificate_type.upper() in ["ZUPELNY", "ZUPEŁNY"]
+        else "Odpis wielojęzyczny aktu urodzenia"
+        if "WIELO" in req.certificate_type.upper()
+        else "Odpis skrócony aktu urodzenia"
+    )
+
+    mother_full = (
+        f"{req.applicant_first_name} {req.applicant_last_name}"
+        if req.applicant_role.lower() == "matka"
+        else "Anna Kowalska"
+    )
+    father_full = (
+        f"{req.applicant_first_name} {req.applicant_last_name}"
+        if req.applicant_role.lower() == "ojciec"
+        else "Piotr Zieliński"
+    )
+
+    return BirthCertificateResponse(
+        certificate_id=cert_id,
+        act_number=act_num,
+        certificate_type=cert_type_label,
+        issue_date=today_iso,
+        registry_office="Urząd Stanu Cywilnego m.st. Warszawy (Wydział Spraw Obywatelskich)",
+        child_first_name=req.child_first_name,
+        child_last_name=req.child_last_name,
+        child_date_of_birth=birth_iso,
+        child_place_of_birth=req.child_place_of_birth or "Warszawa",
+        child_gender=req.child_gender,
+        child_pesel=child_pesel,
+        mother_name=mother_full,
+        mother_maiden_name=req.applicant_last_name,
+        father_name=father_full,
+        applicant_pesel=req.applicant_pesel,
+        delivery_channel=req.delivery_channel,
+        status="WYDANY_ELEKTRONICZNIE",
+        electronic_seal="Kwalifikowana Pieczęć Elektroniczna Ministra Cyfryzacji",
+        official_portal_url="https://www.gov.pl/web/cyfryzacja/rejestr-stanu-cywilnego",
+        legal_basis="Art. 44 i 45 ustawy Prawo o aktach stanu cywilnego",
+        verification_code=ver_code,
+    )
+
+
+def get_sample_birth_certificate_service(pesel: str | None = None) -> BirthCertificateResponse:
+    """Returns sample birth certificate prefilled for the given applicant PESEL or defaults."""
+    clean_pesel = (pesel or "92011501234").strip()
+    profile = PREDEFINED_PROFILES.get(clean_pesel)
+    fname = str(profile.get("first_name", "Anna")) if profile else "Anna"
+    lname = str(profile.get("last_name", "Kowalska")) if profile else "Kowalska"
+    role = "Ojciec" if profile and profile.get("gender") == "Mężczyzna" else "Matka"
+
+    req = BirthCertificateRequest(
+        child_first_name="Franciszek",
+        child_last_name=lname,
+        child_date_of_birth="2026-05-15",
+        child_place_of_birth="Warszawa",
+        child_gender="Mężczyzna",
+        applicant_first_name=fname,
+        applicant_last_name=lname,
+        applicant_pesel=clean_pesel,
+        applicant_role=role,
+        certificate_type="SKRÓCONY",
+        purpose="Uzyskanie zasiłku macierzyńskiego w ZUS",
+        delivery_channel="ELEKTRONICZNA_EPUAP_MOBYWATEL",
+    )
+    return simulate_birth_certificate_service(req)

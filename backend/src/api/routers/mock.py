@@ -8,6 +8,8 @@ from ..models.auth import (
     TokenResponse,
 )
 from ..models.simulation import (
+    BirthCertificateRequest,
+    BirthCertificateResponse,
     ContributionDebtCertificateResponse,
     EzlaCertificateResponse,
     EzlaCitizenResponse,
@@ -18,7 +20,9 @@ from ..services.simulation import (
     get_citizen_debt_certificate_service,
     get_citizen_ezla_service,
     get_mock_user_profile_service,
+    get_sample_birth_certificate_service,
     get_single_ezla_certificate_service,
+    simulate_birth_certificate_service,
 )
 
 ZUS_ENDPOINT_DESCRIPTION = (
@@ -132,6 +136,37 @@ class MockRouter(APIRouter):
             ),
         )
         # mObywatel IdP mock endpoints (BE-27)
+        self.add_api_route(
+            "/usc/birth-certificate",
+            self.post_birth_certificate_route,
+            methods=["POST"],
+            response_model=BirthCertificateResponse,
+            summary="Symulacja złożenia wniosku o odpis aktu urodzenia w USC",
+            description=(
+                "Symuluje złożenie wniosku przez gov.pl o odpis aktu urodzenia "
+                "z Rejestru Stanu Cywilnego (art. 44-45 ustawy Prawo o aktach stanu cywilnego). "
+                "Odpis jest wymagany do zasiłku macierzyńskiego w ZUS."
+            ),
+        )
+
+        self.add_api_route(
+            "/usc/birth-certificate",
+            self.get_sample_birth_certificate_route,
+            methods=["GET"],
+            response_model=BirthCertificateResponse,
+            summary="Pobranie przykładowego odpisu aktu urodzenia z USC",
+            description="Zwraca przykładowy odpis aktu urodzenia z Rejestru Stanu Cywilnego.",
+        )
+
+        self.add_api_route(
+            "/usc/birth-certificate/{pesel}",
+            self.get_sample_birth_certificate_route,
+            methods=["GET"],
+            response_model=BirthCertificateResponse,
+            summary="Pobranie odpisu aktu urodzenia dla wskazanego numeru PESEL",
+            description="Zwraca odpis aktu urodzenia powiązany z danym numerem PESEL rodzica.",
+        )
+
         # mObywatel IdP mock endpoints (BE-27)
         self.add_api_route(
             "/mobywatel/identities",
@@ -165,9 +200,22 @@ class MockRouter(APIRouter):
         """Returns mock PUE ZUS profile (BE-28)."""
         return get_mock_user_profile_service(user_id)
 
+    def post_birth_certificate_route(
+        self, payload: BirthCertificateRequest
+    ) -> BirthCertificateResponse:
+        """Simulates requesting birth certificate from USC registry."""
+        return simulate_birth_certificate_service(payload)
+
+    def get_sample_birth_certificate_route(
+        self, pesel: str | None = None
+    ) -> BirthCertificateResponse:
+        """Returns sample birth certificate from USC registry."""
+        return get_sample_birth_certificate_service(pesel)
+
     def get_zus_insurance_data_route(self, pesel: str) -> UserProfileResponse:
         """Returns simulated ZUS insurance data for the given PESEL."""
         return get_mock_user_profile_service(pesel)
+
     def list_mobywatel_identities_route(self) -> list[CitizenIdentity]:
         """Returns mock citizen identities for mObywatel login simulation."""
         return self.mobywatel.list_identities()
@@ -221,6 +269,37 @@ class ZusRouter(APIRouter):
         )
 
         self.add_api_route(
+            "/usc/birth-certificate",
+            self.post_birth_certificate_route,
+            methods=["POST"],
+            response_model=BirthCertificateResponse,
+            summary="Symulacja złożenia wniosku o odpis aktu urodzenia w USC",
+            description=(
+                "Symuluje złożenie wniosku przez gov.pl o odpis aktu urodzenia "
+                "z Rejestru Stanu Cywilnego (art. 44-45 ustawy Prawo o aktach stanu cywilnego). "
+                "Odpis jest wymagany do zasiłku macierzyńskiego w ZUS."
+            ),
+        )
+
+        self.add_api_route(
+            "/usc/birth-certificate",
+            self.get_sample_birth_certificate_route,
+            methods=["GET"],
+            response_model=BirthCertificateResponse,
+            summary="Pobranie przykładowego odpisu aktu urodzenia z USC",
+            description="Zwraca przykładowy odpis aktu urodzenia z Rejestru Stanu Cywilnego.",
+        )
+
+        self.add_api_route(
+            "/usc/birth-certificate/{pesel}",
+            self.get_sample_birth_certificate_route,
+            methods=["GET"],
+            response_model=BirthCertificateResponse,
+            summary="Pobranie odpisu aktu urodzenia dla wskazanego numeru PESEL",
+            description="Zwraca odpis aktu urodzenia powiązany z danym numerem PESEL rodzica.",
+        )
+
+        self.add_api_route(
             "/debt/{pesel}",
             self.get_zus_debt_certificate_route,
             methods=["GET"],
@@ -250,6 +329,18 @@ class ZusRouter(APIRouter):
         """Returns details of a single e-ZLA certificate by document ID."""
         return get_single_ezla_certificate_service(document_id)
 
+    def post_birth_certificate_route(
+        self, payload: BirthCertificateRequest
+    ) -> BirthCertificateResponse:
+        """Simulates requesting birth certificate from USC registry."""
+        return simulate_birth_certificate_service(payload)
+
+    def get_sample_birth_certificate_route(
+        self, pesel: str | None = None
+    ) -> BirthCertificateResponse:
+        """Returns sample birth certificate from USC registry."""
+        return get_sample_birth_certificate_service(pesel)
+
     def get_zus_debt_certificate_route(
         self,
         pesel: str,
@@ -257,5 +348,6 @@ class ZusRouter(APIRouter):
     ) -> ContributionDebtCertificateResponse:
         """Returns simulated contribution debt certificate on entitlement date for given PESEL."""
         return get_citizen_debt_certificate_service(pesel, entitlement_date=entitlement_date)
+
 
 router = MockRouter()
