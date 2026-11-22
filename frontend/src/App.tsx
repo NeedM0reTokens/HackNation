@@ -6,6 +6,7 @@ import { QuickActionsBar } from "./components/QuickActionsBar";
 import { PueModal } from "./components/PueModal";
 import { PdfModal } from "./components/PdfModal";
 import { MobywatelMockModal } from "./components/MobywatelMockModal";
+import { MobileBottomNav } from "./components/MobileBottomNav";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { AppStateProvider, useAppState } from "./components/app-state";
 import { AssistantFab } from "./components/assistant/assistant-fab";
@@ -351,6 +352,18 @@ const AppContent: React.FC = () => {
       {/* ASYSTENT AI */}
       <AssistantFab />
       <AssistantPanel />
+
+      {/* MOBILNA NAWIGACJA NA DOLE EKRANU */}
+      <MobileBottomNav
+        activeTab={activeTab}
+        onSelectTab={(tabId) => {
+          setActiveTab(tabId);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+        onOpenPdfModal={() => setIsPdfModalOpen(true)}
+        onOpenPueModal={() => setIsPueModalOpen(true)}
+        onLoginToggle={handleLoginToggle}
+      />
     </div>
   );
 };
