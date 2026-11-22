@@ -183,6 +183,7 @@ class UserProfileResponse(BaseModel):
     """
 
     # Identifiers
+    user_id: str | None = Field(default=None, description="Identyfikator użytkownika / PESEL")
     pesel: str = Field(..., description="Numer PESEL ubezpieczonego")
     user_id: str | None = Field(
         default=None,
@@ -279,4 +280,87 @@ class UserProfileResponse(BaseModel):
     )
     max_sickness_days: int = Field(
         270, description="Maksymalny limit okresu zasiłkowego (270 dni w ciąży, 182 dni standard)"
+    )
+
+
+class BirthCertificateRequest(BaseModel):
+    """Wniosek o odpis aktu urodzenia dziecka z Rejestru Stanu Cywilnego (USC)."""
+
+    child_first_name: str = Field(
+        default="Franciszek", description="Imię dziecka", examples=["Franciszek"]
+    )
+    child_last_name: str = Field(
+        default="Kowalski", description="Nazwisko dziecka", examples=["Kowalski"]
+    )
+    child_date_of_birth: str = Field(
+        default="2026-05-15",
+        description="Data urodzenia dziecka (YYYY-MM-DD)",
+        examples=["2026-05-15"],
+    )
+    child_place_of_birth: str = Field(default="Warszawa", description="Miejsce urodzenia")
+    child_gender: str = Field(default="Mężczyzna", description="Płeć dziecka (Kobieta/Mężczyzna)")
+    child_pesel: str | None = Field(
+        default=None, description="PESEL dziecka (opcjonalny dla noworodka)"
+    )
+    applicant_first_name: str = Field(
+        default="Anna", description="Imię wnioskodawcy (rodzica)", examples=["Anna"]
+    )
+    applicant_last_name: str = Field(
+        default="Kowalska", description="Nazwisko wnioskodawcy (rodzica)", examples=["Kowalska"]
+    )
+    applicant_pesel: str = Field(
+        default="92011501234", description="PESEL wnioskodawcy", examples=["92011501234"]
+    )
+    applicant_role: str = Field(
+        default="Matka", description="Rola wnioskodawcy (Matka / Ojciec / Opiekun prawny)"
+    )
+    certificate_type: str = Field(
+        default="SKRÓCONY", description="Rodzaj odpisu: SKRÓCONY, ZUPEŁNY, WIELOJĘZYCZNY"
+    )
+    purpose: str = Field(
+        default="Uzyskanie zasiłku macierzyńskiego w ZUS", description="Cel wniosku"
+    )
+    delivery_channel: str = Field(
+        default="ELEKTRONICZNA_EPUAP_MOBYWATEL", description="Sposób odbioru dokumentu"
+    )
+
+
+class BirthCertificateResponse(BaseModel):
+    """Simulated official electronic birth certificate excerpt from Civil Registry (USC)."""
+
+    certificate_id: str = Field(
+        ..., description="Unikalny identyfikator odpisu aktu stanu cywilnego"
+    )
+    act_number: str = Field(..., description="Numer aktu urodzenia w Rejestrze Stanu Cywilnego")
+    certificate_type: str = Field(
+        ..., description="Pełna nazwa wydanego odpisu (skrócony / zupełny)"
+    )
+    issue_date: str = Field(..., description="Data wydania dokumentu (YYYY-MM-DD)")
+    registry_office: str = Field(..., description="Urząd Stanu Cywilnego sporządzający akt")
+    child_first_name: str = Field(..., description="Imię dziecka")
+    child_last_name: str = Field(..., description="Nazwisko dziecka")
+    child_date_of_birth: str = Field(..., description="Data urodzenia dziecka (YYYY-MM-DD)")
+    child_place_of_birth: str = Field(..., description="Miejsce urodzenia dziecka")
+    child_gender: str = Field(..., description="Płeć dziecka")
+    child_pesel: str = Field(..., description="Nadany numer PESEL dziecka")
+    mother_name: str = Field(..., description="Imię i nazwisko matki")
+    mother_maiden_name: str = Field(default="Kowalska", description="Nazwisko rodowe matki")
+    father_name: str = Field(..., description="Imię i nazwisko ojca")
+    applicant_pesel: str = Field(..., description="PESEL osoby składającej wniosek")
+    delivery_channel: str = Field(..., description="Kanał doręczenia (ePUAP / mObywatel)")
+    status: str = Field(default="WYDANY_ELEKTRONICZNIE", description="Status realizacji wniosku")
+    electronic_seal: str = Field(
+        default="Kwalifikowana Pieczęć Elektroniczna Ministra Cyfryzacji",
+        description="Pieczęć elektroniczna uwierzytelniająca dokument",
+    )
+    official_portal_url: str = Field(
+        default="https://www.gov.pl/web/cyfryzacja/rejestr-stanu-cywilnego",
+        description="Oficjalny adres usługi rządowej Rejestru Stanu Cywilnego",
+    )
+    legal_basis: str = Field(
+        default="Art. 44 i 45 ustawy Prawo o aktach stanu cywilnego (Dz. U. z 2023 r. poz. 1378)",
+        description="Podstawa prawna wydania odpisu aktu stanu cywilnego",
+    )
+    verification_code: str = Field(
+        ..., description="Unikalny kod weryfikacji autentyczności dokumentu"
     )
