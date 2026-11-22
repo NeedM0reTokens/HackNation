@@ -19,6 +19,8 @@ DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
 FALLBACK_GEMINI_MODELS = (
     "gemini-3.1-flash-lite",
     "gemini-3.5-flash-lite",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
 )
 GEMINI_ENDPOINT_TEMPLATE = (
     "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
@@ -1572,6 +1574,7 @@ class GeminiAssistantService:
         self, request: AssistantAskRequest, api_key: str
     ) -> AssistantAskResponse | None:
         prompt_content = self._build_gemini_prompt(request)
+        is_bearer = api_key.startswith("AQ.") or api_key.startswith("ya29.")
 
         request_body = {
             "contents": [
@@ -1601,7 +1604,13 @@ class GeminiAssistantService:
 
         async with httpx.AsyncClient(timeout=10.0) as client:
             for model_name in models_to_try:
-                model_url = GEMINI_ENDPOINT_TEMPLATE.format(model=model_name, key=api_key)
+                if is_bearer:
+                    model_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent"
+                    headers = {"Authorization": f"Bearer {api_key}"}
+                else:
+                    model_url = GEMINI_ENDPOINT_TEMPLATE.format(model=model_name, key=api_key)
+                    headers = {}
+
                 model_body = json.loads(json.dumps(request_body))
 
                 if model_name.startswith(("gemini-3", "gemini-4")):
@@ -1615,7 +1624,7 @@ class GeminiAssistantService:
                 else:
                     model_body["generationConfig"].pop("thinkingConfig", None)
 
-                resp = await client.post(model_url, json=model_body)
+                resp = await client.post(model_url, json=model_body, headers=headers)
 
                 if resp.status_code != 200:
                     logger.warning(
@@ -1733,17 +1742,57 @@ class GeminiAssistantService:
         msg_lower = request.message.lower()
         msg_norm = _normalize_text(msg_lower)
 
-        if request.topic_id and request.topic_id in STATUTORY_GLOSSARY:
-            item = STATUTORY_GLOSSARY[request.topic_id]
-            return AssistantAskResponse(
-                id=f"kb-{uuid.uuid4().hex[:8]}",
-                title=item["title"],
-                summary=item["summary"],
-                details=item.get("details", []),
-                legal_basis=item.get("legal_basis"),
-                model_used="statutory-knowledge-engine",
-                is_live_ai=False,
-            )
+        # 1. Jawny temat z requestu lub z kontekstu AiFieldExplainer
+        explicit_topic = request.topic_id
+        if not explicit_topic and isinstance(request.user_context, dict):
+            explicit_topic = request.user_context.get("requested_topic")
+
+        if explicit_topic:
+            norm_topic = TOPIC_ALIASES.get(str(explicit_topic).strip().lower(), str(explicit_topic).strip().lower())
+            req_title = request.user_context.get("requested_title") if isinstance(request.user_context, dict) else None
+            req_basis = request.user_context.get("topic_legal_basis") if isinstance(request.user_context, dict) else None
+            req_rules = request.user_context.get("topic_rules") if isinstance(request.user_context, dict) else None
+            req_summary = request.user_context.get("topic_summary") if isinstance(request.user_context, dict) else None
+
+            if norm_topic in STATUTORY_GLOSSARY:
+                item = STATUTORY_GLOSSARY[norm_topic]
+                extended_details = list(item.get("details", []))
+                if isinstance(req_rules, list):
+                    for r in req_rules:
+                        if r not in extended_details:
+                            extended_details.append(r)
+                extended_details.append("Zadbaj o zachowanie 21-dniowego terminu od dnia porodu na złożenie wniosku o zasiłek.")
+                extended_details.append("W razie wątpliwości skonsultuj sprawę przez PUE ZUS lub infolinię COT: 22 560 16 00.")
+                return AssistantAskResponse(
+                    id=f"kb-{uuid.uuid4().hex[:8]}",
+                    title=f"Analiza ekspercka ZUS: {item['title']}",
+                    summary=f"{item['summary']} W stanie prawnym 2026 r. prawidłowa interpretacja ma kluczowe znaczenie dla terminowej wypłaty świadczeń.",
+                    details=extended_details,
+                    legal_basis=item.get("legal_basis") or req_basis,
+                    model_used="statutory-knowledge-engine",
+                    is_live_ai=False,
+                )
+            else:
+                topic_summary = req_summary or f"Szczegółowa analiza formalno-prawna dla zagadnienia: {req_title or explicit_topic}."
+                extended_details = []
+                if isinstance(req_rules, list) and req_rules:
+                    extended_details.extend(req_rules)
+                else:
+                    extended_details.extend([
+                        "Świadczenie rozliczane w oparciu o stan prawny 2026 r.",
+                        "Wymagane terminowe złożenie dokumentów (np. Z-3 / Z-3a / ZAM) do właściwego oddziału ZUS.",
+                    ])
+                extended_details.append("Zadbaj o zachowanie wymaganych terminów kodeksowych i zasiłkowych.")
+                extended_details.append("W razie wątpliwości skonsultuj sprawę przez PUE ZUS lub infolinię COT: 22 560 16 00.")
+                return AssistantAskResponse(
+                    id=f"kb-{uuid.uuid4().hex[:8]}",
+                    title=f"Analiza ekspercka ZUS: {req_title or explicit_topic}",
+                    summary=f"{topic_summary} W stanie prawnym 2026 r. prawidłowa interpretacja ma kluczowe znaczenie dla terminowej wypłaty świadczeń.",
+                    details=extended_details,
+                    legal_basis=req_basis or "Ustawa z dnia 25 czerwca 1999 r. o świadczeniach pieniężnych z ubezpieczenia społecznego w razie choroby i macierzyństwa (Dz.U. 2026)",
+                    model_used="statutory-knowledge-engine",
+                    is_live_ai=False,
+                )
 
         best_match_key: str | None = None
         for patterns, key in KEYWORD_PATTERNS:
@@ -1769,52 +1818,6 @@ class GeminiAssistantService:
             return self._build_refusal_response()
 
         if isinstance(request.user_context, dict):
-            req_topic = request.user_context.get("requested_topic")
-            req_title = request.user_context.get("requested_title")
-            req_basis = request.user_context.get("topic_legal_basis")
-            req_rules = request.user_context.get("topic_rules")
-            if req_topic:
-                norm_topic = TOPIC_ALIASES.get(str(req_topic).strip().lower(), str(req_topic).strip().lower())
-                if norm_topic in STATUTORY_GLOSSARY:
-                    item = STATUTORY_GLOSSARY[norm_topic]
-                    extended_details = list(item.get("details", []))
-                    if isinstance(req_rules, list):
-                        for r in req_rules:
-                            if r not in extended_details:
-                                extended_details.append(r)
-                    extended_details.append("Zadbaj o zachowanie 21-dniowego terminu od dnia porodu na złożenie wniosku o zasiłek.")
-                    extended_details.append("W razie wątpliwości skonsultuj sprawę przez PUE ZUS lub infolinię COT: 22 560 16 00.")
-                    return AssistantAskResponse(
-                        id=f"kb-{uuid.uuid4().hex[:8]}",
-                        title=f"Analiza ekspercka ZUS: {item['title']}",
-                        summary=f"{item['summary']} W stanie prawnym 2026 r. prawidłowa interpretacja ma kluczowe znaczenie dla terminowej wypłaty świadczeń.",
-                        details=extended_details,
-                        legal_basis=item.get("legal_basis") or req_basis,
-                        model_used="statutory-knowledge-engine",
-                        is_live_ai=False,
-                    )
-                else:
-                    topic_summary = request.user_context.get("topic_summary") or f"Szczegółowa analiza formalno-prawna dla zagadnienia: {req_title or req_topic}."
-                    extended_details = []
-                    if isinstance(req_rules, list) and req_rules:
-                        extended_details.extend(req_rules)
-                    else:
-                        extended_details.extend([
-                            "Świadczenie rozliczane w oparciu o stan prawny 2026 r.",
-                            "Wymagane terminowe złożenie dokumentów (np. Z-3 / Z-3a / ZAM) do właściwego oddziału ZUS.",
-                        ])
-                    extended_details.append("Zadbaj o zachowanie wymaganych terminów kodeksowych i zasiłkowych.")
-                    extended_details.append("W razie wątpliwości skonsultuj sprawę przez PUE ZUS lub infolinię COT: 22 560 16 00.")
-                    return AssistantAskResponse(
-                        id=f"kb-{uuid.uuid4().hex[:8]}",
-                        title=f"Analiza ekspercka ZUS: {req_title or req_topic}",
-                        summary=f"{topic_summary} W stanie prawnym 2026 r. prawidłowa interpretacja ma kluczowe znaczenie dla terminowej wypłaty świadczeń.",
-                        details=extended_details,
-                        legal_basis=req_basis or "Ustawa z dnia 25 czerwca 1999 r. o świadczeniach pieniężnych z ubezpieczenia społecznego w razie choroby i macierzyństwa (Dz.U. 2026)",
-                        model_used="statutory-knowledge-engine",
-                        is_live_ai=False,
-                    )
-
             active_tab = request.user_context.get("active_tab")
             tab_context_keys = {
                 "chorobowy": "kod-b",

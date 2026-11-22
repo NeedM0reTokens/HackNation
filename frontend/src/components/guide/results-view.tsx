@@ -67,13 +67,13 @@ export function ResultsView({
     const motherIncome = isMother
       ? input.grossSalary
       : input.includePartner
-      ? input.partnerGrossSalary
+      ? (input.partnerGrossSalary || 0)
       : 0;
 
     const fatherIncome = isFather
       ? input.grossSalary
       : isMother && input.includePartner
-      ? input.partnerGrossSalary
+      ? (input.partnerGrossSalary || 0)
       : 0;
 
     const isMotherInsured = isMother

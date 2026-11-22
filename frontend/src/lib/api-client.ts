@@ -959,6 +959,21 @@ export async function askAssistantApi(
       legalBasis: data.legal_basis || undefined,
     };
   } catch (err: any) {
+    if (userContext?.requested_topic) {
+      const topicKey = userContext.requested_topic;
+      const local = glossary[topicKey];
+      if (local) {
+        return {
+          id: `fallback-${Date.now()}`,
+          title: userContext.requested_title || local.title,
+          summary: userContext.topic_summary || local.summary,
+          details: (userContext.topic_rules && userContext.topic_rules.length > 0)
+            ? [...local.details, ...userContext.topic_rules.filter((r: string) => !local.details.includes(r))]
+            : local.details,
+          legalBasis: userContext.topic_legal_basis || local.legalBasis,
+        };
+      }
+    }
     throw new BackendOfflineError("POST /api/assistant/ask", err);
   }
 }
