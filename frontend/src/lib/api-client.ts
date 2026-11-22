@@ -590,20 +590,7 @@ export async function calculateParentalSharing(payload: ParentalSharingInput): P
   }
 }
 
-// 8. Przypadki szczególne (POST /api/calculators/special-cases)
-export interface SpecialCasesPayload {
-  case_type: 'ZA_ZYCIEM' | 'PREMATURE_HOSPITALIZATION' | 'STILLBIRTH_OR_DEATH'
-  gross_monthly_income: number
-  employment_type?: string
-  children_born_count?: number
-  is_insured_at_birth?: boolean
-  has_za_zyciem_certificate?: boolean
-  child_birth_week?: number
-  birth_weight_grams?: number
-  hospitalization_weeks?: number
-  is_stillbirth?: boolean
-  child_death_after_birth?: boolean
-}
+
 
 // 11. Łączenie rodzicielskiego z pracą na max 1/2 etatu (BE-19: POST /api/calculators/parental-work-combination)
 export async function calculateParentalWorkCombination(payload: ParentalWorkInput): Promise<ParentalWorkResult> {
@@ -878,11 +865,24 @@ export async function calculateSpecialCases(payload: SpecialCasesInput): Promise
       const totalBenefit = Math.round(dailyRate * 1.0 * matWeeks * 7 * 100) / 100
       return {
         case_type: 'STILLBIRTH_OR_DEATH',
-        maternity_weeks: 8,
-        benefit_rate_percent: 100.0,
-        funeral_allowance_amount: 4000,
+        is_eligible: true,
+        base_maternity_weeks: matWeeks,
+        supplementary_maternity_weeks: 0,
+        total_maternity_weeks: matWeeks,
+        parental_weeks: 0,
+        non_transferable_parental_weeks: 0,
+        total_leave_weeks: matWeeks,
+        calculation_base_net: Math.round(base * 100) / 100,
+        daily_rate: dailyRate,
+        total_benefit_amount: totalBenefit,
+        one_time_grant_pln: 4000.0,
+        can_interrupt_maternity_for_hospitalization: false,
+        min_mandatory_mother_maternity_weeks: matWeeks,
         description: 'Prawo do 8 tygodni urlopu macierzyńskiego (100%) oraz zasiłku pogrzebowego 4000 zł.',
         required_documents: ['Akt urodzenia z adnotacją o martwym urodzeniu lub zaświadczenie lekarskie.', 'Wniosek Z-12 o zasiłek pogrzebowy.'],
+        legal_basis: ['Art. 180(1) Kodeksu Pracy (urlop w razie urodzenia martwego dziecka)'],
+        important_notes: ['Zasiłek macierzyński przysługuje w wymiarze 8 tygodni (56 dni) płatny 100%.'],
+        periods: [],
       }
     }
   }
