@@ -133,8 +133,88 @@ export async function getAllowanceRates() {
   }
 }
 
+export interface MobywatelIdentity {
+  pesel: string;
+  first_name: string;
+  last_name: string;
+  date_of_birth: string;
+  email: string;
+  role: string;
+  label: string;
+}
+
+export async function getMobywatelIdentities(): Promise<MobywatelIdentity[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/auth/mobywatel/identities`, {
+      method: "GET",
+      headers: getHeaders(),
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn("Nie udało się pobrać tożsamości z backendu, użycie listy zapasowej:", err);
+  }
+  return [
+    {
+      pesel: "92011501234",
+      first_name: "Anna",
+      last_name: "Kowalska",
+      date_of_birth: "1992-01-15",
+      email: "anna.kowalska@obywatel.gov.pl",
+      role: "user",
+      label: "Anna Kowalska - Przyszła Matka (UoP, Ciąża)",
+    },
+    {
+      pesel: "89032005678",
+      first_name: "Piotr",
+      last_name: "Zieliński",
+      date_of_birth: "1989-03-20",
+      email: "piotr.zielinski@obywatel.gov.pl",
+      role: "user",
+      label: "Piotr Zieliński - Przyszły Ojciec (UoP, Ojcowski)",
+    },
+    {
+      pesel: "95081012345",
+      first_name: "Karolina",
+      last_name: "Wiśniewska",
+      date_of_birth: "1995-08-10",
+      email: "karolina.wisniewska@obywatel.gov.pl",
+      role: "user",
+      label: "Karolina Wiśniewska - Zleceniobiorca (Dobrowolne chorobowe)",
+    },
+    {
+      pesel: "85040398765",
+      first_name: "Tomasz",
+      last_name: "Lewandowski",
+      date_of_birth: "1985-04-03",
+      email: "tomasz.lewandowski@obywatel.gov.pl",
+      role: "user",
+      label: "Tomasz Lewandowski - Przedsiębiorca (JDG, Zaległość ZUS)",
+    },
+    {
+      pesel: "99010155555",
+      first_name: "Julia",
+      last_name: "Dąbrowska",
+      date_of_birth: "1999-01-01",
+      email: "julia.dabrowska@obywatel.gov.pl",
+      role: "user",
+      label: "Julia Dąbrowska - Brak ubezpieczenia (Obywatel)",
+    },
+    {
+      pesel: "80051209876",
+      first_name: "Marek",
+      last_name: "Nowak",
+      date_of_birth: "1980-05-12",
+      email: "admin.nowak@zus.pl",
+      role: "admin",
+      label: "Marek Nowak - Inspektor ZUS (Administrator)",
+    },
+  ];
+}
+
 // 3. Logowanie przez mObywatel
-export async function loginWithMObywatel(): Promise<{
+export async function loginWithMObywatel(pesel: string = "92011501234"): Promise<{
   user: InsuredUser;
   simulation?: any;
   token?: string;
@@ -143,7 +223,7 @@ export async function loginWithMObywatel(): Promise<{
     const loginRes = await fetch(`${API_BASE_URL}/api/auth/mobywatel/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pesel: "92051203456" }),
+      body: JSON.stringify({ pesel }),
     });
     if (!loginRes.ok) throw new Error(`HTTP ${loginRes.status}`);
     const tokenData = await loginRes.json();
@@ -151,20 +231,39 @@ export async function loginWithMObywatel(): Promise<{
       setAuthToken(tokenData.access_token);
     }
 
-    const res = await fetch(
-      `${API_BASE_URL}/api/simulation/profile/anna-kowalska`,
-      {
-        method: "GET",
-        headers: getHeaders(),
-      },
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const simData = await res.json();
+    let simData: any = null;
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/api/simulation/profile/${encodeURIComponent(pesel)}`,
+        {
+          method: "GET",
+          headers: getHeaders(),
+        },
+      );
+      if (res.ok) {
+        simData = await res.json();
+      }
+    } catch {
+      // Ignorujemy brak profilu w symulacji
+    }
+
+    const firstName = simData?.first_name || tokenData.user?.first_name || "Obywatel";
+    const lastName = simData?.last_name || tokenData.user?.last_name || "";
+    const cleanPesel = pesel.replace(/\D/g, "");
+    const masked =
+      cleanPesel.length === 11
+        ? `${cleanPesel.slice(0, 2)}•••••••${cleanPesel.slice(-2)}`
+        : cleanPesel;
+
     return {
       user: {
-        firstName: simData.first_name || "Anna",
-        lastName: simData.last_name || "Kowalska",
-        peselMasked: "92•••••••45",
+        firstName,
+        lastName,
+        peselMasked: masked,
+        pesel: cleanPesel,
+        role: tokenData.user?.role || "user",
+        email: tokenData.user?.email,
+        simulation: simData,
       },
       simulation: simData,
       token: tokenData.access_token,

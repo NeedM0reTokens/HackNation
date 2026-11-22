@@ -45,8 +45,28 @@ class MobywatelService:
         return list(self._citizens.values())
 
     def get_identity(self, pesel: str) -> CitizenIdentity | None:
-        """Looks up a citizen identity by their PESEL."""
-        return self._citizens.get(pesel)
+        """Looks up a citizen identity by their PESEL or alias, or generates dynamic fallback."""
+        clean = pesel.strip()
+        if clean in self._citizens:
+            return self._citizens[clean]
+        if clean in ("92051203456", "anna-kowalska"):
+            base = self._citizens.get("92011501234")
+            if base:
+                return base
+        if len(clean) == 11 and clean.isdigit():
+            from .simulation import _parse_pesel_details
+            dob, gender = _parse_pesel_details(clean)
+            fname = "Katarzyna" if gender == "Kobieta" else "Jan"
+            return CitizenIdentity(
+                pesel=clean,
+                first_name=fname,
+                last_name="Kowalska" if gender == "Kobieta" else "Kowalski",
+                date_of_birth=dob,
+                email=f"{fname.lower()}.kowalska@obywatel.gov.pl",
+                role="user",
+                label=f"{fname} Kowalska - Obywatel (Symulacja dynamiczna)",
+            )
+        return None
 
     def authenticate(self, pesel: str) -> TokenResponse:
         """
