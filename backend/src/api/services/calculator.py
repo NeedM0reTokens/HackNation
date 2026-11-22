@@ -349,7 +349,12 @@ def calculate_integrated_parental_service(
     timeline_periods: list[TimelinePeriod] = []
     current_date = data.child_birth_date
 
-    if data.include_pregnancy_sick_leave and data.pregnancy_sick_leave_days > 0:
+    if (
+        data.include_pregnancy_sick_leave
+        and data.pregnancy_sick_leave_days > 0
+        and data.is_mother_insured
+        and data.mother_gross_monthly_income > 0
+    ):
         sick_days = data.pregnancy_sick_leave_days
         sick_start = current_date - timedelta(days=sick_days)
         sick_end = current_date - timedelta(days=1)
@@ -509,11 +514,12 @@ def calculate_integrated_parental_service(
             )
             current_date = p_end + timedelta(days=1)
 
-    if father_parental_weeks > 0:
+    if father_parental_weeks > 0 and data.is_father_insured and data.father_gross_monthly_income > 0:
         f_days = father_parental_weeks * 7
         f_start = current_date
         f_end = f_start + timedelta(days=f_days - 1)
-        f_daily = round(father_daily_100 * (parental_rate / 100.0), 2)
+        father_rate = rates.standard_parental_rate  # Always 70% per art. 31 ust. 3 ustawy zasiłkowej
+        f_daily = round(father_daily_100 * (father_rate / 100.0), 2)
         f_total = round(f_daily * f_days, 2)
         timeline_periods.append(
             TimelinePeriod(
@@ -527,7 +533,7 @@ def calculate_integrated_parental_service(
                 end_date=f_end,
                 weeks=father_parental_weeks,
                 days=f_days,
-                rate_percentage=parental_rate,
+                rate_percentage=father_rate,
                 daily_benefit_net=f_daily,
                 monthly_benefit_net=round(f_daily * 30.0, 2),
                 total_benefit_net=f_total,
@@ -538,13 +544,13 @@ def calculate_integrated_parental_service(
                 payer="ZUS",
                 description=(
                     f"Indywidualne prawo ojca do {durations.non_transferable_parental_weeks} "
-                    "tygodni urlopu rodzicielskiego (Dyrektywa Work-Life Balance)."
+                    "tygodni urlopu rodzicielskiego (Dyrektywa Work-Life Balance, płatne 70%)."
                 ),
             )
         )
         current_date = f_end + timedelta(days=1)
 
-    if data.include_paternity_leave and data.is_father_insured:
+    if data.include_paternity_leave and data.is_father_insured and data.father_gross_monthly_income > 0:
         pat_start = data.child_birth_date + timedelta(days=data.paternity_start_offset_days)
         pat_end = pat_start + timedelta(days=durations.paternity_leave_days - 1)
         pat_daily = round(father_daily_100 * (rates.paternity_benefit_rate / 100.0), 2)
@@ -661,17 +667,22 @@ def calculate_integrated_parental_service(
     base_mat_days = mother_maternity_weeks * 7
     base_par_days = (parental_pool_weeks - durations.non_transferable_parental_weeks) * 7
     fat_par_days = durations.non_transferable_parental_weeks * 7
+    father_par_total = (
+        round(father_daily_100 * (rates.standard_parental_rate / 100.0) * fat_par_days, 2)
+        if (data.is_father_insured and data.father_gross_monthly_income > 0)
+        else 0.0
+    )
 
     uni_total = round(
         (mother_daily_100 * (rates.unified_benefit_rate / 100.0) * base_mat_days)
         + (mother_daily_100 * (rates.unified_benefit_rate / 100.0) * base_par_days)
-        + (father_daily_100 * (rates.standard_parental_rate / 100.0) * fat_par_days),
+        + father_par_total,
         2,
     )
     var_total = round(
         (mother_daily_100 * (rates.full_maternity_rate / 100.0) * base_mat_days)
         + (mother_daily_100 * (rates.standard_parental_rate / 100.0) * base_par_days)
-        + (father_daily_100 * (rates.standard_parental_rate / 100.0) * fat_par_days),
+        + father_par_total,
         2,
     )
 

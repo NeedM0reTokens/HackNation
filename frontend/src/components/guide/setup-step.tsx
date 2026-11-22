@@ -775,6 +775,57 @@ export function SetupStep({
             )}
           </div>
 
+          {/* Opcja uwzględnienia drugiego rodzica */}
+          <div style={{
+            padding: '10px 14px',
+            backgroundColor: '#F8FAFC',
+            border: '1px solid #E2E8F0',
+            borderRadius: '6px',
+          }}>
+            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', gap: '12px' }}>
+              <span style={{ fontSize: '0.86rem', fontWeight: 600, color: '#1E293B' }}>
+                Uwzględnij dochód drugiego rodzica (do kalkulacji 9 tyg. ojca / urlopu ojcowskiego)
+              </span>
+              <input
+                type="checkbox"
+                checked={input.includePartner}
+                onChange={(e) => update('includePartner', e.target.checked)}
+                style={{ width: '16px', height: '16px', accentColor: '#334155', cursor: 'pointer' }}
+              />
+            </label>
+            {input.includePartner && (
+              <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #E2E8F0' }}>
+                <label style={{ fontSize: '0.8rem', color: '#475569', display: 'block', marginBottom: '4px' }}>
+                  Średnie miesięczne wynagrodzenie brutto drugiego rodzica (PLN):
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="number"
+                    min="0"
+                    step="50"
+                    className="zus-input"
+                    value={input.partnerGrossSalary || ''}
+                    onChange={(e) => update('partnerGrossSalary', Math.max(0, Number(e.target.value) || 0))}
+                    placeholder="np. 6000"
+                    style={{ paddingRight: '45px' }}
+                  />
+                  <span style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    fontWeight: 600,
+                    color: '#64748B',
+                    fontSize: '0.88rem',
+                    pointerEvents: 'none',
+                  }}>
+                    zł
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* 5. Sytuacje szczególne (opcjonalnie) */}
           <div
             style={{
@@ -802,30 +853,71 @@ export function SetupStep({
             </div>
 
             {input.role === "mother" && (
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  cursor: "pointer",
-                  fontSize: "0.84rem",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={input.premature}
-                  onChange={(e) => update("premature", e.target.checked)}
+              <>
+                <label
                   style={{
-                    accentColor: "var(--zus-green)",
-                    width: "16px",
-                    height: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    cursor: "pointer",
+                    fontSize: "0.84rem",
                   }}
-                />
-                <span style={{ color: "#1E293B" }}>
-                  Wcześniak lub hospitalizacja noworodka (+ do 15 tyg. urlopu
-                  uzupełniającego 100%)
-                </span>
-              </label>
+                >
+                  <input
+                    type="checkbox"
+                    checked={input.pregnancySickLeave}
+                    onChange={(e) => update("pregnancySickLeave", e.target.checked)}
+                    style={{
+                      accentColor: "var(--zus-green)",
+                      width: "16px",
+                      height: "16px",
+                    }}
+                  />
+                  <span style={{ color: "#1E293B" }}>
+                    Przebywam na zwolnieniu lekarskim w ciąży (L4 z kodem B, 100% płatne przed porodem)
+                  </span>
+                </label>
+
+                {input.pregnancySickLeave && (
+                  <div style={{ marginLeft: "24px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "0.8rem", color: "#64748B" }}>Liczba dni L4 przed porodem:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="270"
+                      className="zus-input"
+                      style={{ width: "80px", padding: "4px 8px", height: "32px" }}
+                      value={input.pregnancySickLeaveDays || 30}
+                      onChange={(e) => update("pregnancySickLeaveDays", Math.max(1, Number(e.target.value) || 30))}
+                    />
+                  </div>
+                )}
+
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    cursor: "pointer",
+                    fontSize: "0.84rem",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={input.premature}
+                    onChange={(e) => update("premature", e.target.checked)}
+                    style={{
+                      accentColor: "var(--zus-green)",
+                      width: "16px",
+                      height: "16px",
+                    }}
+                  />
+                  <span style={{ color: "#1E293B" }}>
+                    Wcześniak lub hospitalizacja noworodka (+ do 15 tyg. urlopu
+                    uzupełniającego 100%)
+                  </span>
+                </label>
+              </>
             )}
 
             <label

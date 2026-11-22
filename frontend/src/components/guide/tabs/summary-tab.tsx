@@ -699,71 +699,85 @@ export function SummaryTab({
                   paddingTop: "12px",
                 }}
               >
-                <table
-                  style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    fontSize: "0.86rem",
-                  }}
-                >
-                  <thead>
-                    <tr
+                {(() => {
+                  const hasFather = backendResult.monthly_cashflow.some((m) => m.father_benefit > 0);
+                  const hasSalary = backendResult.monthly_cashflow.some((m) => m.work_salary > 0);
+                  const hasMother = backendResult.monthly_cashflow.some((m) => m.mother_benefit > 0);
+
+                  return (
+                    <table
                       style={{
-                        backgroundColor: "#F8FAFC",
-                        borderBottom: "2px solid #E2E8F0",
-                        textAlign: "left",
+                        width: "100%",
+                        borderCollapse: "collapse",
+                        fontSize: "0.86rem",
                       }}
                     >
-                      <th style={{ padding: "8px 12px" }}>Okres</th>
-                      <th style={{ padding: "8px 12px" }}>Zasiłek mamy</th>
-                      <th style={{ padding: "8px 12px" }}>Zasiłek taty</th>
-                      <th style={{ padding: "8px 12px" }}>Pensja z pracy</th>
-                      <th
-                        style={{
-                          padding: "8px 12px",
-                          fontWeight: 800,
-                          color: "#007834",
-                        }}
-                      >
-                        Łącznie / m-c
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {backendResult.monthly_cashflow.map((m, idx) => (
-                      <tr
-                        key={idx}
-                        style={{ borderBottom: "1px solid #E2E8F0" }}
-                      >
-                        <td style={{ padding: "8px 12px", fontWeight: 600 }}>
-                          {m.year_month}
-                        </td>
-                        <td style={{ padding: "8px 12px" }}>
-                          {m.mother_benefit > 0
-                            ? `${m.mother_benefit} zł`
-                            : "—"}
-                        </td>
-                        <td style={{ padding: "8px 12px" }}>
-                          {m.father_benefit > 0
-                            ? `${m.father_benefit} zł`
-                            : "—"}
-                        </td>
-                        <td style={{ padding: "8px 12px" }}>
-                          {m.work_salary > 0 ? `${m.work_salary} zł` : "—"}
-                        </td>
-                        <td
+                      <thead>
+                        <tr
                           style={{
-                            padding: "8px 12px",
-                            fontWeight: 700,
-                            color: "#007834",
+                            backgroundColor: "#F8FAFC",
+                            borderBottom: "2px solid #E2E8F0",
+                            textAlign: "left",
                           }}
                         >
-                          {m.total_month_income} zł
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          <th style={{ padding: "8px 12px" }}>Okres</th>
+                          {hasMother && <th style={{ padding: "8px 12px" }}>Zasiłek matki</th>}
+                          {hasFather && <th style={{ padding: "8px 12px" }}>Zasiłek ojca</th>}
+                          {hasSalary && <th style={{ padding: "8px 12px" }}>Pensja z pracy</th>}
+                          <th
+                            style={{
+                              padding: "8px 12px",
+                              fontWeight: 800,
+                              color: "#007834",
+                            }}
+                          >
+                            Łącznie / m-c
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {backendResult.monthly_cashflow.map((m, idx) => (
+                          <tr
+                            key={idx}
+                            style={{ borderBottom: "1px solid #E2E8F0" }}
+                          >
+                            <td style={{ padding: "8px 12px", fontWeight: 600 }}>
+                              {m.year_month}
+                            </td>
+                            {hasMother && (
+                              <td style={{ padding: "8px 12px" }}>
+                                {m.mother_benefit > 0
+                                  ? `${m.mother_benefit} zł`
+                                  : "—"}
+                              </td>
+                            )}
+                            {hasFather && (
+                              <td style={{ padding: "8px 12px" }}>
+                                {m.father_benefit > 0
+                                  ? `${m.father_benefit} zł`
+                                  : "—"}
+                              </td>
+                            )}
+                            {hasSalary && (
+                              <td style={{ padding: "8px 12px" }}>
+                                {m.work_salary > 0 ? `${m.work_salary} zł` : "—"}
+                              </td>
+                            )}
+                            <td
+                              style={{
+                                padding: "8px 12px",
+                                fontWeight: 700,
+                                color: "#007834",
+                              }}
+                            >
+                              {m.total_month_income} zł
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  );
+                })()}
               </div>
             )}
           </div>
