@@ -1,19 +1,38 @@
 from datetime import date
 
-from ..data import NAME_TO_PESEL, PREDEFINED_PROFILES
-from ..models.simulation import ActiveEzlaInfo, MonthlyContribution, UserProfileResponse
+from fastapi import HTTPException, status
+
+from ..data import (
+    PREDEFINED_EZLA,
+    PREDEFINED_EZLA_BY_DOC,
+    PREDEFINED_PROFILES,
+)
+from ..models.simulation import (
+    ActiveEzlaInfo,
+    BirthCertificateRequest,
+    BirthCertificateResponse,
+    ContributionDebtCertificateResponse,
+    ContributionDebtItem,
+    EzlaCertificateResponse,
+    EzlaCitizenResponse,
+    MonthlyContribution,
+    UserProfileResponse,
+)
+from .admin import config_service
 
 
 def _generate_monthly_contributions(gross_amount: float) -> list[MonthlyContribution]:
     """
     Generates 12 monthly contribution records preceding current month.
-    Each contribution deducts employee social security portion: 13.71%.
+    Each contribution deducts employee social security portion dynamically from config.
     """
     if gross_amount <= 0:
         return []
 
+    cfg = config_service.get_config()
+    social_rate = cfg.benefit_rates.social_contributions_rate
+
     contributions: list[MonthlyContribution] = []
-    # Reference year-month for simulation (2025-05 to 2026-04)
     months = [
         "2025-05",
         "2025-06",
@@ -29,7 +48,7 @@ def _generate_monthly_contributions(gross_amount: float) -> list[MonthlyContribu
         "2026-04",
     ]
 
-    social_deducted = round(gross_amount * 0.1371, 2)
+    social_deducted = round(gross_amount * (social_rate / 100.0), 2)
     net_base = round(gross_amount - social_deducted, 2)
 
     for m in months:
@@ -80,17 +99,19 @@ def _parse_pesel_details(pesel: str) -> tuple[str, str]:
     return "1992-01-01", "Kobieta"
 
 
-def get_mock_user_profile_service(user_id_or_pesel: str) -> UserProfileResponse:
+def get_mock_user_profile_service(pesel: str) -> UserProfileResponse:
     """
-    Returns simulated ZUS insurance profile for a person by their PESEL or alias.
+    Returns simulated ZUS insurance profile for a person by their PESEL.
     If the PESEL is recognized in the predefined scenarios, returns specific data.
     If an unknown PESEL is given, generates a realistic, legally compliant default profile.
+    Statutory limits and thresholds are loaded dynamically from JSON config.
     """
-    normalized_id = user_id_or_pesel.strip().lower()
-    pesel = NAME_TO_PESEL.get(normalized_id, normalized_id)
+    clean_pesel = pesel.strip()
+    cfg = config_service.get_config()
+    statutory_debt_limit = cfg.benefit_amounts.zus_debt_limit
 
-    if pesel in PREDEFINED_PROFILES:
-        raw = dict(PREDEFINED_PROFILES[pesel])
+    if clean_pesel in PREDEFINED_PROFILES:
+        raw = dict(PREDEFINED_PROFILES[clean_pesel])
         gross = float(raw["average_monthly_gross"])
         contributions = _generate_monthly_contributions(gross)
 
@@ -99,16 +120,18 @@ def get_mock_user_profile_service(user_id_or_pesel: str) -> UserProfileResponse:
             if isinstance(ez, dict):
                 active_ezla_list.append(ActiveEzlaInfo.model_validate(ez))
 
+        overdue_amt = float(raw["overdue_amount"])
+        overdue_blocks = overdue_amt > statutory_debt_limit
+
         return UserProfileResponse(
+            user_id=clean_pesel,
             pesel=str(raw["pesel"]),
-            user_id=normalized_id,
             first_name=str(raw["first_name"]),
             last_name=str(raw["last_name"]),
             date_of_birth=str(raw["date_of_birth"]),
             gender=str(raw["gender"]),
             source="ZUS Centralny Rejestr Ubezpieczonych (eZUS Mock)",
             has_insurance=bool(raw["has_insurance"]),
-            has_active_insurance=bool(raw["has_insurance"]),
             insurance_status=str(raw["insurance_status"]),
             insurance_title=str(raw["insurance_title"]),
             insurance_type=str(raw["insurance_type"]),
@@ -125,10 +148,9 @@ def get_mock_user_profile_service(user_id_or_pesel: str) -> UserProfileResponse:
             payer_name=raw.get("payer_name") or None,
             payer_nip=raw.get("payer_nip") or None,
             is_large_payer=bool(raw["is_large_payer"]),
-            overdue_contributions=bool(raw["overdue_contributions"]),
             has_overdue_contributions=bool(raw["has_overdue_contributions"]),
-            overdue_amount=float(raw["overdue_amount"]),
-            overdue_blocks_benefits=bool(raw["overdue_blocks_benefits"]),
+            overdue_amount=overdue_amt,
+            overdue_blocks_benefits=overdue_blocks,
             has_active_ezla=bool(raw["has_active_ezla"]),
             active_ezla=active_ezla_list,
             sickness_days_used_in_year=int(raw["sickness_days_used_in_year"]),
@@ -136,26 +158,25 @@ def get_mock_user_profile_service(user_id_or_pesel: str) -> UserProfileResponse:
         )
 
     # Dynamic generation for any other custom PESEL
-    dob, gender = _parse_pesel_details(pesel)
+    dob, gender = _parse_pesel_details(clean_pesel)
     first_name = "Katarzyna" if gender == "Kobieta" else "Jan"
     last_name = "Kowalski"
 
-    # Standard default in 2026: full-time employment contract, 6000 PLN gross
     gross = 6000.0
-    social_deducted = round(gross * 0.1371, 2)
+    social_rate = cfg.benefit_rates.social_contributions_rate
+    social_deducted = round(gross * (social_rate / 100.0), 2)
     net_base = round(gross - social_deducted, 2)
     contributions = _generate_monthly_contributions(gross)
 
     return UserProfileResponse(
-        pesel=pesel,
-        user_id=pesel,
+        user_id=clean_pesel,
+        pesel=clean_pesel,
         first_name=first_name,
         last_name=last_name,
         date_of_birth=dob,
         gender=gender,
         source="ZUS Centralny Rejestr Ubezpieczonych (eZUS Mock)",
         has_insurance=True,
-        has_active_insurance=True,
         insurance_status="ACTIVE",
         insurance_title="Umowa o pracę (pracownik)",
         insurance_type="UoP",
@@ -164,7 +185,7 @@ def get_mock_user_profile_service(user_id_or_pesel: str) -> UserProfileResponse:
         sickness_insurance_type="MANDATORY",
         insurance_start_date="2024-01-01",
         insurance_duration_days=450,
-        waiting_period_days_required=30,
+        waiting_period_days_required=cfg.periods_and_limits.mandatory_waiting_period_days,
         waiting_period_satisfied=True,
         average_monthly_gross=gross,
         calculation_base_net=net_base,
@@ -172,12 +193,331 @@ def get_mock_user_profile_service(user_id_or_pesel: str) -> UserProfileResponse:
         payer_name="Przykładowy Płatnik Sp. z o.o.",
         payer_nip="1112223344",
         is_large_payer=True,
-        overdue_contributions=False,
         has_overdue_contributions=False,
         overdue_amount=0.0,
         overdue_blocks_benefits=False,
         has_active_ezla=False,
         active_ezla=[],
         sickness_days_used_in_year=0,
-        max_sickness_days=182,
+        max_sickness_days=cfg.periods_and_limits.max_standard_sick_leave_days,
     )
+
+
+def get_citizen_ezla_service(pesel: str) -> EzlaCitizenResponse:
+    """
+    Returns electronic sick leave certificates (e-ZLA) for a citizen by PESEL.
+    Simulates retrieval of e-ZLA incapacity certificates from the ZUS medical registry.
+    """
+    clean_pesel = pesel.strip()
+    cfg = config_service.get_config()
+
+    if clean_pesel in PREDEFINED_PROFILES:
+        raw_profile = dict(PREDEFINED_PROFILES[clean_pesel])
+        raw_certs = PREDEFINED_EZLA.get(clean_pesel, [])
+        certificates = [EzlaCertificateResponse.model_validate(c) for c in raw_certs]
+
+        active_count = sum(1 for c in certificates if c.status == "ACTIVE")
+        has_active = active_count > 0
+
+        return EzlaCitizenResponse(
+            pesel=str(raw_profile["pesel"]),
+            first_name=str(raw_profile["first_name"]),
+            last_name=str(raw_profile["last_name"]),
+            date_of_birth=str(raw_profile["date_of_birth"]),
+            gender=str(raw_profile["gender"]),
+            source="ZUS Rejestr Zaświadczeń Lekarskich (e-ZLA Mock)",
+            has_active_ezla=has_active,
+            total_certificates_count=len(certificates),
+            active_certificates_count=active_count,
+            sickness_days_used_in_year=int(raw_profile.get("sickness_days_used_in_year", 0)),
+            max_sickness_days=int(
+                raw_profile.get(
+                    "max_sickness_days", cfg.periods_and_limits.max_standard_sick_leave_days
+                )
+            ),
+            certificates=certificates,
+        )
+
+    # Dynamic fallback for arbitrary unknown PESEL
+    dob, gender = _parse_pesel_details(clean_pesel)
+    first_name = "Katarzyna" if gender == "Kobieta" else "Jan"
+    last_name = "Kowalski"
+
+    return EzlaCitizenResponse(
+        pesel=clean_pesel,
+        first_name=first_name,
+        last_name=last_name,
+        date_of_birth=dob,
+        gender=gender,
+        source="ZUS Rejestr Zaświadczeń Lekarskich (e-ZLA Mock)",
+        has_active_ezla=False,
+        total_certificates_count=0,
+        active_certificates_count=0,
+        sickness_days_used_in_year=0,
+        max_sickness_days=cfg.periods_and_limits.max_standard_sick_leave_days,
+        certificates=[],
+    )
+
+
+def get_single_ezla_certificate_service(document_id: str) -> EzlaCertificateResponse:
+    """Returns a specific e-ZLA certificate by its unique document ID."""
+    normalized_doc = document_id.strip()
+    if normalized_doc in PREDEFINED_EZLA_BY_DOC:
+        return EzlaCertificateResponse.model_validate(PREDEFINED_EZLA_BY_DOC[normalized_doc])
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Nie znaleziono zaświadczenia lekarskiego e-ZLA o identyfikatorze {document_id}",
+    )
+
+
+def get_citizen_debt_certificate_service(
+    pesel: str,
+    entitlement_date: str | None = None,
+) -> ContributionDebtCertificateResponse:
+    """
+    Simulates retrieval of contribution debt status and issuance of a ZUS certificate
+    (RD-3) as of the date entitlement to benefits arose (Art. 2a of Sickness Benefits Act).
+    Crucial for self-employed individuals (JDG/B2B) where arrears > 1% minimum wage
+    suspend right to benefits. Threshold is loaded dynamically from JSON config.
+    """
+    clean_pesel = pesel.strip()
+    cfg = config_service.get_config()
+    statutory_debt_limit = cfg.benefit_amounts.zus_debt_limit
+
+    if clean_pesel in PREDEFINED_PROFILES:
+        raw = dict(PREDEFINED_PROFILES[clean_pesel])
+        first_name = str(raw["first_name"])
+        last_name = str(raw["last_name"])
+        payer_name = raw.get("payer_name") or None
+        payer_nip = raw.get("payer_nip") or None
+        insurance_type = str(raw.get("insurance_type", ""))
+        insurance_title = str(raw.get("insurance_title", ""))
+        is_entrepreneur = insurance_type.upper() in {"JDG", "B2B"}
+        has_overdue = bool(raw.get("has_overdue_contributions", False))
+        overdue_amount = float(raw.get("overdue_amount", 0.0))
+
+        if entitlement_date and entitlement_date.strip():
+            effective_entitlement_date = entitlement_date.strip()
+        else:
+            active_ezla_list = raw.get("active_ezla", [])
+            if (
+                active_ezla_list
+                and isinstance(active_ezla_list[0], dict)
+                and active_ezla_list[0].get("start_date")
+            ):
+                effective_entitlement_date = str(active_ezla_list[0]["start_date"])
+            else:
+                effective_entitlement_date = date.today().isoformat()
+    else:
+        _dob, gender = _parse_pesel_details(clean_pesel)
+        first_name = "Katarzyna" if gender == "Kobieta" else "Jan"
+        last_name = "Kowalski"
+        payer_name = "Przykładowy Płatnik Sp. z o.o."
+        payer_nip = "1112223344"
+        insurance_title = "Umowa o pracę (pracownik)"
+        is_entrepreneur = False
+        has_overdue = False
+        overdue_amount = 0.0
+        effective_entitlement_date = (
+            entitlement_date.strip() if entitlement_date else date.today().isoformat()
+        )
+
+    overdue_blocks = overdue_amount > statutory_debt_limit
+    issue_date = date.today().isoformat()
+    date_path = effective_entitlement_date.replace("-", "/")
+    certificate_id = f"ZUS/RD-3/{date_path}/{clean_pesel}"
+
+    if overdue_amount <= 0.0 or not has_overdue:
+        payment_status = "CLEARED"
+        certificate_type = "ZAŚWIADCZENIE O NIEZALEGANIU W OPŁACANIU SKŁADEK"
+        status_description = (
+            f"Na dzień powstania prawa do świadczenia ({effective_entitlement_date}) płatnik "
+            "nie posiada zaległości z tytułu składek na ubezpieczenia społeczne w rejestrach ZUS. "
+            "Warunek określony w art. 2a ustawy zasiłkowej jest w pełni spełniony."
+        )
+        debt_items: list[ContributionDebtItem] = []
+    elif not overdue_blocks:
+        payment_status = "WITHIN_TOLERANCE"
+        certificate_type = "ZAŚWIADCZENIE O STANIE ZADŁUŻENIA PONIŻEJ PROGU BLOKUJĄCEGO"
+        status_description = (
+            f"Na dzień powstania prawa do świadczenia ({effective_entitlement_date}) "
+            f"stwierdzono zadłużenie w kwocie {overdue_amount:.2f} PLN. Kwota ta nie przekracza "
+            f"progu 1% minimalnego wynagrodzenia ({statutory_debt_limit:.2f} PLN). "
+            "Zadłużenie nie powoduje zawieszenia wypłaty świadczeń."
+        )
+        debt_items = [
+            ContributionDebtItem(
+                fund_name="Fundusz Ubezpieczeń Społecznych (FUS - składka chorobowa)",
+                period="2026-03",
+                due_amount=overdue_amount,
+                interest_amount=0.0,
+                total_item_amount=overdue_amount,
+            )
+        ]
+    else:
+        payment_status = "DEBT_BLOCKS_BENEFIT"
+        certificate_type = "ZAŚWIADCZENIE O STANIE ZALEGŁOŚCI W OPŁACANIU SKŁADEK"
+        status_description = (
+            f"Na dzień powstania prawa do świadczenia ({effective_entitlement_date}) "
+            f"stwierdzono zadłużenie z tytułu składek w łącznej wysokości {overdue_amount:.2f} "
+            f"PLN, przekraczające próg 1% minimalnego wynagrodzenia "
+            f"({statutory_debt_limit:.2f} PLN). Na podstawie art. 2a ust. 1 ustawy zasiłkowej "
+            "wypłata świadczeń zostaje wstrzymana do czasu całkowitej spłaty zadłużenia."
+        )
+        principal = round(overdue_amount * 0.914, 2)
+        interest = round(overdue_amount - principal, 2)
+        debt_items = [
+            ContributionDebtItem(
+                fund_name="Fundusz Ubezpieczeń Społecznych (FUS - chorobowe i wypadkowe)",
+                period="2026-03",
+                due_amount=principal,
+                interest_amount=interest,
+                total_item_amount=overdue_amount,
+            )
+        ]
+
+    legal_instruction = (
+        "Zgodnie z art. 2a ust. 1 ustawy z dnia 25 czerwca 1999 r. o świadczeniach pieniężnych "
+        "z ubezpieczenia społecznego w razie choroby i macierzyństwa, świadczenia nie przysługują "
+        "osobom prowadzącym pozarolniczą działalność i osobom z nimi współpracującym, jeżeli w "
+        "dniu powstania prawa do świadczenia występuje zadłużenie z tytułu składek na kwotę "
+        f"przekraczającą 1% minimalnego wynagrodzenia za pracę ({statutory_debt_limit:.2f} zł), "
+        "do czasu spłaty całości zadłużenia. Zgodnie z art. 2a ust. 2, prawo do świadczenia "
+        "przedawnia się, jeżeli zadłużenie nie zostanie spłacone w ciągu 6 miesięcy od dnia "
+        "powstania prawa do świadczenia. W razie spłaty całości zadłużenia w terminie 6 miesięcy, "
+        "świadczenie przysługuje za cały okres."
+    )
+
+    return ContributionDebtCertificateResponse(
+        certificate_id=certificate_id,
+        certificate_type=certificate_type,
+        issue_date=issue_date,
+        entitlement_date=effective_entitlement_date,
+        source="ZUS Centralny Rejestr Płatników Składek (eZUS Mock)",
+        pesel=clean_pesel,
+        first_name=first_name,
+        last_name=last_name,
+        payer_name=payer_name,
+        payer_nip=payer_nip,
+        is_entrepreneur=is_entrepreneur,
+        insurance_title=insurance_title,
+        has_overdue_contributions=has_overdue,
+        overdue_amount=overdue_amount,
+        statutory_debt_limit=statutory_debt_limit,
+        overdue_blocks_benefits=overdue_blocks,
+        payment_status=payment_status,
+        status_description=status_description,
+        debt_items=debt_items,
+        legal_basis=(
+            "Art. 2a ustawy z dnia 25 czerwca 1999 r. o świadczeniach pieniężnych z ubezpieczenia "
+            "społecznego w razie choroby i macierzyństwa"
+        ),
+        legal_instruction=legal_instruction,
+    )
+
+
+def simulate_birth_certificate_service(req: BirthCertificateRequest) -> BirthCertificateResponse:
+    """
+    Simulates requesting and issuing an official electronic copy of a birth certificate
+    from the Central Civil Registry (Rejestr Stanu Cywilnego / USC) via gov.pl / ePUAP / mObywatel.
+    Pursuant to Art. 44 & 45 of the Civil Status Records Act, this official excerpt is required
+    to apply for maternity benefits in ZUS and parental leaves at an employer.
+    """
+    import hashlib
+    import random
+
+    today_iso = date.today().isoformat()
+    birth_iso = req.child_date_of_birth or "2026-05-15"
+
+    if req.child_pesel and len(req.child_pesel) == 11:
+        child_pesel = req.child_pesel
+    else:
+        try:
+            parts = birth_iso.split("-")
+            yy = parts[0][2:]
+            mm = int(parts[1]) + 20
+            dd = parts[2]
+            gender_digit = "1" if req.child_gender == "Mężczyzna" else "2"
+            r1, r2, r3 = random.randint(10, 99), random.randint(1, 9), random.randint(1, 9)
+            random_part = f"{r1}{r2}{gender_digit}{r3}"
+            child_pesel = f"{yy}{mm:02d}{dd}{random_part}"
+        except Exception:
+            child_pesel = "26251508912"
+
+    raw_hash = (
+        hashlib.sha256(f"{child_pesel}-{req.applicant_pesel}-{today_iso}".encode())
+        .hexdigest()
+        .upper()
+    )
+    act_num = f"1465011/00/AU/{birth_iso[:4]}/{raw_hash[:6]}"
+    cert_id = f"USC/1465011/{birth_iso[:4]}/URO/{raw_hash[6:12]}"
+    ver_code = f"VER-USC-{raw_hash[12:20]}"
+
+    cert_type_label = (
+        "Odpis zupełny aktu urodzenia"
+        if req.certificate_type.upper() in ["ZUPELNY", "ZUPEŁNY"]
+        else "Odpis wielojęzyczny aktu urodzenia"
+        if "WIELO" in req.certificate_type.upper()
+        else "Odpis skrócony aktu urodzenia"
+    )
+
+    mother_full = (
+        f"{req.applicant_first_name} {req.applicant_last_name}"
+        if req.applicant_role.lower() == "matka"
+        else "Anna Kowalska"
+    )
+    father_full = (
+        f"{req.applicant_first_name} {req.applicant_last_name}"
+        if req.applicant_role.lower() == "ojciec"
+        else "Piotr Zieliński"
+    )
+
+    return BirthCertificateResponse(
+        certificate_id=cert_id,
+        act_number=act_num,
+        certificate_type=cert_type_label,
+        issue_date=today_iso,
+        registry_office="Urząd Stanu Cywilnego m.st. Warszawy (Wydział Spraw Obywatelskich)",
+        child_first_name=req.child_first_name,
+        child_last_name=req.child_last_name,
+        child_date_of_birth=birth_iso,
+        child_place_of_birth=req.child_place_of_birth or "Warszawa",
+        child_gender=req.child_gender,
+        child_pesel=child_pesel,
+        mother_name=mother_full,
+        mother_maiden_name=req.applicant_last_name,
+        father_name=father_full,
+        applicant_pesel=req.applicant_pesel,
+        delivery_channel=req.delivery_channel,
+        status="WYDANY_ELEKTRONICZNIE",
+        electronic_seal="Kwalifikowana Pieczęć Elektroniczna Ministra Cyfryzacji",
+        official_portal_url="https://www.gov.pl/web/cyfryzacja/rejestr-stanu-cywilnego",
+        legal_basis="Art. 44 i 45 ustawy Prawo o aktach stanu cywilnego",
+        verification_code=ver_code,
+    )
+
+
+def get_sample_birth_certificate_service(pesel: str | None = None) -> BirthCertificateResponse:
+    """Returns sample birth certificate prefilled for the given applicant PESEL or defaults."""
+    clean_pesel = (pesel or "92011501234").strip()
+    profile = PREDEFINED_PROFILES.get(clean_pesel)
+    fname = str(profile.get("first_name", "Anna")) if profile else "Anna"
+    lname = str(profile.get("last_name", "Kowalska")) if profile else "Kowalska"
+    role = "Ojciec" if profile and profile.get("gender") == "Mężczyzna" else "Matka"
+
+    req = BirthCertificateRequest(
+        child_first_name="Franciszek",
+        child_last_name=lname,
+        child_date_of_birth="2026-05-15",
+        child_place_of_birth="Warszawa",
+        child_gender="Mężczyzna",
+        applicant_first_name=fname,
+        applicant_last_name=lname,
+        applicant_pesel=clean_pesel,
+        applicant_role=role,
+        certificate_type="SKRÓCONY",
+        purpose="Uzyskanie zasiłku macierzyńskiego w ZUS",
+        delivery_channel="ELEKTRONICZNA_EPUAP_MOBYWATEL",
+    )
+    return simulate_birth_certificate_service(req)
